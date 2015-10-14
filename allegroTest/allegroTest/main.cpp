@@ -23,7 +23,16 @@ ALLEGRO_DISPLAY *display = NULL;
 //ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
 int shipX = 200;
 int shipY = 200;
+int bgX = 0;
+int bgY = 0;
+int strSpeed = 6;
+int diagSpeed = 3;
 bool setLeft, setRight, setUp, setDown;
+bool slow = false;
+int maxX = 3840;
+int maxY = 3840;
+int screenX = 640;
+int screenY = 480;
  
 void abort_game(const char* message)
 {
@@ -45,14 +54,14 @@ void init(void)
         abort_game("Failed to create timer");
  
     al_set_new_display_flags(ALLEGRO_WINDOWED);
-    display = al_create_display(640, 480);
+    display = al_create_display(screenX, screenY);
     if (!display)
         abort_game("Failed to create display");
 
 	if(!al_init_image_addon())
 		abort_game("Failed to initialize al_init_image_addon");
 
-	bg = al_load_bitmap("c:/dev/allegro/images/bg.png"); //Load background image
+	bg = al_load_bitmap("c:/dev/allegro/images/bg2.jpg"); //Load background image
 	shipUp = al_load_bitmap("c:/dev/allegro/images/shipUp.png");
 	shipDown = al_load_bitmap("c:/dev/allegro/images/shipDown.png");
 	shipLeft = al_load_bitmap("c:/dev/allegro/images/shipLeft.png");
@@ -134,40 +143,43 @@ void shutdown(void)
 
 void update_logic()
 {
-	int speed = 3;
-	int diagSpeed = 2;
+	//Increment/Decrement the speed depending on what keys are currently pressed
 	if (setUp)
 		if (setLeft) {
-			shipY -= diagSpeed;
-			shipX -= diagSpeed;
+			if (shipY>0) shipY -= diagSpeed;
+			if (shipX>0) shipX -= diagSpeed;
 		}
 		else if (setRight) {
-			shipY -= diagSpeed;
-			shipX += diagSpeed;
+			if (shipY>0) shipY -= diagSpeed;
+			if (shipX<maxX-42) shipX += diagSpeed;
 		}
 		else {
-			shipY -= speed;
+			if (shipY>0) shipY -= strSpeed;
 		}
 	if (setDown)
 		if (setLeft) {
-			shipY += diagSpeed;
-			shipX -= diagSpeed;
+			if (shipY<maxY-42) shipY += diagSpeed;
+			if (shipX>0) shipX -= diagSpeed;
 		}
 		else if (setRight) {
-			shipY += diagSpeed;
-			shipX += diagSpeed;
+			if (shipY<maxY-42) shipY += diagSpeed;
+			if (shipX<maxX-42) shipX += diagSpeed;
 		}
 		else {
-			shipY += speed;
+			if (shipY<maxY-42) shipY += strSpeed;
 		}
 	if (setLeft) {
 		if (!setUp && !setDown)
-			shipX -= speed;
+			if (shipX>0) shipX -= strSpeed;
 	}
 	if (setRight) {
 		if (!setUp && !setDown)
-			shipX += speed;
+			if (shipX<maxX-42) shipX += strSpeed;
 	}
+
+	//Set which screen the ship is currently in
+	bgX = -(int(float(shipX)/screenX)*screenX);
+	bgY = -(int(float(shipY)/screenY)*screenY);
 }
 
 void check_key(ALLEGRO_EVENT e)
@@ -259,8 +271,8 @@ void clear_key(ALLEGRO_EVENT e)
 
 void update_graphics()
 {
-	al_draw_bitmap(bg,0,0,0); //Draw background first
-	al_draw_bitmap(shipCurrent,shipX,shipY,0); //Draw ship
+	al_draw_bitmap(bg,bgX,bgY,0); //Draw background first
+	al_draw_bitmap(shipCurrent,shipX%screenX,shipY%screenY,0); //Draw ship
 }
  
 void game_loop(void)
@@ -274,12 +286,14 @@ void game_loop(void)
  
         if (event.type == ALLEGRO_EVENT_TIMER) {
             redraw = true;
-            update_logic(); //Inexorable game logic, that is..
+            update_logic();
         }
         else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
+			slow = false;
             check_key(event);
         }
 		else if (event.type == ALLEGRO_EVENT_KEY_UP) {
+			slow = true;
 			clear_key(event);
 		}
  
