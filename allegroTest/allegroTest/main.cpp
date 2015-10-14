@@ -1,15 +1,34 @@
 #include <allegro5/allegro5.h>
+#include "allegro5/allegro_image.h"
 #include <stdio.h>
 #include <stdlib.h>
- 
+#include <iostream>
+#include <conio.h>
+
+
 bool done;
-ALLEGRO_EVENT_QUEUE* event_queue;
-ALLEGRO_TIMER* timer;
-ALLEGRO_DISPLAY* display;
+ALLEGRO_EVENT_QUEUE *event_queue = NULL;
+ALLEGRO_TIMER *timer = NULL;
+ALLEGRO_BITMAP *bg = NULL;
+ALLEGRO_BITMAP *shipCurrent = NULL;
+ALLEGRO_BITMAP *shipUp = NULL;
+ALLEGRO_BITMAP *shipDown = NULL;
+ALLEGRO_BITMAP *shipLeft = NULL;
+ALLEGRO_BITMAP *shipRight = NULL;
+ALLEGRO_BITMAP *shipUpLeft = NULL;
+ALLEGRO_BITMAP *shipDownLeft = NULL;
+ALLEGRO_BITMAP *shipUpRight = NULL;
+ALLEGRO_BITMAP *shipDownRight = NULL;
+ALLEGRO_DISPLAY *display = NULL;
+//ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
+int shipX = 200;
+int shipY = 200;
+bool setLeft, setRight, setUp, setDown;
  
 void abort_game(const char* message)
 {
     printf("%s \n", message);
+	getch();
     exit(1);
 }
  
@@ -29,6 +48,43 @@ void init(void)
     display = al_create_display(640, 480);
     if (!display)
         abort_game("Failed to create display");
+
+	if(!al_init_image_addon())
+		abort_game("Failed to initialize al_init_image_addon");
+
+	bg = al_load_bitmap("c:/dev/allegro/images/bg.png"); //Load background image
+	shipUp = al_load_bitmap("c:/dev/allegro/images/shipUp.png");
+	shipDown = al_load_bitmap("c:/dev/allegro/images/shipDown.png");
+	shipLeft = al_load_bitmap("c:/dev/allegro/images/shipLeft.png");
+	shipRight = al_load_bitmap("c:/dev/allegro/images/shipRight.png");
+	shipUpLeft = al_load_bitmap("c:/dev/allegro/images/shipUpLeft.png");
+	shipDownLeft = al_load_bitmap("c:/dev/allegro/images/shipDownLeft.png");
+	shipUpRight = al_load_bitmap("c:/dev/allegro/images/shipUpRight.png");
+	shipDownRight = al_load_bitmap("c:/dev/allegro/images/shipDownRight.png");
+	shipCurrent = shipRight;
+	//al_append_path_component(path, "Images");
+	//al_set_path_filename(path, "bg.png");
+	//image = al_load_bitmap(al_path_cstr(path, '/'));
+
+	if(!bg)
+		abort_game("Failed to load the background image");
+
+	if(!shipUp)
+		abort_game("Failed to load the ship image");
+	if(!shipDown)
+		abort_game("Failed to load the ship image");
+	if(!shipLeft)
+		abort_game("Failed to load the ship image");
+	if(!shipRight)
+		abort_game("Failed to load the ship image");
+	if(!shipUpLeft)
+		abort_game("Failed to load the ship image");
+	if(!shipDownLeft)
+		abort_game("Failed to load the ship image");
+	if(!shipUpRight)
+		abort_game("Failed to load the ship image");
+	if(!shipDownRight)
+		abort_game("Failed to load the ship image");
  
     event_queue = al_create_event_queue();
     if (!event_queue)
@@ -48,9 +104,163 @@ void shutdown(void)
  
     if (display)
         al_destroy_display(display);
+
+	if (bg)
+		al_destroy_bitmap(bg);
+
+	if (shipUp)
+		al_destroy_bitmap(shipUp);
+	if (shipDown)
+		al_destroy_bitmap(shipDown);
+	if (shipLeft)
+		al_destroy_bitmap(shipLeft);
+	if (shipRight)
+		al_destroy_bitmap(shipRight);
+	if (shipUpLeft)
+		al_destroy_bitmap(shipUpLeft);
+	if (shipDownLeft)
+		al_destroy_bitmap(shipDownLeft);
+	if (shipUpRight)
+		al_destroy_bitmap(shipUpRight);
+	if (shipDownRight)
+		al_destroy_bitmap(shipDownRight);
  
     if (event_queue)
         al_destroy_event_queue(event_queue);
+
+	//if (path)
+	//	al_destroy_path(path);
+}
+
+void update_logic()
+{
+	int speed = 3;
+	int diagSpeed = 2;
+	if (setUp)
+		if (setLeft) {
+			shipY -= diagSpeed;
+			shipX -= diagSpeed;
+		}
+		else if (setRight) {
+			shipY -= diagSpeed;
+			shipX += diagSpeed;
+		}
+		else {
+			shipY -= speed;
+		}
+	if (setDown)
+		if (setLeft) {
+			shipY += diagSpeed;
+			shipX -= diagSpeed;
+		}
+		else if (setRight) {
+			shipY += diagSpeed;
+			shipX += diagSpeed;
+		}
+		else {
+			shipY += speed;
+		}
+	if (setLeft) {
+		if (!setUp && !setDown)
+			shipX -= speed;
+	}
+	if (setRight) {
+		if (!setUp && !setDown)
+			shipX += speed;
+	}
+}
+
+void check_key(ALLEGRO_EVENT e)
+{
+	if (e.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+		done = true;
+    }
+	if (e.keyboard.keycode == ALLEGRO_KEY_LEFT) {
+		setLeft = true;
+		if (setUp) {
+			shipCurrent = shipUpLeft;
+		}
+		else if (setDown) {
+			shipCurrent = shipDownLeft;
+		}
+		else {
+			shipCurrent = shipLeft;
+		}
+    }
+	if (e.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
+        setRight = true;
+		if (setUp) {
+			shipCurrent = shipUpRight;
+		}
+		else if (setDown) {
+			shipCurrent = shipDownRight;
+		}
+		else {
+			shipCurrent = shipRight;
+		}
+    }
+	if (e.keyboard.keycode == ALLEGRO_KEY_UP) {
+        setUp = true;
+		if (setLeft) {
+			shipCurrent = shipUpLeft;
+		}
+		else if (setRight) {
+			shipCurrent = shipUpRight;
+		}
+		else {
+			shipCurrent = shipUp;
+		}
+    }
+	if (e.keyboard.keycode == ALLEGRO_KEY_DOWN) {
+        setDown = true;
+		if (setLeft) {
+			shipCurrent = shipDownLeft;
+		}
+		else if (setRight) {
+			shipCurrent = shipDownRight;
+		}
+		else {
+			shipCurrent = shipDown;
+		}
+    }
+}
+
+void clear_key(ALLEGRO_EVENT e)
+{
+	if (e.keyboard.keycode == ALLEGRO_KEY_LEFT) {
+        setLeft = false;
+		if (setUp)
+			shipCurrent = shipUp;
+		else if (setDown)
+			shipCurrent = shipDown;
+    }
+	if (e.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
+        setRight = false;
+		if (setUp)
+			shipCurrent = shipUp;
+		else if (setDown)
+			shipCurrent = shipDown;
+    }
+	if (e.keyboard.keycode == ALLEGRO_KEY_UP) {
+        setUp = false;
+		if (setLeft)
+			shipCurrent = shipLeft;
+		else if (setRight)
+			shipCurrent = shipRight;
+    }
+	if (e.keyboard.keycode == ALLEGRO_KEY_DOWN) {
+        setDown = false;
+		if (setLeft)
+			shipCurrent = shipLeft;
+		else if (setRight)
+			shipCurrent = shipRight;
+    }
+}
+
+void update_graphics()
+{
+	al_draw_bitmap(bg,0,0,0); //Draw background first
+	al_draw_bitmap(shipCurrent,shipX,shipY,0); //Draw ship
 }
  
 void game_loop(void)
@@ -64,19 +274,19 @@ void game_loop(void)
  
         if (event.type == ALLEGRO_EVENT_TIMER) {
             redraw = true;
-            //update_logic();
+            update_logic(); //Inexorable game logic, that is..
         }
         else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
-            if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
-                done = true;
-            }
-            //get_user_input();
+            check_key(event);
         }
+		else if (event.type == ALLEGRO_EVENT_KEY_UP) {
+			clear_key(event);
+		}
  
-        if (redraw && al_is_event_queue_empty(event_queue)) {
+        if (redraw) { //&& al_is_event_queue_empty(event_queue)
             redraw = false;
             al_clear_to_color(al_map_rgb(0, 0, 0));
-            //update_graphics();
+            update_graphics(); //For now, just redraw the background and draw the ship at its current pos
             al_flip_display();
         }
     }
