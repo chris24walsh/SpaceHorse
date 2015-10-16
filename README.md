@@ -1,1 +1,3 @@
-# allegro
+This is a small coding project to develop a space shooter game :)
+
+More to follow later...
