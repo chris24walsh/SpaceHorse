@@ -15,6 +15,8 @@ ALLEGRO_BITMAP *shipUp = NULL;
 ALLEGRO_BITMAP *shipDown = NULL;
 ALLEGRO_BITMAP *shipLeft = NULL;
 ALLEGRO_BITMAP *shipRight = NULL;
+ALLEGRO_BITMAP *shipRight1 = NULL;
+ALLEGRO_BITMAP *shipRight2 = NULL;
 ALLEGRO_BITMAP *shipUpLeft = NULL;
 ALLEGRO_BITMAP *shipDownLeft = NULL;
 ALLEGRO_BITMAP *shipUpRight = NULL;
@@ -23,14 +25,19 @@ ALLEGRO_DISPLAY *display = NULL;
 //ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
 int shipX = 200;
 int shipY = 200;
+int shipH = 43;
+int shipW = 43;
 int bgX = 0;
 int bgY = 0;
 int strSpeed = 6;
 int diagSpeed = 3;
 bool setLeft, setRight, setUp, setDown;
 bool slow = false;
+//int maxX = 1280;
+//int maxY = 960;
 int maxX = 3840;
 int maxY = 3840;
+
 int screenX = 640;
 int screenY = 480;
  
@@ -66,11 +73,13 @@ void init(void)
 	shipDown = al_load_bitmap("c:/dev/allegro/images/shipDown.png");
 	shipLeft = al_load_bitmap("c:/dev/allegro/images/shipLeft.png");
 	shipRight = al_load_bitmap("c:/dev/allegro/images/shipRight.png");
+	shipRight1 = al_load_bitmap("c:/dev/allegro/images/shipRight1.png");
+	shipRight2 = al_load_bitmap("c:/dev/allegro/images/shipRight2.png");
 	shipUpLeft = al_load_bitmap("c:/dev/allegro/images/shipUpLeft.png");
 	shipDownLeft = al_load_bitmap("c:/dev/allegro/images/shipDownLeft.png");
 	shipUpRight = al_load_bitmap("c:/dev/allegro/images/shipUpRight.png");
 	shipDownRight = al_load_bitmap("c:/dev/allegro/images/shipDownRight.png");
-	shipCurrent = shipRight;
+	shipCurrent = shipRight2;
 	//al_append_path_component(path, "Images");
 	//al_set_path_filename(path, "bg.png");
 	//image = al_load_bitmap(al_path_cstr(path, '/'));
@@ -84,7 +93,7 @@ void init(void)
 		abort_game("Failed to load the ship image");
 	if(!shipLeft)
 		abort_game("Failed to load the ship image");
-	if(!shipRight)
+	if(!shipRight1)
 		abort_game("Failed to load the ship image");
 	if(!shipUpLeft)
 		abort_game("Failed to load the ship image");
@@ -123,8 +132,8 @@ void shutdown(void)
 		al_destroy_bitmap(shipDown);
 	if (shipLeft)
 		al_destroy_bitmap(shipLeft);
-	if (shipRight)
-		al_destroy_bitmap(shipRight);
+	if (shipRight1)
+		al_destroy_bitmap(shipRight1);
 	if (shipUpLeft)
 		al_destroy_bitmap(shipUpLeft);
 	if (shipDownLeft)
@@ -208,7 +217,7 @@ void check_key(ALLEGRO_EVENT e)
 			shipCurrent = shipDownRight;
 		}
 		else {
-			shipCurrent = shipRight;
+			shipCurrent = shipRight1;
 		}
     }
 	if (e.keyboard.keycode == ALLEGRO_KEY_UP) {
@@ -258,14 +267,14 @@ void clear_key(ALLEGRO_EVENT e)
 		if (setLeft)
 			shipCurrent = shipLeft;
 		else if (setRight)
-			shipCurrent = shipRight;
+			shipCurrent = shipRight1;
     }
 	if (e.keyboard.keycode == ALLEGRO_KEY_DOWN) {
         setDown = false;
 		if (setLeft)
 			shipCurrent = shipLeft;
 		else if (setRight)
-			shipCurrent = shipRight;
+			shipCurrent = shipRight1;
     }
 }
 
