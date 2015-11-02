@@ -14,23 +14,34 @@ ALLEGRO_BITMAP *ship = NULL;
 ALLEGRO_BITMAP *ship1 = NULL;
 ALLEGRO_BITMAP *ship2 = NULL;
 ALLEGRO_BITMAP *shipCurrent = NULL;
+const int maxFireballs = 15;
+ALLEGRO_BITMAP *fireball[maxFireballs];
 ALLEGRO_DISPLAY *display = NULL;
 //ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
+int bgX = 0;
+int bgY = 0;
+int maxX = 3840;
+int maxY = 3240;
+int screenX = 1920;
+int screenY = 1080;
+bool leftPressed, rightPressed, upPressed, downPressed;
+int flipflop = 0;
+
 int shipX = 200;
 int shipY = 200;
 int shipH = 100;
 int shipW = 100;
-float angle = 0;
-float speed = 0;
-int maxSpeed = 7;
-int bgX = 0;
-int bgY = 0;
-int maxX = 3840;
-int maxY = 2160;
-int screenX = 1920;
-int screenY = 1080;
-bool setLeft, setRight, setUp, setDown;
-int flipflop = 0;
+float shipA = 0;
+float shipS = 0;
+int maxShipS = 7;
+
+int fireballNumber = 1;
+int fireW = 30;
+int fireH = 20;
+int fireX[maxFireballs];
+int fireY[maxFireballs];
+float fireA[maxFireballs] = {0};
+float fireS = 17;
 
 void abort_game(const char* message)
 {
@@ -64,6 +75,7 @@ void init(void)
 	ship1 = al_load_bitmap("c:/dev/allegro/images/ship1.png");
 	ship2 = al_load_bitmap("c:/dev/allegro/images/ship2.png");
 	shipCurrent = ship;
+	for (int i=0; i<maxFireballs; i++) fireball[i] = al_load_bitmap("c:/dev/allegro/images/fireball.png");
 	//al_append_path_component(path, "Images");
 	//al_set_path_filename(path, "bg.png");
 	//image = al_load_bitmap(al_path_cstr(path, '/'));
@@ -79,6 +91,11 @@ void init(void)
     al_register_event_source(event_queue, al_get_display_event_source(display));
  
     done = false;
+
+	//Set up fireballs
+	//for (int i=0; i<10; i++) fireball[i] = NULL;
+	for (int i=0; i<maxFireballs; i++) fireX[i] = maxX + fireW;
+	for (int i=0; i<maxFireballs; i++) fireY[i] = maxY + fireH;
 }
  
 void shutdown(void)
@@ -91,84 +108,107 @@ void shutdown(void)
 	//if (path) al_destroy_path(path);
 }
 
+void fire()
+{
+	int x = fireballNumber++;
+	fireX[x] = shipX%screenX;
+	fireY[x] = shipY%screenY;
+	fireA[x] = shipA;
+	if (fireballNumber>maxFireballs) fireballNumber = 1;
+}
+
 void press_key(ALLEGRO_EVENT e)
 {
 	if (e.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
 		done = true;
     }
 	if (e.keyboard.keycode == ALLEGRO_KEY_LEFT) {
-		setLeft = true;
+		leftPressed = true;
     }
 	if (e.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
-        setRight = true;
+        rightPressed = true;
     }
 	if (e.keyboard.keycode == ALLEGRO_KEY_UP) {
-        setUp = true;
+        upPressed = true;
     }
 	if (e.keyboard.keycode == ALLEGRO_KEY_DOWN) {
-        setDown = true;
+        downPressed = true;
     }
+	if (e.keyboard.keycode == ALLEGRO_KEY_F) {
+		fire();
+	}
 }
 
 void release_key(ALLEGRO_EVENT e)
 {
 	if (e.keyboard.keycode == ALLEGRO_KEY_LEFT) {
-        setLeft = false;
+        leftPressed = false;
     }
 	if (e.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
-        setRight = false;
+        rightPressed = false;
     }
 	if (e.keyboard.keycode == ALLEGRO_KEY_UP) {
-        setUp = false;
+        upPressed = false;
     }
 	if (e.keyboard.keycode == ALLEGRO_KEY_DOWN) {
-        setDown = false;
+        downPressed = false;
     }
 }
 
 void update_logic()
 {
 	//Rotate clockwise or anti-clockwise
-	if (setLeft) {
-		angle-=0.05;
+	if (leftPressed) {
+		shipA-=0.05;
 	}
-	if (setRight) {
-		angle+=0.05;
+	if (rightPressed) {
+		shipA+=0.05;
 	}
 
 	//Cycle between different rocket sprites, to give effect of rocket blasting
-	if (speed>0) {
+	if (shipS>0) {
 		if (flipflop<5) shipCurrent = ship1;
 		else if (flipflop>=5) shipCurrent = ship2;
 		flipflop++;
 		if (flipflop==10) flipflop=0;
 	}
+	else shipCurrent = ship;
 
-	//Increase or decrease speed
-	if (setUp) {
-		if (speed<maxSpeed) speed += 1;
+	//Increase or decrease shipS
+	if (upPressed) {
+		if (shipS<maxShipS) shipS += 1;
 	}
-	if (setDown) {
-		flipflop = 0;
-		shipCurrent = ship;
-		if (speed>0) speed -= 1;
+	else if (downPressed) {
+		if (shipS>0) shipS -= 1;
 	}
 
-	//Apply translation to ship, if it veers off screen translate it to other side of screen
-	if (shipX>60) shipX += speed * cos(angle);
-	if (shipY>60) shipY += speed * sin(angle);
-	//if (shipX>(shipW/2) && shipX<(maxX-(shipW/2))) shipX += speed * cos(angle);
-	//if (shipY>(shipH/2) && shipY<(maxY-(shipH/2))) shipY += speed * sin(angle);
+	//Resolve translations for x and y axis
+	int xshipS = shipS * cos(shipA);
+	int yshipS = shipS * sin(shipA);
+
+	//Apply translation to ship
+	//Restrict map in X axis (can't travel below 0, above maxX)
+	if ((shipX<shipW/2 && xshipS<0) || (shipX>maxX-(shipW/2) && xshipS>0)) ; //Can't travel
+	else shipX += xshipS;
 	
+	//Restrict map in Y axis (can't travel below 0, above maxY)
+	if ((shipY<shipH/2 && yshipS<0) || (shipY>maxY-(shipH/2) && yshipS>0)) ; //Can't travel
+	else shipY += yshipS;
+
 	//Set which screen the ship is currently in
 	bgX = -(int(float(shipX)/screenX)*screenX);
 	bgY = -(int(float(shipY)/screenY)*screenY);
+	
+	//Set fireball position
+	for (int i=0; i<maxFireballs; i++) fireX[i] += fireS * cos(fireA[i]);
+	for (int i=0; i<maxFireballs; i++) fireY[i] += fireS * sin(fireA[i]);
 }
 
 void update_graphics()
 {
 	al_draw_bitmap(bg,bgX,bgY,0); //Draw background first
-	al_draw_rotated_bitmap(shipCurrent, 50, 50, shipX%screenX, shipY%screenY, angle, 0); //Draw ship (at a rotation)
+	for (int i=0; i<maxFireballs; i++) al_draw_rotated_bitmap(fireball[i], fireW/2, fireH/2, fireX[i], fireY[i], fireA[i], 0); //Draw fireball
+	al_draw_rotated_bitmap(shipCurrent, shipW/2, shipH/2, shipX%screenX, shipY%screenY, shipA, 0); //Draw ship (at a rotation)
 }
  
 void game_loop(void)
@@ -190,7 +230,7 @@ void game_loop(void)
 		else if (event.type == ALLEGRO_EVENT_KEY_UP) {
 			release_key(event);
 		}
- 
+
         if (redraw && al_is_event_queue_empty(event_queue)) {
             redraw = false;
             al_clear_to_color(al_map_rgb(0, 0, 0));
