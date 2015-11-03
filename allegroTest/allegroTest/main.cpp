@@ -24,10 +24,11 @@ ALLEGRO_DISPLAY *display = NULL;
 
 //ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
 
+//Screen vars
 int bgX = 0;
 int bgY = 0;
 int maxX = 3840;
-int maxY = 3240;
+int maxY = 2160;
 int screenX = 1920;
 int screenY = 1080;
 bool leftPressed, rightPressed, upPressed, downPressed;
@@ -88,7 +89,7 @@ void init(void)
 		abort_game("Failed to initialize al_init_image_addon");
 
 	//Load bitmap files
-	bg = al_load_bitmap("c:/dev/allegro/images/bg2.jpg"); //Load background image
+	bg = al_load_bitmap("c:/dev/allegro/images/bg3.png"); //Load background image
 	ship = al_load_bitmap("c:/dev/allegro/images/ship.png");
 	ship1 = al_load_bitmap("c:/dev/allegro/images/ship1.png");
 	ship2 = al_load_bitmap("c:/dev/allegro/images/ship2.png");
@@ -105,7 +106,7 @@ void init(void)
 	//image = al_load_bitmap(al_path_cstr(path, '/'));
 
 	//Random seed the dockingstation
-	//srand(time(NULL));
+	srand(6); //srand(time(NULL));
 	for (int i=0; i<3; i++) dockingX[i] = float(maxX)*(rand()%100)/100;
 	for (int i=0; i<3; i++) dockingY[i] = float(maxY)*(rand()%100)/100;
 
