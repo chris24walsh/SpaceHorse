@@ -21,16 +21,17 @@ ALLEGRO_BITMAP *dockingStation[3];
 ALLEGRO_BITMAP *dockingText;
 ALLEGRO_BITMAP *upgradedText;
 ALLEGRO_DISPLAY *display = NULL;
+ALLEGRO_DISPLAY_MODE disp_data;
 
 //ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
 
 //Screen vars
 int bgX = 0;
 int bgY = 0;
-int maxX = 3840;
-int maxY = 2160;
-int screenX = 1920;
-int screenY = 1080;
+int maxX;// = 3840;
+int maxY;// = 2160;
+int screenX;// = 1920;
+int screenY;// = 1080;
 bool leftPressed, rightPressed, upPressed, downPressed;
 int flipflop = 0;
 
@@ -80,6 +81,11 @@ void init(void)
     if (!timer)
         abort_game("Failed to create timer");
  
+	al_get_display_mode(al_get_num_display_modes() - 1, &disp_data);
+	screenX = disp_data.width;
+	screenY = disp_data.height;
+	maxX = screenX*10;
+	maxY = screenY*10;
     al_set_new_display_flags(ALLEGRO_FULLSCREEN);
     display = al_create_display(screenX, screenY);
     if (!display)
@@ -89,7 +95,7 @@ void init(void)
 		abort_game("Failed to initialize al_init_image_addon");
 
 	//Load bitmap files
-	bg = al_load_bitmap("c:/dev/allegro/images/bg3.png"); //Load background image
+	bg = al_load_bitmap("c:/dev/allegro/images/bg.png"); //Load background image
 	ship = al_load_bitmap("c:/dev/allegro/images/ship.png");
 	ship1 = al_load_bitmap("c:/dev/allegro/images/ship1.png");
 	ship2 = al_load_bitmap("c:/dev/allegro/images/ship2.png");
@@ -282,7 +288,8 @@ void update_graphics()
 {
 	//Space mode
 	if (!dockingScr) {
-		al_draw_bitmap(bg,-bgX,-bgY,0); //Draw background first
+		//al_draw_bitmap(bg,-bgX,-bgY,0); //Draw background first
+		al_draw_bitmap(bg,0,0,0); //Draw background first
 		for (int i=0; i<3; i++)
 			if (dockingX[i]>bgX && dockingX[i]<(bgX+screenX) && dockingY[i]>bgY && dockingY[i]<(bgY+screenY))
 				al_draw_rotated_bitmap(dockingStation[i], 125, 125, dockingX[i]%screenX, dockingY[i]%screenY, 0, 0); //Draw planets only if their coordinates exist within current screen
