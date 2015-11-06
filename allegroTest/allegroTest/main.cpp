@@ -37,7 +37,7 @@ int numberGrids = 2; //Number of grids along one side of the square map actually
 int windowWidth, windowHeight, maxX, maxY, screenWidth, screenHeight;
 int backgroundWidth = 1920;
 int backgroundHeight = 1080;
-int scaleX, scaleY, scaleW, scaleH;
+int scaledWidth, scaledHeight, scaledOffsetX, scaledOffsetY;
 bool leftPressed, rightPressed, upPressed, downPressed;
 
 //Ship vars
@@ -70,7 +70,7 @@ bool safe = true;
 bool dispUpgradeText = false;
 
 //Network vars
-bool useServer = false;
+bool useServer = true;
 ENetHost * host; //This machine
 ENetPeer * peer; //Remote machine
 
@@ -133,8 +133,8 @@ void init(void)
 	
 	//Setup Display
 	al_get_display_mode(al_get_num_display_modes() - 1, &disp_data); //Set resolution to max
-	windowWidth = 640;
-	windowHeight = 480;
+	windowWidth = 640*2;
+	windowHeight = 480*2;
 	//windowWidth = disp_data.width;
 	//windowHeight = disp_data.height;
 	maxX = windowWidth*numberGrids;
@@ -145,12 +145,22 @@ void init(void)
     if (!display)
         abort_game("Failed to create display");
 
+	//Calculate scaling factor
+	float sx = float(windowWidth)/backgroundWidth;
+	float sy = float(windowHeight)/backgroundHeight;
+	float scale = sx<sy?sx:sy;
+	scaledWidth = windowWidth * scale;
+	scaledHeight = windowHeight * scale;
+	scaledOffsetX = (windowWidth - scaledWidth) / 2;
+	scaledOffsetY = (windowHeight - scaledHeight) / 2;
+
 	//Initialise image addon
 	if(!al_init_image_addon())
 		abort_game("Failed to initialize al_init_image_addon");
 
 	//Load bitmap files
 	//buffer = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png");
+	buffer = al_create_bitmap(windowWidth, windowHeight);
 	backgroundSprite = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
 	shipSprite = al_load_bitmap("c:/dev/allegro/images/shipSprite.png"); //Stationary ship sprite
 	shipSprite1 = al_load_bitmap("c:/dev/allegro/images/shipSprite1.png"); //Moving ship sprite 1
@@ -207,8 +217,13 @@ void init(void)
     }
     //atexit (enet_deinitialize); //deinitialise upon program exit
 
+	//select server/client/singleplayer
+	std::cout << "Do you want to set up server(1), client(2) or play singleplayer(3)?: ";
+	int choice;
+	std::cin >> choice;
+
 	//Create server (or client as below, depending on whether useServer is true/false)
-	if (useServer) {
+	if (choice==1) {
 		ENetAddress address;
 		//Bind server to localhost
 		address.host = ENET_HOST_ANY;
@@ -225,7 +240,7 @@ void init(void)
 	}
 
 	//Create client
-	else {
+	else if (choice==2) {
 		host = enet_host_create (NULL /* create a client host */,
 					1 /* only allow 1 outgoing connection */,
 					2 /* allow up 2 channels to be used, 0 and 1 */,
@@ -237,6 +252,7 @@ void init(void)
 		//Begin connection to server machine
 		connectServer();
 	}
+	else ; //Single player mode (just don't setup server or client!)
 }
  
 void shutdown(void)
@@ -414,8 +430,8 @@ void update_graphics()
 		al_clear_to_color(al_map_rgb(25,0,25));
 		al_draw_rotated_bitmap(shipSprite, shipWidth/2, shipHeight/2, 250, 250, 0, 0);
 		al_draw_rotated_bitmap(fireball[0], fireballHeight/2, fireballWidth/2, 250, 250, 0, 0);
-		al_draw_bitmap(dockingText, 700, 400, 0);
-		if (dispUpgradeText) al_draw_bitmap(upgradedText, 700, 700, 0);
+		al_draw_bitmap(dockingText, 0, 0, 0);
+		if (dispUpgradeText) al_draw_bitmap(upgradedText, 0, windowHeight/2, 0);
 	}
 }
  
@@ -441,13 +457,11 @@ void game_loop(void)
 
         if (redraw && al_is_event_queue_empty(event_queue)) {
             redraw = false;
-			//al_set_target_bitmap(buffer);
+			al_set_target_bitmap(buffer);
             al_clear_to_color(al_map_rgb(0, 0, 0));
             update_graphics(); //Redraw background and sprites
-			//al_set_target_backbuffer(display);
-			//al_draw_bitmap(buffer, 0, 0, 0);
-			//al_draw_scaled_bitmap(buffer, 0, 0, backgroundWidth, backgroundHeight, scaleX, scaleY, scaleW, scaleH, 0);
-            //al_draw_scaled_bitmap(buffer, 0, 0, windowWidth, windowHeight, scaleX, scaleY, scaleW, scaleH, 0);
+			al_set_target_backbuffer(display);
+            al_draw_scaled_bitmap(buffer, 0, 0, windowWidth, windowHeight, scaledOffsetX, scaledOffsetY, scaledWidth, scaledHeight, 0);
             al_flip_display();
         }
     }
@@ -463,7 +477,7 @@ void connectServer() {
 	ENetEvent event;
 	//ENetPeer *peer;
 	/* Connect to some.server.net:1234. */
-	enet_address_set_host (& address, "192.168.8.102");
+	enet_address_set_host (& address, "localhost");
 	address.port = 1234;
 	/* Initiate the connection, allocating the two channels 0 and 1. */
 	peer = enet_host_connect (host, & address, 2, 0);    
