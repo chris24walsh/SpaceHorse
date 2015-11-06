@@ -1,4 +1,4 @@
-#include <enet\enet.h>
+#include <enet\enet.h> //Must be included before the allegro library to prevent conflicts
 #include <allegro5/allegro5.h>
 #include "allegro5/allegro_image.h"
 #include <stdio.h>
@@ -9,6 +9,10 @@
 #include <cmath>
 
 
+////////////////////////////////////
+/////     GLOBAL VARIABLES     /////
+
+//Allegro objects
 bool done;
 ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 ALLEGRO_TIMER *timer = NULL;
@@ -25,8 +29,6 @@ ALLEGRO_BITMAP *upgradedText = NULL;
 ALLEGRO_BITMAP *buffer = NULL;
 ALLEGRO_DISPLAY *display = NULL;
 ALLEGRO_DISPLAY_MODE disp_data;
-
-//ALLEGRO_PATH *path = al_get_standard_path(ALLEGRO_RESOURCES_PATH);
 
 //Screen vars
 int gridX = 0;
@@ -68,55 +70,91 @@ bool safe = true;
 bool dispUpgradeText = false;
 
 //Network vars
-bool useServer = true;
+bool useServer = false;
 ENetHost * host; //This machine
 ENetPeer * peer; //Remote machine
 
-//Network Functions
+
+/////////////////////////////////////////
+/////     Function Declarations     /////
+
+//Program control functions declaration
+void abort_game(const char*);
+void init();
+void shutdown();
+
+//Game Functions declaration
+void fire();
+void dock();
+void upgrade_weapon();
+void press_key(ALLEGRO_EVENT);
+void release_key(ALLEGRO_EVENT);
+void update_logic();
+void update_graphics();
+void game_loop();
+
+//Network Functions declaration
 void connectServer();
 void sendData();
 int receiveData();
 
+
+/////////////////////////////////
+/////     Main function     /////
+
+int main(int argc, char* argv[])
+{
+    init();
+    game_loop();
+    shutdown();
+}
+
+
+//////////////////////////////////////////////
+/////      Program control functions     /////
+
 void abort_game(const char* message)
 {
     printf("%s \n", message);
-	getch();
+	_getch();
     exit(1);
 }
  
 void init(void)
 {
+	//Allegro initialisation
     if (!al_init())
         abort_game("Failed to initialize allegro");
- 
     if (!al_install_keyboard())
         abort_game("Failed to install keyboard");
- 
     timer = al_create_timer(1.0 / 60);
     if (!timer)
         abort_game("Failed to create timer");
 	
 	//Setup Display
 	al_get_display_mode(al_get_num_display_modes() - 1, &disp_data); //Set resolution to max
-	windowWidth = disp_data.width;
-	windowHeight = disp_data.height;
+	windowWidth = 640;
+	windowHeight = 480;
+	//windowWidth = disp_data.width;
+	//windowHeight = disp_data.height;
 	maxX = windowWidth*numberGrids;
 	maxY = windowHeight*numberGrids;
-	
     //al_set_new_display_flags(ALLEGRO_FULLSCREEN);
+	al_set_new_display_flags(ALLEGRO_WINDOWED);
     display = al_create_display(windowWidth, windowHeight);
     if (!display)
         abort_game("Failed to create display");
 
+	//Initialise image addon
 	if(!al_init_image_addon())
 		abort_game("Failed to initialize al_init_image_addon");
 
 	//Load bitmap files
-	buffer = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png");
+	//buffer = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png");
 	backgroundSprite = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
-	shipSprite = al_load_bitmap("c:/dev/allegro/images/shipSprite.png");
-	shipSprite1 = al_load_bitmap("c:/dev/allegro/images/shipSprite1.png");
-	shipSprite2 = al_load_bitmap("c:/dev/allegro/images/shipSprite2.png");
+	shipSprite = al_load_bitmap("c:/dev/allegro/images/shipSprite.png"); //Stationary ship sprite
+	shipSprite1 = al_load_bitmap("c:/dev/allegro/images/shipSprite1.png"); //Moving ship sprite 1
+	shipSprite2 = al_load_bitmap("c:/dev/allegro/images/shipSprite2.png"); // Moving ship sprite 2
 	shipSpriteCurrent = shipSprite;
 	for (int i=0; i<maxFireballs; i++) fireball[i] = al_load_bitmap("c:/dev/allegro/images/fireball.png");
 	dockingStation[0] = al_load_bitmap("c:/dev/allegro/images/dockingStation1.png");
@@ -125,21 +163,25 @@ void init(void)
 	dockingText = al_load_bitmap("c:/dev/allegro/images/dockingText.png");
 	upgradedText = al_load_bitmap("c:/dev/allegro/images/upgradedText.png");
 	
+	//Check if bitmaps loaded properly
+	if(!backgroundSprite) abort_game("Failed to load the background image");
+	if(!shipSprite) abort_game("Failed to load the shipSprite image");
+	if(!shipSprite1) abort_game("Failed to load the shipSprite1 image");
+	if(!shipSprite2) abort_game("Failed to load the shipSprite2 image");
+	if(!fireball[0]) abort_game("Failed to load the fireball image");
+	if(!dockingStation[0]) abort_game("Failed to load the dockingStation1 image");
+	if(!dockingStation[1]) abort_game("Failed to load the dockingStation2 image");
+	if(!dockingStation[2]) abort_game("Failed to load the dockingStation3 image");
+	if(!dockingText) abort_game("Failed to load the dockingText image");
+	if(!upgradedText) abort_game("Failed to load the upgradedText image");
+
 	//al_append_path_component(path, "Images");
 	//al_set_path_filename(path, "backgroundSprite.png");
 	//image = al_load_bitmap(al_path_cstr(path, '/'));
-
-	//Random seed the dockingstation
-	srand(6); //srand(time(NULL));
-	for (int i=0; i<3; i++) dockingX[i] = float(maxX)*(rand()%100)/100;
-	for (int i=0; i<3; i++) dockingY[i] = float(maxY)*(rand()%100)/100;
-
-	if(!backgroundSprite) abort_game("Failed to load the background image");
-	if(!shipSprite) abort_game("Failed to load the ship image");
 	
+	//Initisatise the event queue
 	event_queue = al_create_event_queue();
     if (!event_queue) abort_game("Failed to create event queue");
- 
     al_register_event_source(event_queue, al_get_keyboard_event_source());
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
     al_register_event_source(event_queue, al_get_display_event_source(display));
@@ -150,36 +192,35 @@ void init(void)
 	for (int i=0; i<maxFireballs; i++) fireballX[i] = maxX + fireballWidth;
 	for (int i=0; i<maxFireballs; i++) fireballY[i] = maxY + fireballHeight;
 
-	//Docking off
+	//Docking station initialisation
 	canDock = dockingScr = false;
+	//Random seed the dockingstations throughout the map
+	srand(6); //srand(time(NULL));
+	for (int i=0; i<3; i++) dockingX[i] = float(maxX)*(rand()%100)/100;
+	for (int i=0; i<3; i++) dockingY[i] = float(maxY)*(rand()%100)/100;
+
 
 	//Initialise the network library
 	if (enet_initialize () != 0)
     {
-        fprintf (stderr, "An error occurred while initializing ENet.\n");
-        //return EXIT_FAILURE;
+        abort_game("An error occurred while initializing ENet.\n");
     }
     //atexit (enet_deinitialize); //deinitialise upon program exit
 
-	//Create server
+	//Create server (or client as below, depending on whether useServer is true/false)
 	if (useServer) {
 		ENetAddress address;
-		/* Bind the server to the default localhost.     */
-		/* A specific host address can be specified by   */
-		/* enet_address_set_host (& address, "x.x.x.x"); */
+		//Bind server to localhost
 		address.host = ENET_HOST_ANY;
-		/* Bind the server to port 1234. */
+		// Bind server to port 1234
 		address.port = 1234;
 		host = enet_host_create (& address /* the address to bind the server host to */, 
 									 32      /* allow up to 32 clients and/or outgoing connections */,
 									  2      /* allow up to 2 channels to be used, 0 and 1 */,
 									  0      /* assume any amount of incoming bandwidth */,
 									  0      /* assume any amount of outgoing bandwidth */);
-		if (host == NULL)
-		{
-			fprintf (stderr, 
-					 "An error occurred while trying to create an ENet server host.\n");
-			//exit (EXIT_FAILURE);
+		if (host == NULL) {
+			abort_game("An error occurred while trying to create an ENet server host.\n");
 		}
 	}
 
@@ -190,33 +231,31 @@ void init(void)
 					2 /* allow up 2 channels to be used, 0 and 1 */,
 					0	/* 57600 / 8 /* 56K modem with 56 Kbps downstream bandwidth */,
 					0	/* 14400 / 8 /* 56K modem with 14 Kbps upstream bandwidth */);
-		if (host == NULL)
-		{
-			fprintf (stderr, 
-					 "An error occurred while trying to create an ENet client host.\n");
-			//exit (EXIT_FAILURE);
+		if (host == NULL) {
+			abort_game("An error occurred while trying to create an ENet client host.\n");
 		}
-
-		//Connect to the server machine
+		//Begin connection to server machine
 		connectServer();
 	}
 }
  
 void shutdown(void)
 {
+	//Allegro shutdown
     if (timer) al_destroy_timer(timer);
     if (display) al_destroy_display(display);
 	if (backgroundSprite)	al_destroy_bitmap(backgroundSprite);
 	if (shipSprite) al_destroy_bitmap(shipSprite);	
     if (event_queue) al_destroy_event_queue(event_queue);
-	//if (path) al_destroy_path(path);
 
-	//Network shutdown
+	//Networking shutdown
 	enet_deinitialize();
 	enet_host_destroy(host);
 }
 
-//Game functions
+
+//////////////////////////////////
+/////     Game functions     /////
 
 void fire()
 {
@@ -236,6 +275,15 @@ void dock()
 		dockingScr = true;
 		shipSpeed = 0;
 		safe = true;
+	}
+}
+
+void upgrade_weapon()
+{
+	if (dockingScr) {
+		dispUpgradeText = true;
+		for (int i=0; i<maxFireballs; i++) fireball[i] = al_load_bitmap("c:/dev/allegro/images/fireball2.png");
+		fireballHeight = 40;
 	}
 }
 
@@ -262,16 +310,8 @@ void press_key(ALLEGRO_EVENT e)
 	if (e.keyboard.keycode == ALLEGRO_KEY_D) {
 		dock();
 	}
-	if (e.keyboard.keycode == ALLEGRO_KEY_E) {
-		//std::cout << gridX << " " << gridY << "    " << dockingX[0] << " " << dockingY[0];
-		int y = 0;
-	}
 	if (e.keyboard.keycode == ALLEGRO_KEY_W) {
-		if (dockingScr) {
-			dispUpgradeText = true;
-			for (int i=0; i<maxFireballs; i++) fireball[i] = al_load_bitmap("c:/dev/allegro/images/fireball2.png");
-			fireballHeight = 40;
-		}
+		upgrade_weapon();
 	}
 }
 
@@ -341,7 +381,7 @@ void update_logic()
 	for (int i=0; i<maxFireballs; i++) fireballX[i] += fireballSpeed * cos(fireballAngle[i]);
 	for (int i=0; i<maxFireballs; i++) fireballY[i] += fireballSpeed * sin(fireballAngle[i]);
 
-	//Check if near docking station
+	//Check if near docking station, and if so allow docking
 	int proxX, proxY;
 	for (int i=0; i<3; i++) {
 		proxX = abs(shipX - dockingX[i]);
@@ -413,14 +453,10 @@ void game_loop(void)
     }
 }
  
-int main(int argc, char* argv[])
-{
-    init();
-    game_loop();
-    shutdown();
-}
 
-//Network functions
+/////////////////////////////////////
+/////     Network functions     /////
+
 //Connect to server
 void connectServer() {
 	ENetAddress address;
@@ -441,8 +477,7 @@ void connectServer() {
 	if (enet_host_service (host, & event, 7000) > 0 &&
 		event.type == ENET_EVENT_TYPE_CONNECT)
 	{
-		puts ("Connection to some.server.net:1234 succeeded.");
-		//
+		puts("Connection to some.server.net:1234 succeeded.");
 	}
 	else
 	{
@@ -484,7 +519,6 @@ int receiveData() {
 					event.peer -> address.port);
 			/* Store any relevant client information here. */
 			event.peer -> data = "Client information";
-			return 0;
 			break;
 		case ENET_EVENT_TYPE_RECEIVE:
 			printf ("A packet of length %u containing %s was received from %s on channel %u.\n",
@@ -496,12 +530,11 @@ int receiveData() {
 			enet_packet_destroy (event.packet);
 			return 1;
 			break;
-       
 		case ENET_EVENT_TYPE_DISCONNECT:
 			printf ("%s disconnected.\n", event.peer -> data);
 			/* Reset the peer's client information. */
 			event.peer -> data = NULL;
-			return 0;
 		}
 	}
+	return 0;
 }
