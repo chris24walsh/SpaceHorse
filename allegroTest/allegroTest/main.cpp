@@ -7,6 +7,7 @@
 #include <conio.h>
 #include <random>
 #include <cmath>
+#include <string>
 
 using namespace std;
 
@@ -71,9 +72,10 @@ bool safe = true;
 bool dispUpgradeText = false;
 
 //Network vars
-bool useServer = true;
+//bool useServer = true;
 ENetHost * host; //This machine
 ENetPeer * peer; //Remote machine
+ENetEvent event;
 
 
 //////////////////////////////////
@@ -260,7 +262,7 @@ void init(Ship *player[])
 	int choice;
 	std::cin >> choice;
 
-	//Create server (or client as below, depending on whether useServer is true/false)
+	//Create server (or client as below, depending on choice);
 	if (choice==1) {
 		ENetAddress address;
 		//Bind server to localhost
@@ -275,6 +277,50 @@ void init(Ship *player[])
 		if (host == NULL) {
 			abort_game("An error occurred while trying to create an ENet server host.\n");
 		}
+
+		//Wait for connection from clients
+		//ENetEvent event;
+		int eventStatus = 1;
+		enet_uint32 wait = 60000;
+		bool first = true;
+		//enet_uint8 *data = NULL;
+		//(*data) = 0;
+
+		while(1) {
+			eventStatus = enet_host_service(host, &event, wait);
+
+			//If we have some event that interests us
+			if (eventStatus > 0) {
+				switch(event.type) {
+				case ENET_EVENT_TYPE_CONNECT:
+					printf("Client connection received from %x\n", event.peer->address.host);
+					peer = event.peer;
+					wait = 0;
+					break;
+				case ENET_EVENT_TYPE_RECEIVE:
+					printf("Client data: %s\n", event.packet->data);
+					//data = event.packet->data;
+					break;
+				case ENET_EVENT_TYPE_DISCONNECT:
+					printf("%s disconnected.\n", event.peer->data);
+					break;
+				}
+			}
+
+			printf("> ");
+			string message = "hello";
+			if (first) {
+				getline(cin, message);
+				first = false;
+			}
+			getline(cin, message);
+			if (message=="quit") break;
+
+			if (strlen(message.c_str()) > 0) {
+				ENetPacket *packet = enet_packet_create(message.c_str(), strlen(message.c_str())+1, ENET_PACKET_FLAG_RELIABLE);
+				enet_peer_send(peer, 0, packet); //Send to global peer
+			}
+		}
 	}
 
 	//Create client
@@ -287,8 +333,68 @@ void init(Ship *player[])
 		if (host == NULL) {
 			abort_game("An error occurred while trying to create an ENet client host.\n");
 		}
+
 		//Begin connection to server machine
-		connectServer();
+		//connectServer();
+		ENetAddress address;
+		//ENetEvent event;
+		//ENetPeer *peer; //Use global peer struct
+		/* Connect to server:1234. */
+		enet_address_set_host (& address, "192.168.8.101");
+		address.port = 1234;
+		
+		
+		/* Initiate the connection, allocating the two channels 0 and 1. */
+		peer = enet_host_connect (host, & address, 2, 0); //Bind successful connection to peer
+		if (peer == NULL)
+		{
+		   fprintf (stderr, 
+					"No available peers for initiating an ENet connection.\n");
+		   exit (EXIT_FAILURE);
+		}
+
+
+		//Wait for return connection from server
+		ENetEvent event;
+		int eventStatus = 1;
+		int wait = 1000;
+		bool first = true;
+		//enet_uint8 *data = NULL;
+		//(*data) = 0;
+
+		while(1) {
+			eventStatus = enet_host_service(host, &event, 0);
+
+			//If we have some event that interests us
+			if (eventStatus > 0) {
+				switch(event.type) {
+				case ENET_EVENT_TYPE_CONNECT:
+					printf("Client connection received from %x\n", event.peer->address.host);
+					wait = 0;
+					break;
+				case ENET_EVENT_TYPE_RECEIVE:
+					printf("Client data: %s\n", event.packet->data);
+					//data = event.packet->data;
+					break;
+				case ENET_EVENT_TYPE_DISCONNECT:
+					printf("%s disconnected.\n", event.peer->data);
+					break;
+				}
+			}
+
+			printf("> ");
+			string message;
+			if (first) {
+				getline(cin, message);
+			}
+			getline(cin, message);
+			if (message=="quit") break;
+			
+			if (strlen(message.c_str()) > 0 && peer) {
+				ENetPacket *packet = enet_packet_create(message.c_str(), strlen(message.c_str())+1, ENET_PACKET_FLAG_RELIABLE);
+				enet_peer_send(peer, 0, packet); //Send to global peer
+			}
+		}
 	}
 	else ; //Single player mode (just don't setup server or client!)
 }
@@ -458,20 +564,32 @@ void update_logic(Ship *player[])
 		else canDock = false;
 	}
 
+	//Apply remote ship's new coordinates to player2's current local coordinates
+	int success = enet_host_service(host, &event, 0); //Non-blocking poll to enets data buffer
+	if (success) {
+		player[1]->x = 600;
+		player[1]->y = 600;
+		player[1]->angle = 0;
+	}
+	
+	//Send player1's data to remote
+	ENetPacket *packet = enet_packet_create("data", strlen("data")+1, ENET_PACKET_FLAG_RELIABLE);
+	enet_peer_send(peer, 0, packet);
 }
 
 void update_graphics(Ship *player[])
 {
 	//Space mode
 	if (!dockingScr) {
-		al_draw_bitmap(backgroundSprite,0,0,0); //Draw background first, unscaled
-		for (int i=0; i<3; i++) //Draw planets next, only if ship's position is within current grid
+		al_draw_bitmap(backgroundSprite,0,0,0); //Draw background first
+		for (int i=0; i<3; i++) //Draw planets next, only if planets' positions are within current grid
 			if (dockingX[i]>gridX && dockingX[i]<(gridX+windowWidth) && dockingY[i]>gridY && dockingY[i]<(gridY+windowHeight))
 				al_draw_rotated_bitmap(dockingStation[i], dockingWidth[i]/2, dockingHeight[i]/2, dockingX[i]%windowWidth, dockingY[i]%windowHeight, 0, 0); //Draw planets only if their coordinates exist within current screen
-		for (int p=0;p<2;p++) {
-			//for (int i=0; i<maxFireballs; i++) al_draw_rotated_bitmap(fireball[i], player[0]->fireWidth/2, player[0]->fireHeight/2, player[0]->fireX[i], player[0]->fireY[i], player[0]->fireAngle[i], 0); //Draw fireballs
-			for (int i=0; i<maxFireballs; i++)  al_draw_rotated_bitmap(player[p]->fireSprite[i], player[p]->fireWidth/2, player[p]->fireHeight/2, player[p]->fireX[i], player[p]->fireY[i], player[p]->fireAngle[i], 0); //Draw fireballs
-			al_draw_rotated_bitmap(player[p]->shipSpriteCurrent, player[p]->width/2, player[p]->height/2, player[p]->x%windowWidth, player[p]->y%windowHeight, player[p]->angle, 0); //Draw ship (at a rotation)
+		for (int p=0;p<2;p++) { //Draw sprites for each Ship object
+			for (int i=0; i<maxFireballs; i++) //Draw fireballs
+				al_draw_rotated_bitmap(player[p]->fireSprite[i], player[p]->fireWidth/2, player[p]->fireHeight/2, player[p]->fireX[i], player[p]->fireY[i], player[p]->fireAngle[i], 0);
+			if ((player[p]->x)>(gridX) && (player[p]->x)<(gridX+windowWidth) && (player[p]->y)>(gridY) && (player[p]->y)<(gridY+windowHeight))  //If Ship object's coordinates are within the current grid, then draw sprite to buffer
+				al_draw_rotated_bitmap(player[p]->shipSpriteCurrent, player[p]->width/2, player[p]->height/2, player[p]->x%windowWidth, player[p]->y%windowHeight, player[p]->angle, 0); 
 		}
 	}
 
@@ -527,7 +645,7 @@ void connectServer() {
 	ENetEvent event;
 	//ENetPeer *peer;
 	/* Connect to some.server.net:1234. */
-	enet_address_set_host (& address, "192.168.8.102");
+	enet_address_set_host (& address, "192.168.8.101");
 	address.port = 1234;
 	/* Initiate the connection, allocating the two channels 0 and 1. */
 	peer = enet_host_connect (host, & address, 2, 0);    
