@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <sstream>
 #include <conio.h>
 #include <random>
 #include <cmath>
@@ -286,7 +287,8 @@ void init(Ship *player[])
 		//enet_uint8 *data = NULL;
 		//(*data) = 0;
 
-		while(1) {
+		bool exit = true;
+		while(exit) {
 			eventStatus = enet_host_service(host, &event, wait);
 
 			//If we have some event that interests us
@@ -300,6 +302,7 @@ void init(Ship *player[])
 				case ENET_EVENT_TYPE_RECEIVE:
 					printf("Client data: %s\n", event.packet->data);
 					//data = event.packet->data;
+					exit = false;
 					break;
 				case ENET_EVENT_TYPE_DISCONNECT:
 					printf("%s disconnected.\n", event.peer->data);
@@ -362,7 +365,8 @@ void init(Ship *player[])
 		//enet_uint8 *data = NULL;
 		//(*data) = 0;
 
-		while(1) {
+		bool exit = true;
+		while(exit) {
 			eventStatus = enet_host_service(host, &event, 0);
 
 			//If we have some event that interests us
@@ -375,6 +379,7 @@ void init(Ship *player[])
 				case ENET_EVENT_TYPE_RECEIVE:
 					printf("Client data: %s\n", event.packet->data);
 					//data = event.packet->data;
+					exit = false;
 					break;
 				case ENET_EVENT_TYPE_DISCONNECT:
 					printf("%s disconnected.\n", event.peer->data);
@@ -509,13 +514,15 @@ void update_logic(Ship *player[])
 	}
 
 	//Cycle between different rocket sprites, to give effect of rocket blasting
-	if (player[0]->speed>0) {
-		if (player[0]->flipflop<5) player[0]->shipSpriteCurrent = player[0]->shipSprite1;
-		else if (player[0]->flipflop>=5) player[0]->shipSpriteCurrent = player[0]->shipSprite2;
-		player[0]->flipflop++;
-		if (player[0]->flipflop==10) player[0]->flipflop=0;
+	for (int p=0;p<2;p++) {
+		if (player[p]->speed>0) {
+			if (player[p]->flipflop<5) player[p]->shipSpriteCurrent = player[p]->shipSprite1;
+			else if (player[p]->flipflop>=5) player[p]->shipSpriteCurrent = player[p]->shipSprite2;
+			player[p]->flipflop++;
+			if (player[p]->flipflop==10) player[p]->flipflop=0;
+		}
+		else player[p]->shipSpriteCurrent = player[p]->shipSprite;
 	}
-	else player[0]->shipSpriteCurrent = player[0]->shipSprite;
 
 	//Increase or decrease player[0]->speed
 	if (upPressed) {
@@ -541,39 +548,49 @@ void update_logic(Ship *player[])
 	//Set which grid the ship is currently in
 	gridX = int(float(player[0]->x)/windowWidth)*windowWidth;
 	gridY = int(float(player[0]->y)/windowHeight)*windowHeight;
-	//gridX = (player[0]->x/windowWidth)*windowWidth;
-	//gridY = (player[0]->y/windowHeight)*windowHeight;
 	
 	//Set fireball position
-	for (int i=0; i<maxFireballs; i++) player[0]->fireX[i] += player[0]->fireSpeed * cos(player[0]->fireAngle[i]);
-	for (int i=0; i<maxFireballs; i++) player[0]->fireY[i] += player[0]->fireSpeed * sin(player[0]->fireAngle[i]);
-	//player[0]->fireX += player[0]->fireSpeed * cos(player[0]->fireAngle);
-	//player[0]->fireY += player[0]->fireSpeed * sin(player[0]->fireAngle);
-
+	for (int p=0;p<2;p++) {
+		for (int i=0; i<maxFireballs; i++) player[p]->fireX[i] += player[p]->fireSpeed * cos(player[p]->fireAngle[i]);
+		for (int i=0; i<maxFireballs; i++) player[p]->fireY[i] += player[p]->fireSpeed * sin(player[p]->fireAngle[i]);
+	}
+	
 	//Check if near docking station, and if so allow docking
 	int proxX, proxY;
 	for (int i=0; i<3; i++) {
 		proxX = abs(player[0]->x - dockingX[i]);
-		//if (proxX<0) proxX *= -1; //Make the distance a positive value
 		proxY = abs(player[0]->y - dockingY[i]);
-		//if (proxY<0) proxY *= -1; //Make the distance a positive value
 		if (proxX<dockingWidth[i]/2 && proxY<dockingHeight[i]/2) {
 			canDock = true;
 			break;
 		}
 		else canDock = false;
 	}
-
-	//Apply remote ship's new coordinates to player2's current local coordinates
-	int success = enet_host_service(host, &event, 0); //Non-blocking poll to enets data buffer
-	if (success) {
-		player[1]->x = 600;
-		player[1]->y = 600;
-		player[1]->angle = 0;
-	}
 	
+	//Apply remote ship's new coordinates to player2's current local coordinates
+	ENetEvent event;
+	enet_uint8 *d = NULL;
+	while(enet_host_service(host, &event, 0) && event.type == ENET_EVENT_TYPE_RECEIVE) { //Non-blocking poll to enets data buffer
+		d = event.packet->data;
+		printf("%lu\n",event.packet->dataLength);
+		player[1]->x = atoi(strtok((char*)d,"|"));
+		player[1]->y = atoi(strtok(NULL,"|"));
+		player[1]->angle = atof(strtok(NULL,"|"));
+		player[1]->speed = atoi(strtok(NULL,"|"));
+		for (int i=0;i<maxFireballs;i++) {
+			player[1]->fireX[i] = atoi(strtok(NULL,"|"));
+			player[1]->fireY[i] = atoi(strtok(NULL,"|"));
+			player[1]->fireAngle[i] = atof(strtok(NULL,"|"));
+		}
+	}
+
 	//Send player1's data to remote
-	ENetPacket *packet = enet_packet_create("data", strlen("data")+1, ENET_PACKET_FLAG_RELIABLE);
+	stringstream ss;
+	ss << player[0]->x << "|" << player[0]->y << "|" << player[0]->angle << "|" << player[0]->speed;
+	for (int i=0;i<maxFireballs;i++)
+		ss << "|" << player[0]->fireX[i] << "|" << player[0]->fireY[i] << "|" << player[0]->fireAngle[i];
+	string data = ss.str();
+	ENetPacket *packet = enet_packet_create(data.c_str(), strlen(data.c_str())+1, 0);
 	enet_peer_send(peer, 0, packet);
 }
 
@@ -639,15 +656,16 @@ void game_loop(Ship *player[])
 /////////////////////////////////////
 /////     Network functions     /////
 
+/*
 //Connect to server
 void connectServer() {
 	ENetAddress address;
 	ENetEvent event;
 	//ENetPeer *peer;
-	/* Connect to some.server.net:1234. */
+	// Connect to some.server.net:1234.
 	enet_address_set_host (& address, "192.168.8.101");
 	address.port = 1234;
-	/* Initiate the connection, allocating the two channels 0 and 1. */
+	// Initiate the connection, allocating the two channels 0 and 1. 
 	peer = enet_host_connect (host, & address, 2, 0);    
 	if (peer == NULL)
 	{
@@ -655,7 +673,7 @@ void connectServer() {
 				"No available peers for initiating an ENet connection.\n");
 	   exit (EXIT_FAILURE);
 	}
-	/* Wait up to 5 seconds for the connection attempt to succeed. */
+	/* Wait up to 5 seconds for the connection attempt to succeed. 
 	if (enet_host_service (host, & event, 7000) > 0 &&
 		event.type == ENET_EVENT_TYPE_CONNECT)
 	{
@@ -663,9 +681,9 @@ void connectServer() {
 	}
 	else
 	{
-		/* Either the 5 seconds are up or a disconnect event was */
-		/* received. Reset the peer in the event the 5 seconds   */
-		/* had run out without any significant event.            */
+		/* Either the 5 seconds are up or a disconnect event was 
+		/* received. Reset the peer in the event the 5 seconds   
+		/* had run out without any significant event.            
 		enet_peer_reset (peer);
 		puts ("Connection to some.server.net:1234 failed.");
 	}
@@ -673,17 +691,17 @@ void connectServer() {
 
 //Sending data
 void sendData() {
-	/* Create a reliable packet of size 7 containing "packet\0" */
+	/* Create a reliable packet of size 7 containing "packet\0" 
 	ENetPacket * packet = enet_packet_create ("packet", strlen ("packet") + 1, ENET_PACKET_FLAG_RELIABLE);
-	/* Extend the packet so and append the string "foo", so it now */
-	/* contains "packetfoo\0"                                      */
+	/* Extend the packet so and append the string "foo", so it now 
+	/* contains "packetfoo\0"                                      
 	enet_packet_resize (packet, strlen ("packetfoo") + 1);
 	//strcpy (& packet -> data [strlen ("packet")], "foo");
-	/* Send the packet to the peer over channel id 0. */
-	/* One could also broadcast the packet by         */
-	/* enet_host_broadcast (host, 0, packet);         */
+	/* Send the packet to the peer over channel id 0. 
+	/* One could also broadcast the packet by         
+	/* enet_host_broadcast (host, 0, packet);         
 	enet_peer_send (peer, 0, packet);
-	/* One could just use enet_host_service() instead. */
+	//* One could just use enet_host_service() instead. 
 	enet_host_flush (host);
 }
 
@@ -699,7 +717,7 @@ int receiveData() {
 			printf ("A new client connected from %x:%u.\n", 
 					event.peer -> address.host,
 					event.peer -> address.port);
-			/* Store any relevant client information here. */
+			/* Store any relevant client information here. 
 			event.peer -> data = "Client information";
 			break;
 		case ENET_EVENT_TYPE_RECEIVE:
@@ -708,15 +726,15 @@ int receiveData() {
 					event.packet -> data,
 					event.peer -> data,
 					event.channelID);
-			/* Clean up the packet now that we're done using it. */
+			/* Clean up the packet now that we're done using it. 
 			enet_packet_destroy (event.packet);
 			return 1;
 			break;
 		case ENET_EVENT_TYPE_DISCONNECT:
 			printf ("%s disconnected.\n", event.peer -> data);
-			/* Reset the peer's client information. */
+			/* Reset the peer's client information. 
 			event.peer -> data = NULL;
 		}
 	}
 	return 0;
-}
+}*/
