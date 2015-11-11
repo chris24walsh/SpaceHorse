@@ -16,16 +16,9 @@ using namespace std;
 /////     GLOBAL VARIABLES     /////
 
 //Allegro objects
-bool done;
 ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 ALLEGRO_TIMER *timer = NULL;
 ALLEGRO_BITMAP *backgroundSprite = NULL;
-/*ALLEGRO_BITMAP *shipSprite = NULL;
-ALLEGRO_BITMAP *shipSprite1 = NULL;
-ALLEGRO_BITMAP *shipSprite2 = NULL;
-ALLEGRO_BITMAP *shipSpriteCurrent = NULL;*/
-const int maxFireballs = 15;
-//ALLEGRO_BITMAP *fireball[maxFireballs];
 ALLEGRO_BITMAP *dockingStation[3];
 ALLEGRO_BITMAP *dockingText = NULL;
 ALLEGRO_BITMAP *upgradedText = NULL;
@@ -36,31 +29,12 @@ ALLEGRO_DISPLAY_MODE disp_data;
 //Screen vars
 int gridX = 0;
 int gridY = 0;
-int numberGrids = 2; //Number of grids along one side of the square map actually...:)
+int numberGrids = 4; //Number of grids along one side of the square map actually...:)
 int windowWidth, windowHeight, maxX, maxY, screenWidth, screenHeight;
-int backgroundWidth = 1920;
+int backgroundWidth = 1920; //Current background image has these dimensions
 int backgroundHeight = 1080;
 int scaledWidth, scaledHeight, scaledOffsetX, scaledOffsetY;
 bool leftPressed, rightPressed, upPressed, downPressed;
-
-//Ship vars
-/*int player[0]->x = 200;
-int player[0]->y = 200;
-int player[0]->height = 100;
-int player[0]->width = 100;
-float player[0]->angle = 0;
-float player[0]->speed = 0;
-int maxplayer[0]->speed = 7;
-int flipflop = 0; */
-
-//Fireball vars
-/*int fireballNumber = 0;
-int player[0]->fireWidth = 30;
-int player[0]->fireHeight = 20;
-int player[0]->fireX[maxFireballs];
-int player[0]->fireY[maxFireballs];
-float player[0]->fireAngle[maxFireballs];
-float fireballSpeed = 17;*/
 
 //Docking station vars
 bool canDock, dockingScr;
@@ -73,10 +47,14 @@ bool safe = true;
 bool dispUpgradeText = false;
 
 //Network vars
-//bool useServer = true;
 ENetHost * host; //This machine
 ENetPeer * peer; //Remote machine
 ENetEvent event;
+
+//Misc
+const int maxFireballs = 15;
+bool done = false;
+int choice;
 
 
 //////////////////////////////////
@@ -129,10 +107,6 @@ void update_logic(Ship*[]);
 void update_graphics(Ship*[]);
 void game_loop(Ship*[]);
 
-//Network Functions declaration
-void connectServer();
-void sendData();
-int receiveData();
 
 /////////////////////////////////
 /////     Main function     /////
@@ -197,8 +171,8 @@ void init(Ship *player[])
 	//Initialise image addon
 	if(!al_init_image_addon())
 		abort_game("Failed to initialize al_init_image_addon");
+
 	//Load bitmap files
-	//buffer = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png");
 	buffer = al_create_bitmap(windowWidth, windowHeight);
 	backgroundSprite = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
 	for (int p=0;p<2;p++) {
@@ -206,7 +180,6 @@ void init(Ship *player[])
 		player[p]->shipSprite1 = al_load_bitmap("c:/dev/allegro/images/shipSprite1.png"); //Moving ship sprite 1
 		player[p]->shipSprite2 = al_load_bitmap("c:/dev/allegro/images/shipSprite2.png"); // Moving ship sprite 2
 		player[p]->shipSpriteCurrent = player[p]->shipSprite;
-		//for (int i=0; i<maxFireballs; i++) fireball[i] = al_load_bitmap("c:/dev/allegro/images/fireball.png");
 		for (int i=0; i<maxFireballs; i++) player[p]->fireSprite[i]= al_load_bitmap("c:/dev/allegro/images/fireball.png");
 	}
 	dockingStation[0] = al_load_bitmap("c:/dev/allegro/images/dockingStation1.png");
@@ -221,8 +194,7 @@ void init(Ship *player[])
 		if(!player[p]->shipSprite) abort_game("Failed to load the shipSprite image");
 		if(!player[p]->shipSprite1) abort_game("Failed to load the shipSprite1 image");
 		if(!player[p]->shipSprite2) abort_game("Failed to load the shipSprite2 image");
-		//if(!fireball[0]) abort_game("Failed to load the fireball image");
-		if(!player[p]->fireSprite) abort_game("Failed to load the fireball image");
+		if(!player[p]->fireSprite[0]) abort_game("Failed to load the fireball image");
 	}
 	if(!dockingStation[0]) abort_game("Failed to load the dockingStation1 image");
 	if(!dockingStation[1]) abort_game("Failed to load the dockingStation2 image");
@@ -230,23 +202,16 @@ void init(Ship *player[])
 	if(!dockingText) abort_game("Failed to load the dockingText image");
 	if(!upgradedText) abort_game("Failed to load the upgradedText image");
 	
-	//Initisatise the event queue
+	//Initialise the event queue
 	event_queue = al_create_event_queue();
     if (!event_queue) abort_game("Failed to create event queue");
     al_register_event_source(event_queue, al_get_keyboard_event_source());
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
     al_register_event_source(event_queue, al_get_display_event_source(display));
- 
-    done = false;
-
-	//Set up fireballs outside map initially
-	//for (int i=0; i<maxFireballs; i++) player[0]->fireX[i] = maxX + player[0]->fireWidth;
-	//for (int i=0; i<maxFireballs; i++) player[0]->fireY[i] = maxY + player[0]->fireHeight;
-
+	
 	//Docking station initialisation
 	canDock = dockingScr = false;
-	//Random seed the dockingstations throughout the map
-	srand(6); //srand(time(NULL));
+	srand(6); //srand(time(NULL)); //Random seed planets across map
 	for (int i=0; i<3; i++) dockingX[i] = float(maxX)*(rand()%100)/100;
 	for (int i=0; i<3; i++) dockingY[i] = float(maxY)*(rand()%100)/100;
 
@@ -256,11 +221,9 @@ void init(Ship *player[])
     {
         abort_game("An error occurred while initializing ENet.\n");
     }
-    //atexit (enet_deinitialize); //deinitialise upon program exit
 
-	//select server/client/singleplayer
+	//Select server/client/singleplayer
 	std::cout << "Do you want to set up server(1), client(2) or play singleplayer(3)?: ";
-	int choice;
 	std::cin >> choice;
 
 	//Create server (or client as below, depending on choice);
@@ -280,15 +243,12 @@ void init(Ship *player[])
 		}
 
 		//Wait for connection from clients
-		//ENetEvent event;
 		int eventStatus = 1;
 		enet_uint32 wait = 60000;
 		bool first = true;
-		//enet_uint8 *data = NULL;
-		//(*data) = 0;
+		bool exit = false;
 
-		bool exit = true;
-		while(exit) {
+		while(!exit) {
 			eventStatus = enet_host_service(host, &event, wait);
 
 			//If we have some event that interests us
@@ -301,7 +261,6 @@ void init(Ship *player[])
 					break;
 				case ENET_EVENT_TYPE_RECEIVE:
 					printf("Client data: %s\n", event.packet->data);
-					//data = event.packet->data;
 					exit = false;
 					break;
 				case ENET_EVENT_TYPE_DISCONNECT:
@@ -338,14 +297,10 @@ void init(Ship *player[])
 		}
 
 		//Begin connection to server machine
-		//connectServer();
 		ENetAddress address;
-		//ENetEvent event;
-		//ENetPeer *peer; //Use global peer struct
 		/* Connect to server:1234. */
 		enet_address_set_host (& address, "192.168.8.101");
 		address.port = 1234;
-		
 		
 		/* Initiate the connection, allocating the two channels 0 and 1. */
 		peer = enet_host_connect (host, & address, 2, 0); //Bind successful connection to peer
@@ -355,18 +310,15 @@ void init(Ship *player[])
 					"No available peers for initiating an ENet connection.\n");
 		   exit (EXIT_FAILURE);
 		}
-
-
+		
 		//Wait for return connection from server
 		ENetEvent event;
 		int eventStatus = 1;
 		int wait = 1000;
 		bool first = true;
-		//enet_uint8 *data = NULL;
-		//(*data) = 0;
+		bool exit = false;
 
-		bool exit = true;
-		while(exit) {
+		while(!exit) {
 			eventStatus = enet_host_service(host, &event, 0);
 
 			//If we have some event that interests us
@@ -378,7 +330,6 @@ void init(Ship *player[])
 					break;
 				case ENET_EVENT_TYPE_RECEIVE:
 					printf("Client data: %s\n", event.packet->data);
-					//data = event.packet->data;
 					exit = false;
 					break;
 				case ENET_EVENT_TYPE_DISCONNECT:
@@ -453,7 +404,6 @@ void upgrade_weapon(Ship *player[])
 {
 	if (dockingScr) {
 		dispUpgradeText = true;
-		//for (int i=0; i<maxFireballs; i++) fireball[i] = al_load_bitmap("c:/dev/allegro/images/fireball2.png");
 		for (int i=0; i<maxFireballs; i++) player[0]->fireSprite[i] = al_load_bitmap("c:/dev/allegro/images/fireball2.png");
 		player[0]->fireHeight = 40;
 	}
@@ -551,8 +501,13 @@ void update_logic(Ship *player[])
 	
 	//Set fireball position
 	for (int p=0;p<2;p++) {
-		for (int i=0; i<maxFireballs; i++) player[p]->fireX[i] += player[p]->fireSpeed * cos(player[p]->fireAngle[i]);
-		for (int i=0; i<maxFireballs; i++) player[p]->fireY[i] += player[p]->fireSpeed * sin(player[p]->fireAngle[i]);
+		for (int i=0; i<maxFireballs; i++) {
+			//if (player[p]->fireX[i]>=gridX && player[p]->fireX[i]<=gridX+windowWidth && player[p]->fireY[i]>=gridY && player[p]->fireY[i]<=gridY+windowHeight) {
+				player[p]->fireX[i] += player[p]->fireSpeed * cos(player[p]->fireAngle[i]);
+				player[p]->fireY[i] += player[p]->fireSpeed * sin(player[p]->fireAngle[i]);
+			//}
+			//else player[p]->fireX[i] = player[p]->fireY[i] = 0;
+		}
 	}
 	
 	//Check if near docking station, and if so allow docking
@@ -567,31 +522,33 @@ void update_logic(Ship *player[])
 		else canDock = false;
 	}
 	
-	//Apply remote ship's new coordinates to player2's current local coordinates
-	ENetEvent event;
-	enet_uint8 *d = NULL;
-	while(enet_host_service(host, &event, 0) && event.type == ENET_EVENT_TYPE_RECEIVE) { //Non-blocking poll to enets data buffer
-		d = event.packet->data;
-		printf("%lu\n",event.packet->dataLength);
-		player[1]->x = atoi(strtok((char*)d,"|"));
-		player[1]->y = atoi(strtok(NULL,"|"));
-		player[1]->angle = atof(strtok(NULL,"|"));
-		player[1]->speed = atoi(strtok(NULL,"|"));
-		for (int i=0;i<maxFireballs;i++) {
-			player[1]->fireX[i] = atoi(strtok(NULL,"|"));
-			player[1]->fireY[i] = atoi(strtok(NULL,"|"));
-			player[1]->fireAngle[i] = atof(strtok(NULL,"|"));
+	if (!choice==3) {
+		//Apply remote ship's new coordinates to player2's current local coordinates
+		ENetEvent event;
+		enet_uint8 *d = NULL;
+		while(enet_host_service(host, &event, 0) && event.type == ENET_EVENT_TYPE_RECEIVE) { //Non-blocking poll to enets data buffer
+			d = event.packet->data;
+			//printf("%lu\n",event.packet->dataLength);
+			player[1]->x = atoi(strtok((char*)d,"|"));
+			player[1]->y = atoi(strtok(NULL,"|"));
+			player[1]->angle = atof(strtok(NULL,"|"));
+			player[1]->speed = atoi(strtok(NULL,"|"));
+			for (int i=0;i<maxFireballs;i++) {
+				player[1]->fireX[i] = atoi(strtok(NULL,"|"));
+				player[1]->fireY[i] = atoi(strtok(NULL,"|"));
+				player[1]->fireAngle[i] = atof(strtok(NULL,"|"));
+			}
 		}
-	}
 
-	//Send player1's data to remote
-	stringstream ss;
-	ss << player[0]->x << "|" << player[0]->y << "|" << player[0]->angle << "|" << player[0]->speed;
-	for (int i=0;i<maxFireballs;i++)
-		ss << "|" << player[0]->fireX[i] << "|" << player[0]->fireY[i] << "|" << player[0]->fireAngle[i];
-	string data = ss.str();
-	ENetPacket *packet = enet_packet_create(data.c_str(), strlen(data.c_str())+1, 0);
-	enet_peer_send(peer, 0, packet);
+		//Send player1's data to remote
+		stringstream ss;
+		ss << player[0]->x << "|" << player[0]->y << "|" << player[0]->angle << "|" << player[0]->speed;
+		for (int i=0;i<maxFireballs;i++)
+			ss << "|" << player[0]->fireX[i] << "|" << player[0]->fireY[i] << "|" << player[0]->fireAngle[i];
+		string data = ss.str();
+		ENetPacket *packet = enet_packet_create(data.c_str(), strlen(data.c_str())+1, 0);
+		enet_peer_send(peer, 0, packet);
+	}
 }
 
 void update_graphics(Ship *player[])
@@ -604,7 +561,8 @@ void update_graphics(Ship *player[])
 				al_draw_rotated_bitmap(dockingStation[i], dockingWidth[i]/2, dockingHeight[i]/2, dockingX[i]%windowWidth, dockingY[i]%windowHeight, 0, 0); //Draw planets only if their coordinates exist within current screen
 		for (int p=0;p<2;p++) { //Draw sprites for each Ship object
 			for (int i=0; i<maxFireballs; i++) //Draw fireballs
-				al_draw_rotated_bitmap(player[p]->fireSprite[i], player[p]->fireWidth/2, player[p]->fireHeight/2, player[p]->fireX[i], player[p]->fireY[i], player[p]->fireAngle[i], 0);
+				//if ((player[p]->fireX[i])>(gridX) && (player[p]->fireX[i])<(gridX+windowWidth) && (player[p]->fireY[i])>(gridY) && (player[p]->fireY[i])<(gridY+windowHeight))
+					al_draw_rotated_bitmap(player[p]->fireSprite[i], player[p]->fireWidth/2, player[p]->fireHeight/2, player[p]->fireX[i], player[p]->fireY[i], player[p]->fireAngle[i], 0);
 			if ((player[p]->x)>(gridX) && (player[p]->x)<(gridX+windowWidth) && (player[p]->y)>(gridY) && (player[p]->y)<(gridY+windowHeight))  //If Ship object's coordinates are within the current grid, then draw sprite to buffer
 				al_draw_rotated_bitmap(player[p]->shipSpriteCurrent, player[p]->width/2, player[p]->height/2, player[p]->x%windowWidth, player[p]->y%windowHeight, player[p]->angle, 0); 
 		}
@@ -651,90 +609,3 @@ void game_loop(Ship *player[])
         }
     }
 }
- 
-
-/////////////////////////////////////
-/////     Network functions     /////
-
-/*
-//Connect to server
-void connectServer() {
-	ENetAddress address;
-	ENetEvent event;
-	//ENetPeer *peer;
-	// Connect to some.server.net:1234.
-	enet_address_set_host (& address, "192.168.8.101");
-	address.port = 1234;
-	// Initiate the connection, allocating the two channels 0 and 1. 
-	peer = enet_host_connect (host, & address, 2, 0);    
-	if (peer == NULL)
-	{
-	   fprintf (stderr, 
-				"No available peers for initiating an ENet connection.\n");
-	   exit (EXIT_FAILURE);
-	}
-	/* Wait up to 5 seconds for the connection attempt to succeed. 
-	if (enet_host_service (host, & event, 7000) > 0 &&
-		event.type == ENET_EVENT_TYPE_CONNECT)
-	{
-		puts("Connection to some.server.net:1234 succeeded.");
-	}
-	else
-	{
-		/* Either the 5 seconds are up or a disconnect event was 
-		/* received. Reset the peer in the event the 5 seconds   
-		/* had run out without any significant event.            
-		enet_peer_reset (peer);
-		puts ("Connection to some.server.net:1234 failed.");
-	}
-}
-
-//Sending data
-void sendData() {
-	/* Create a reliable packet of size 7 containing "packet\0" 
-	ENetPacket * packet = enet_packet_create ("packet", strlen ("packet") + 1, ENET_PACKET_FLAG_RELIABLE);
-	/* Extend the packet so and append the string "foo", so it now 
-	/* contains "packetfoo\0"                                      
-	enet_packet_resize (packet, strlen ("packetfoo") + 1);
-	//strcpy (& packet -> data [strlen ("packet")], "foo");
-	/* Send the packet to the peer over channel id 0. 
-	/* One could also broadcast the packet by         
-	/* enet_host_broadcast (host, 0, packet);         
-	enet_peer_send (peer, 0, packet);
-	//* One could just use enet_host_service() instead. 
-	enet_host_flush (host);
-}
-
-//Receiving data
-int receiveData() {
-	ENetEvent event;
-	// Non-blocking event poll
-	while (enet_host_service (host, & event, 0) > 0)
-	{
-		switch (event.type)
-		{
-		case ENET_EVENT_TYPE_CONNECT:
-			printf ("A new client connected from %x:%u.\n", 
-					event.peer -> address.host,
-					event.peer -> address.port);
-			/* Store any relevant client information here. 
-			event.peer -> data = "Client information";
-			break;
-		case ENET_EVENT_TYPE_RECEIVE:
-			printf ("A packet of length %u containing %s was received from %s on channel %u.\n",
-					event.packet -> dataLength,
-					event.packet -> data,
-					event.peer -> data,
-					event.channelID);
-			/* Clean up the packet now that we're done using it. 
-			enet_packet_destroy (event.packet);
-			return 1;
-			break;
-		case ENET_EVENT_TYPE_DISCONNECT:
-			printf ("%s disconnected.\n", event.peer -> data);
-			/* Reset the peer's client information. 
-			event.peer -> data = NULL;
-		}
-	}
-	return 0;
-}*/
