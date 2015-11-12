@@ -68,7 +68,9 @@ public:
 	ALLEGRO_BITMAP *fireSprite[maxFireballs];
 
 	Ship() {
-		x = y = 200;
+		srand(time(NULL));
+		x = rand()%1000;
+		y = rand()%1000;
 		height = width = 100;
 		speed = speedX = speedY = 0;
 		maxSpeed = 7;
@@ -184,7 +186,7 @@ void init(Ship *player[])
 	//Load bitmap files
 	buffer = al_create_bitmap(windowWidth, windowHeight);
 	backgroundSprite = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
-	for (int p=0;p<2;p++) {
+	for (int p=0;p<numPlayers;p++) {
 		player[p]->shipSprite = al_load_bitmap("c:/dev/allegro/images/shipSprite.png"); //Stationary ship sprite
 		player[p]->shipSprite1 = al_load_bitmap("c:/dev/allegro/images/shipSprite1.png"); //Moving ship sprite 1
 		player[p]->shipSprite2 = al_load_bitmap("c:/dev/allegro/images/shipSprite2.png"); // Moving ship sprite 2
@@ -199,7 +201,7 @@ void init(Ship *player[])
 	
 	//Check if bitmaps loaded properly
 	if(!backgroundSprite) abort_game("Failed to load the background image");
-	for (int p=0;p<2;p++) {
+	for (int p=0;p<numPlayers;p++) {
 		if(!player[p]->shipSprite) abort_game("Failed to load the shipSprite image");
 		if(!player[p]->shipSprite1) abort_game("Failed to load the shipSprite1 image");
 		if(!player[p]->shipSprite2) abort_game("Failed to load the shipSprite2 image");
@@ -371,7 +373,7 @@ void shutdown(Ship *player[])
     if (timer) al_destroy_timer(timer);
     if (display) al_destroy_display(display);
 	if (backgroundSprite)	al_destroy_bitmap(backgroundSprite);
-	for (int p=0;p<2;p++) {
+	for (int p=0;p<numPlayers;p++) {
 		if (player[p]->shipSprite) al_destroy_bitmap(player[p]->shipSprite);
 		if (player[p]->shipSprite1) al_destroy_bitmap(player[p]->shipSprite1);
 		if (player[p]->shipSprite2) al_destroy_bitmap(player[p]->shipSprite2);
@@ -474,7 +476,7 @@ void update_logic(Ship *player[])
 	}
 
 	//Cycle between different rocket sprites, to give effect of rocket blasting
-	for (int p=0;p<2;p++) {
+	for (int p=0;p<numPlayers;p++) {
 		if (player[p]->speed>0) {
 			if (player[p]->flipflop<5) player[p]->shipSpriteCurrent = player[p]->shipSprite1;
 			else if (player[p]->flipflop>=5) player[p]->shipSpriteCurrent = player[p]->shipSprite2;
@@ -510,7 +512,7 @@ void update_logic(Ship *player[])
 	gridY = int(float(player[0]->y)/windowHeight)*windowHeight;
 	
 	//Set fireball position
-	for (int p=0;p<2;p++) {
+	for (int p=0;p<numPlayers;p++) {
 		for (int i=0; i<maxFireballs; i++) player[p]->fireX[i] += player[p]->fireSpeed * cos(player[p]->fireAngle[i]);
 		for (int i=0; i<maxFireballs; i++) player[p]->fireY[i] += player[p]->fireSpeed * sin(player[p]->fireAngle[i]);
 	}
@@ -564,7 +566,7 @@ void update_graphics(Ship *player[])
 		for (int i=0; i<3; i++) //Draw planets next, only if planets' positions are within current grid
 			if (dockingX[i]>gridX && dockingX[i]<(gridX+windowWidth) && dockingY[i]>gridY && dockingY[i]<(gridY+windowHeight))
 				al_draw_rotated_bitmap(dockingStation[i], dockingWidth[i]/2, dockingHeight[i]/2, dockingX[i]%windowWidth, dockingY[i]%windowHeight, 0, 0); //Draw planets only if their coordinates exist within current screen
-		for (int p=0;p<2;p++) { //Draw sprites for each Ship object
+		for (int p=numPlayers-1;p>=0;p--) { //Draw sprites for each Ship object
 			for (int i=0; i<maxFireballs; i++) //Draw fireballs
 				if ((player[p]->fireX[i])>(gridX) && (player[p]->fireX[i])<(gridX+windowWidth) && (player[p]->fireY[i])>(gridY) && (player[p]->fireY[i])<(gridY+windowHeight))
 					al_draw_rotated_bitmap(player[p]->fireSprite[i], player[p]->fireWidth/2, player[p]->fireHeight/2, player[p]->fireX[i]%windowWidth, player[p]->fireY[i]%windowHeight, player[p]->fireAngle[i], 0);
