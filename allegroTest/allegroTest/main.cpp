@@ -51,6 +51,7 @@ bool dispUpgradeText = false;
 ENetHost * host; //This machine
 ENetPeer * peer; //Remote machine
 ENetEvent event;
+int wait = 0;
 
 //Misc vars
 bool done;
@@ -128,6 +129,7 @@ int main(int argc, char* argv[])
 	std::cin >> choice;
 	if (choice==3) numPlayers = 1;
 	else numPlayers = 2;
+	if (choice==1) wait = 60000;
 
     init(player);
     game_loop(player);
@@ -250,7 +252,8 @@ void init(Ship *player[])
 		if (host == NULL) {
 			abort_game("An error occurred while trying to create an ENet server host.\n");
 		}
-
+		
+		/*
 		//Wait for connection from clients
 		int eventStatus = 1;
 		enet_uint32 wait = 60000;
@@ -270,7 +273,6 @@ void init(Ship *player[])
 					break;
 				case ENET_EVENT_TYPE_RECEIVE:
 					printf("Client data: %s\n", event.packet->data);
-					//data = event.packet->data;
 					exit = false;
 					break;
 				case ENET_EVENT_TYPE_DISCONNECT:
@@ -279,7 +281,8 @@ void init(Ship *player[])
 				}
 			}
 
-			printf("> ");
+			string message = "hello";
+			/*printf("> ");
 			string message = "hello";
 			if (first) {
 				getline(cin, message);
@@ -292,7 +295,7 @@ void init(Ship *player[])
 				ENetPacket *packet = enet_packet_create(message.c_str(), strlen(message.c_str())+1, ENET_PACKET_FLAG_RELIABLE);
 				enet_peer_send(peer, 0, packet); //Send to global peer
 			}
-		}
+		}*/
 	}
 
 	//Create client
@@ -307,10 +310,10 @@ void init(Ship *player[])
 		}
 
 		//Begin connection to server machine
-		//connectServer();
 		ENetAddress address;
 		/* Connect to server:1234. */
-		enet_address_set_host (& address, "192.168.8.101");
+		//enet_address_set_host (& address, "192.168.8.101");
+		enet_address_set_host (& address, "localhost");
 		address.port = 1234;
 		
 		
@@ -323,7 +326,7 @@ void init(Ship *player[])
 		   exit (EXIT_FAILURE);
 		}
 
-
+		/*
 		//Wait for return connection from server
 		ENetEvent event;
 		int eventStatus = 1;
@@ -350,6 +353,7 @@ void init(Ship *player[])
 				}
 			}
 
+			string message = "hello";
 			printf("> ");
 			string message;
 			if (first) {
@@ -362,7 +366,7 @@ void init(Ship *player[])
 				ENetPacket *packet = enet_packet_create(message.c_str(), strlen(message.c_str())+1, ENET_PACKET_FLAG_RELIABLE);
 				enet_peer_send(peer, 0, packet); //Send to global peer
 			}
-		}
+		}*/
 	}
 	else ; //Single player mode (just don't setup server or client!)
 }
@@ -533,17 +537,30 @@ void update_logic(Ship *player[])
 		//Apply remote ship's new coordinates to player2's current local coordinates
 		ENetEvent event;
 		enet_uint8 *d = NULL;
-		while(enet_host_service(host, &event, 0) && event.type == ENET_EVENT_TYPE_RECEIVE) { //Non-blocking poll to enets data buffer
-			d = event.packet->data;
-			printf("%lu\n",event.packet->dataLength);
-			player[1]->x = atoi(strtok((char*)d,"|"));
-			player[1]->y = atoi(strtok(NULL,"|"));
-			player[1]->angle = atof(strtok(NULL,"|"));
-			player[1]->speed = atoi(strtok(NULL,"|"));
-			for (int i=0;i<maxFireballs;i++) {
-				player[1]->fireX[i] = atoi(strtok(NULL,"|"));
-				player[1]->fireY[i] = atoi(strtok(NULL,"|"));
-				player[1]->fireAngle[i] = atof(strtok(NULL,"|"));
+		while(enet_host_service(host, &event, wait)) { //Non-blocking poll to enets data buffer
+			
+			switch(event.type) {
+			case ENET_EVENT_TYPE_CONNECT:
+				printf("Client connection received from %x\n", event.peer->address.host);
+				break;
+			case ENET_EVENT_TYPE_RECEIVE:
+				printf("Client data: %s\n", event.packet->data);
+				wait = 0;
+				/*d = event.packet->data;
+				player[1]->x = atoi(strtok((char*)d,"|"));
+				player[1]->y = atoi(strtok(NULL,"|"));
+				player[1]->angle = atof(strtok(NULL,"|"));
+				player[1]->speed = atoi(strtok(NULL,"|"));
+				for (int i=0;i<maxFireballs;i++) {
+					player[1]->fireX[i] = atoi(strtok(NULL,"|"));
+					player[1]->fireY[i] = atoi(strtok(NULL,"|"));
+					player[1]->fireAngle[i] = atof(strtok(NULL,"|"));
+				}*/
+
+				break;
+			case ENET_EVENT_TYPE_DISCONNECT:
+				printf("%s disconnected.\n", event.peer->data);
+				break;
 			}
 		}
 
