@@ -200,7 +200,6 @@ void init(Ship *player[])
 	
 	//Load bitmap files
 	//buffer = al_create_bitmap(windowWidth, windowHeight);
-	al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);
 	buffer = al_create_bitmap(maxX, maxY);
 	backgroundSprite1 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
 	backgroundSprite2 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
