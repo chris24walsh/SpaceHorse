@@ -18,7 +18,15 @@ using namespace std;
 //Allegro objects
 ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 ALLEGRO_TIMER *timer = NULL;
-ALLEGRO_BITMAP *backgroundSprite = NULL;
+ALLEGRO_BITMAP *backgroundSprite1 = NULL;
+ALLEGRO_BITMAP *backgroundSprite2 = NULL;
+ALLEGRO_BITMAP *backgroundSprite3 = NULL;
+ALLEGRO_BITMAP *backgroundSprite4 = NULL;
+ALLEGRO_BITMAP *backgroundSprite5 = NULL;
+ALLEGRO_BITMAP *backgroundSprite6 = NULL;
+ALLEGRO_BITMAP *backgroundSprite7 = NULL;
+ALLEGRO_BITMAP *backgroundSprite8 = NULL;
+ALLEGRO_BITMAP *backgroundSprite9 = NULL;
 const int maxFireballs = 15;
 ALLEGRO_BITMAP *dockingStation[3];
 ALLEGRO_BITMAP *dockingText = NULL;
@@ -30,12 +38,15 @@ ALLEGRO_DISPLAY_MODE disp_data;
 //Screen vars
 int gridX = 0;
 int gridY = 0;
-int numberGrids = 2; //Number of grids along one side of the square map actually...:)
+int bgX = 0;
+int bgY = 0;
+int numberGrids = 3; //Number of grids along one side of the square map actually...:)
 int windowWidth, windowHeight, maxX, maxY, screenWidth, screenHeight;
 int backgroundWidth = 1920;
 int backgroundHeight = 1080;
 int scaledWidth, scaledHeight, scaledOffsetX, scaledOffsetY;
-bool leftPressed, rightPressed, upPressed, downPressed;
+bool leftPressed, rightPressed, upPressed, downPressed, firePressed;
+int FPS = 60;
 
 //Docking station vars
 bool canDock, dockingScr;
@@ -64,7 +75,7 @@ int numPlayers;
 
 class Ship {
 public:
-	int x, y, height, width, speed, speedX, speedY, maxSpeed, flipflop, fireballNumber, fireX[maxFireballs], fireY[maxFireballs], fireHeight, fireWidth, fireSpeed;
+	int x, y, height, width, speed, speedX, speedY, maxSpeed, flipflop, fireballNumber, fireX[maxFireballs], fireY[maxFireballs], fireHeight, fireWidth, fireSpeed, fireCycle;
 	float angle, fireAngle[maxFireballs];
 	ALLEGRO_BITMAP *shipSprite, *shipSprite1, *shipSprite2, *shipSpriteCurrent;
 	ALLEGRO_BITMAP *fireSprite[maxFireballs];
@@ -89,6 +100,7 @@ public:
 			fireY[i] = 2000;
 			fireAngle[i] = 0;
 		}
+		fireCycle = 100;
 	};
 };
 
@@ -126,8 +138,8 @@ int main(int argc, char* argv[])
 	Ship *player2 = &p2;
 	Ship *player[2] = {player1, player2};
 
-	std::cout << "Do you want to set up server(1), client(2) or play singleplayer(3)?: ";
-	std::cin >> choice;
+	cout << "Do you want to set up server(1), client(2) or play singleplayer(3)?: ";
+	cin >> choice;
 	if (choice==3) numPlayers = 1;
 	else numPlayers = 2;
 	if (choice==1) wait = 60000;
@@ -155,14 +167,14 @@ void init(Ship *player[])
         abort_game("Failed to initialize allegro");
     if (!al_install_keyboard())
         abort_game("Failed to install keyboard");
-    timer = al_create_timer(1.0 / 60);
+    timer = al_create_timer(1.0 / FPS);
     if (!timer)
         abort_game("Failed to create timer");
 	
 	//Setup Display
 	al_get_display_mode(al_get_num_display_modes() - 1, &disp_data); //Set resolution to max
-	windowWidth = 640*2;
-	windowHeight = 480*2;
+	windowWidth = backgroundWidth;
+	windowHeight = backgroundHeight;
 	//windowWidth = disp_data.width;
 	//windowHeight = disp_data.height;
 	maxX = windowWidth*numberGrids;
@@ -187,8 +199,18 @@ void init(Ship *player[])
 		abort_game("Failed to initialize al_init_image_addon");
 	
 	//Load bitmap files
-	buffer = al_create_bitmap(windowWidth, windowHeight);
-	backgroundSprite = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
+	//buffer = al_create_bitmap(windowWidth, windowHeight);
+	al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);
+	buffer = al_create_bitmap(maxX, maxY);
+	backgroundSprite1 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
+	backgroundSprite2 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
+	backgroundSprite3 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
+	backgroundSprite4 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
+	backgroundSprite5 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
+	backgroundSprite6 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
+	backgroundSprite7 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
+	backgroundSprite8 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
+	backgroundSprite9 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
 	for (int p=0;p<numPlayers;p++) {
 		player[p]->shipSprite = al_load_bitmap("c:/dev/allegro/images/shipSprite.png"); //Stationary ship sprite
 		player[p]->shipSprite1 = al_load_bitmap("c:/dev/allegro/images/shipSprite1.png"); //Moving ship sprite 1
@@ -203,13 +225,12 @@ void init(Ship *player[])
 	upgradedText = al_load_bitmap("c:/dev/allegro/images/upgradedText.png");
 	
 	//Check if bitmaps loaded properly
-	if(!backgroundSprite) abort_game("Failed to load the background image");
+	if(!backgroundSprite1) abort_game("Failed to load the background image");
 	for (int p=0;p<numPlayers;p++) {
 		if(!player[p]->shipSprite) abort_game("Failed to load the shipSprite image");
 		if(!player[p]->shipSprite1) abort_game("Failed to load the shipSprite1 image");
 		if(!player[p]->shipSprite2) abort_game("Failed to load the shipSprite2 image");
-		//if(!fireball[0]) abort_game("Failed to load the fireball image");
-		if(!player[p]->fireSprite) abort_game("Failed to load the fireball image");
+		if(!player[p]->fireSprite[0]) abort_game("Failed to load the fireball image");
 	}
 	if(!dockingStation[0]) abort_game("Failed to load the dockingStation1 image");
 	if(!dockingStation[1]) abort_game("Failed to load the dockingStation2 image");
@@ -253,50 +274,6 @@ void init(Ship *player[])
 		if (host == NULL) {
 			abort_game("An error occurred while trying to create an ENet server host.\n");
 		}
-		
-		/*
-		//Wait for connection from clients
-		int eventStatus = 1;
-		enet_uint32 wait = 60000;
-		bool first = true;
-		bool exit = true;
-
-		while(exit) {
-			eventStatus = enet_host_service(host, &event, wait);
-
-			//If we have some event that interests us
-			if (eventStatus > 0) {
-				switch(event.type) {
-				case ENET_EVENT_TYPE_CONNECT:
-					printf("Client connection received from %x\n", event.peer->address.host);
-					peer = event.peer;
-					wait = 0;
-					break;
-				case ENET_EVENT_TYPE_RECEIVE:
-					printf("Client data: %s\n", event.packet->data);
-					exit = false;
-					break;
-				case ENET_EVENT_TYPE_DISCONNECT:
-					printf("%s disconnected.\n", event.peer->data);
-					break;
-				}
-			}
-
-			string message = "hello";
-			/*printf("> ");
-			string message = "hello";
-			if (first) {
-				getline(cin, message);
-				first = false;
-			}
-			getline(cin, message);
-			if (message=="quit") break;
-
-			if (strlen(message.c_str()) > 0) {
-				ENetPacket *packet = enet_packet_create(message.c_str(), strlen(message.c_str())+1, ENET_PACKET_FLAG_RELIABLE);
-				enet_peer_send(peer, 0, packet); //Send to global peer
-			}
-		}*/
 	}
 
 	//Create client
@@ -317,7 +294,6 @@ void init(Ship *player[])
 		enet_address_set_host (& address, "localhost");
 		address.port = 1234;
 		
-		
 		/* Initiate the connection, allocating the two channels 0 and 1. */
 		peer = enet_host_connect (host, & address, 2, 0); //Bind successful connection to peer
 		if (peer == NULL)
@@ -326,48 +302,6 @@ void init(Ship *player[])
 					"No available peers for initiating an ENet connection.\n");
 		   exit (EXIT_FAILURE);
 		}
-
-		/*
-		//Wait for return connection from server
-		ENetEvent event;
-		int eventStatus = 1;
-		int wait = 1000;
-		bool first = true;
-		bool exit = true;
-
-		while(exit) {
-			eventStatus = enet_host_service(host, &event, 0);
-
-			//If we have some event that interests us
-			if (eventStatus > 0) {
-				switch(event.type) {
-				case ENET_EVENT_TYPE_CONNECT:
-					printf("Client connection received from %x\n", event.peer->address.host);
-					wait = 0;
-					break;
-				case ENET_EVENT_TYPE_RECEIVE:
-					printf("Client data: %s\n", event.packet->data);
-					break;
-				case ENET_EVENT_TYPE_DISCONNECT:
-					printf("%s disconnected.\n", event.peer->data);
-					break;
-				}
-			}
-
-			string message = "hello";
-			printf("> ");
-			string message;
-			if (first) {
-				getline(cin, message);
-			}
-			getline(cin, message);
-			if (message=="quit") break;
-			
-			if (strlen(message.c_str()) > 0 && peer) {
-				ENetPacket *packet = enet_packet_create(message.c_str(), strlen(message.c_str())+1, ENET_PACKET_FLAG_RELIABLE);
-				enet_peer_send(peer, 0, packet); //Send to global peer
-			}
-		}*/
 	}
 	else ; //Single player mode (just don't setup server or client!)
 }
@@ -377,7 +311,7 @@ void shutdown(Ship *player[])
 	//Allegro shutdown
     if (timer) al_destroy_timer(timer);
     if (display) al_destroy_display(display);
-	if (backgroundSprite)	al_destroy_bitmap(backgroundSprite);
+	if (backgroundSprite1)	al_destroy_bitmap(backgroundSprite1);
 	for (int p=0;p<numPlayers;p++) {
 		if (player[p]->shipSprite) al_destroy_bitmap(player[p]->shipSprite);
 		if (player[p]->shipSprite1) al_destroy_bitmap(player[p]->shipSprite1);
@@ -398,13 +332,7 @@ void shutdown(Ship *player[])
 
 void fire(Ship *player[])
 {
-	int x = player[0]->fireballNumber++; //Cycled through available fireballs (having a high upper threshold of fireballs prevents onscreen fireballs being recycled)
-	player[0]->fireX[x] = player[0]->x;
-	player[0]->fireY[x] = player[0]->y;
-	player[0]->fireAngle[x] = player[0]->angle;
-	if (player[0]->fireballNumber>=maxFireballs){
-		player[0]->fireballNumber = 0;
-	}
+	firePressed = true;
 }
 
 void dock(Ship *player[])
@@ -468,6 +396,10 @@ void release_key(ALLEGRO_EVENT e, Ship *player[])
 	if (e.keyboard.keycode == ALLEGRO_KEY_DOWN) {
         downPressed = false;
     }
+	if (e.keyboard.keycode == ALLEGRO_KEY_F) {
+		firePressed = false;
+		player[0]->fireCycle = 10;
+	}
 }
 
 void update_logic(Ship *player[])
@@ -515,11 +447,30 @@ void update_logic(Ship *player[])
 	//Set which grid the ship is currently in
 	gridX = int(float(player[0]->x)/windowWidth)*windowWidth;
 	gridY = int(float(player[0]->y)/windowHeight)*windowHeight;
+
+	//Set background coordinates
+	bgX = player[0]->x - windowWidth/2;
+	bgY = player[0]->y - windowHeight/2;
 	
 	//Set fireball position
 	for (int p=0;p<numPlayers;p++) {
 		for (int i=0; i<maxFireballs; i++) player[p]->fireX[i] += player[p]->fireSpeed * cos(player[p]->fireAngle[i]);
 		for (int i=0; i<maxFireballs; i++) player[p]->fireY[i] += player[p]->fireSpeed * sin(player[p]->fireAngle[i]);
+	}
+
+	//Set fire cycle
+	if (firePressed) {
+		if (player[0]->fireCycle >= 10) {
+			int x = player[0]->fireballNumber++; //Cycled through available fireballs (having a high upper threshold of fireballs prevents onscreen fireballs being recycled)
+			player[0]->fireX[x] = player[0]->x;
+			player[0]->fireY[x] = player[0]->y;
+			player[0]->fireAngle[x] = player[0]->angle;
+			if (player[0]->fireballNumber>=maxFireballs){
+				player[0]->fireballNumber = 0;
+			}
+			player[0]->fireCycle = 0;
+		}
+		player[0]->fireCycle++;
 	}
 	
 	//Check if near docking station, and if so allow docking
@@ -535,11 +486,9 @@ void update_logic(Ship *player[])
 	}
 	
 	if (choice!=3) {
-		// && (event.type == ENET_EVENT_TYPE_CONNECT || event.type == ENET_EVENT_TYPE_RECEIVE)
 		//Apply remote ship's new coordinates to player2's current local coordinates
-		//ENetEvent event;
 		enet_uint8 *d = NULL;
-		if (enet_host_service(host, &event, wait)) { //Non-blocking poll to enets data buffer
+		while (enet_host_service(host, &event, wait)) { //Non-blocking poll to enets data buffer
 			
 			switch(event.type) {
 			case ENET_EVENT_TYPE_CONNECT:
@@ -547,7 +496,6 @@ void update_logic(Ship *player[])
 				peer = event.peer;
 				break;
 			case ENET_EVENT_TYPE_RECEIVE:
-				//printf("Client data: %s\n", event.packet->data);
 				wait = 0;
 				d = event.packet->data;
 				player[1]->x = atoi(strtok((char*)d,"|"));
@@ -582,17 +530,41 @@ void update_graphics(Ship *player[])
 {
 	//Space mode
 	if (!dockingScr) {
-		al_draw_bitmap(backgroundSprite,0,0,0); //Draw background first
+
+		//Set and clear the buffer first
+		al_set_target_bitmap(buffer);
+        al_clear_to_color(al_map_rgb(30, 30, 30));
+		
+		//Draw all the sprites
+		al_draw_bitmap(backgroundSprite1,gridX,gridY,0); //Draw background first
+		al_draw_bitmap(backgroundSprite2,gridX,gridY-windowHeight,0);
+		al_draw_bitmap(backgroundSprite3,gridX,gridY+windowHeight,0);
+		al_draw_bitmap(backgroundSprite4,gridX-windowWidth,gridY,0);
+		al_draw_bitmap(backgroundSprite4,gridX-windowWidth,gridY-windowHeight,0);
+		al_draw_bitmap(backgroundSprite4,gridX-windowWidth,gridY+windowHeight,0);
+		al_draw_bitmap(backgroundSprite5,gridX+windowWidth,gridY,0);
+		al_draw_bitmap(backgroundSprite5,gridX+windowWidth,gridY-windowHeight,0);
+		al_draw_bitmap(backgroundSprite5,gridX+windowWidth,gridY+windowHeight,0);
+
 		for (int i=0; i<3; i++) //Draw planets next, only if planets' positions are within current grid
-			if (dockingX[i]>gridX && dockingX[i]<(gridX+windowWidth) && dockingY[i]>gridY && dockingY[i]<(gridY+windowHeight))
-				al_draw_rotated_bitmap(dockingStation[i], dockingWidth[i]/2, dockingHeight[i]/2, dockingX[i]%windowWidth, dockingY[i]%windowHeight, 0, 0); //Draw planets only if their coordinates exist within current screen
+			//if (dockingX[i]>gridX && dockingX[i]<(gridX+windowWidth) && dockingY[i]>gridY && dockingY[i]<(gridY+windowHeight))
+			al_draw_rotated_bitmap(dockingStation[i], dockingWidth[i]/2, dockingHeight[i]/2, dockingX[i], dockingY[i], 0, 0); //Draw planets only if their coordinates exist within current screen
 		for (int p=numPlayers-1;p>=0;p--) { //Draw sprites for each Ship object
 			for (int i=0; i<maxFireballs; i++) //Draw fireballs
-				if ((player[p]->fireX[i])>(gridX) && (player[p]->fireX[i])<(gridX+windowWidth) && (player[p]->fireY[i])>(gridY) && (player[p]->fireY[i])<(gridY+windowHeight))
-					al_draw_rotated_bitmap(player[p]->fireSprite[i], player[p]->fireWidth/2, player[p]->fireHeight/2, player[p]->fireX[i]%windowWidth, player[p]->fireY[i]%windowHeight, player[p]->fireAngle[i], 0);
-			if ((player[p]->x)>(gridX) && (player[p]->x)<(gridX+windowWidth) && (player[p]->y)>(gridY) && (player[p]->y)<(gridY+windowHeight))  //If Ship object's coordinates are within the current grid, then draw sprite to buffer
-				al_draw_rotated_bitmap(player[p]->shipSpriteCurrent, player[p]->width/2, player[p]->height/2, player[p]->x%windowWidth, player[p]->y%windowHeight, player[p]->angle, 0); 
+				//if ((player[p]->fireX[i])>(gridX) && (player[p]->fireX[i])<(gridX+windowWidth) && (player[p]->fireY[i])>(gridY) && (player[p]->fireY[i])<(gridY+windowHeight))
+				al_draw_rotated_bitmap(player[p]->fireSprite[i], player[p]->fireWidth/2, player[p]->fireHeight/2, player[p]->fireX[i], player[p]->fireY[i], player[p]->fireAngle[i], 0);
+			//if ((player[p]->x)>(gridX) && (player[p]->x)<(gridX+windowWidth) && (player[p]->y)>(gridY) && (player[p]->y)<(gridY+windowHeight))  //If Ship object's coordinates are within the current grid, then draw sprite to buffer
+			//if (p==0)
+				//al_draw_rotated_bitmap(player[p]->shipSpriteCurrent, player[p]->width/2, player[p]->height/2, windowWidth/2, windowHeight/2, player[p]->angle, 0); 
+			//else
+				al_draw_rotated_bitmap(player[p]->shipSpriteCurrent, player[p]->width/2, player[p]->height/2, player[p]->x, player[p]->y, player[p]->angle, 0); 
+
 		}
+
+		//After writing all the sprites to the buffer, draw buffer to display at correct position (depending on ships position, of course)
+		al_set_target_backbuffer(display);
+		al_clear_to_color(al_map_rgb(25,0,25));
+		al_draw_bitmap(buffer, -bgX, -bgY, 0);
 	}
 
 	//Docking mode
@@ -626,14 +598,10 @@ void game_loop(Ship *player[])
 			release_key(event, player);
 		}
 
-        if (redraw && al_is_event_queue_empty(event_queue)) {
+        if (redraw) {// && al_is_event_queue_empty(event_queue)) {
             redraw = false;
-			al_set_target_bitmap(buffer);
-            al_clear_to_color(al_map_rgb(0, 0, 0));
             update_graphics(player); //Redraw background and sprites
-			al_set_target_backbuffer(display);
-            al_draw_scaled_bitmap(buffer, 0, 0, windowWidth, windowHeight, scaledOffsetX, scaledOffsetY, scaledWidth, scaledHeight, 0);
-            al_flip_display();
+			al_flip_display();
         }
     }
 }
