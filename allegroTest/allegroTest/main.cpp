@@ -52,6 +52,7 @@ ENetHost * host; //This machine
 ENetPeer * peer; //Remote machine
 ENetEvent event;
 int wait = 0;
+int pCount = 0;
 
 //Misc vars
 bool done;
@@ -534,19 +535,21 @@ void update_logic(Ship *player[])
 	}
 	
 	if (choice!=3) {
+		// && (event.type == ENET_EVENT_TYPE_CONNECT || event.type == ENET_EVENT_TYPE_RECEIVE)
 		//Apply remote ship's new coordinates to player2's current local coordinates
-		ENetEvent event;
+		//ENetEvent event;
 		enet_uint8 *d = NULL;
-		while(enet_host_service(host, &event, wait)) { //Non-blocking poll to enets data buffer
+		if (enet_host_service(host, &event, wait)) { //Non-blocking poll to enets data buffer
 			
 			switch(event.type) {
 			case ENET_EVENT_TYPE_CONNECT:
-				printf("Client connection received from %x\n", event.peer->address.host);
+				printf("Connection received from %x\n", event.peer->address.host);
+				peer = event.peer;
 				break;
 			case ENET_EVENT_TYPE_RECEIVE:
-				printf("Client data: %s\n", event.packet->data);
+				//printf("Client data: %s\n", event.packet->data);
 				wait = 0;
-				/*d = event.packet->data;
+				d = event.packet->data;
 				player[1]->x = atoi(strtok((char*)d,"|"));
 				player[1]->y = atoi(strtok(NULL,"|"));
 				player[1]->angle = atof(strtok(NULL,"|"));
@@ -555,7 +558,7 @@ void update_logic(Ship *player[])
 					player[1]->fireX[i] = atoi(strtok(NULL,"|"));
 					player[1]->fireY[i] = atoi(strtok(NULL,"|"));
 					player[1]->fireAngle[i] = atof(strtok(NULL,"|"));
-				}*/
+				}
 
 				break;
 			case ENET_EVENT_TYPE_DISCONNECT:
