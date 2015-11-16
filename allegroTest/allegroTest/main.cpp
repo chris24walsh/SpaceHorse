@@ -327,8 +327,8 @@ void init(Ship *player[])
 		//Begin connection to server machine
 		ENetAddress address;
 		/* Connect to server:1234. */
-		//enet_address_set_host (& address, "192.168.8.101");
-		enet_address_set_host (& address, "localhost");
+		enet_address_set_host (& address, "192.168.1.101");
+		//enet_address_set_host (& address, "localhost");
 		address.port = 1234;
 		
 		/* Initiate the connection, allocating the two channels 0 and 1. */
