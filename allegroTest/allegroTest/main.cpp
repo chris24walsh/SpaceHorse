@@ -1,6 +1,9 @@
 #include <enet\enet.h> //Must be included before the allegro library to prevent conflicts
 #include <allegro5/allegro5.h>
 #include "allegro5/allegro_image.h"
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_primitives.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
@@ -27,6 +30,7 @@ ALLEGRO_BITMAP *backgroundSprite6 = NULL;
 ALLEGRO_BITMAP *backgroundSprite7 = NULL;
 ALLEGRO_BITMAP *backgroundSprite8 = NULL;
 ALLEGRO_BITMAP *backgroundSprite9 = NULL;
+ALLEGRO_FONT *font;
 const int maxFireballs = 15;
 ALLEGRO_BITMAP *dockingStation[3];
 ALLEGRO_BITMAP *dockingText = NULL;
@@ -40,7 +44,7 @@ int gridX = 0;
 int gridY = 0;
 int bgX = 0;
 int bgY = 0;
-int numberGrids = 3; //Number of grids along one side of the square map actually...:)
+int numberGrids = 5; //Number of grids along one side of the square map actually...:)
 int windowWidth, windowHeight, maxX, maxY, screenWidth, screenHeight;
 int backgroundWidth = 1920;
 int backgroundHeight = 1080;
@@ -170,7 +174,20 @@ void init(Ship *player[])
     timer = al_create_timer(1.0 / FPS);
     if (!timer)
         abort_game("Failed to create timer");
+
+	//Initialise image addon
+	if(!al_init_image_addon())
+		abort_game("Failed to initialise al_init_image_addon");
 	
+	//Initialise the font addon
+	al_init_font_addon(); 
+	if (!al_init_ttf_addon())
+		abort_game("Failed to initalise al_init_ttf_addon");
+
+	//Initialise primitives addon
+	if (!al_init_primitives_addon())
+		abort_game("Failed to initialise al_init_primitives_addon");
+ 
 	//Setup Display
 	al_get_display_mode(al_get_num_display_modes() - 1, &disp_data); //Set resolution to max
 	windowWidth = backgroundWidth;
@@ -185,6 +202,13 @@ void init(Ship *player[])
     if (!display)
         abort_game("Failed to create display");
 
+	font = al_load_ttf_font("C:/Dev/allegro/Font/pirulen.ttf",25,0 );
+	
+	if (!font){
+		abort_game("Could not load 'pirulen.ttf'.\n");
+	}
+	
+
 	//Calculate scaling factor
 	float sx = float(windowWidth)/backgroundWidth;
 	float sy = float(windowHeight)/backgroundHeight;
@@ -194,10 +218,6 @@ void init(Ship *player[])
 	scaledOffsetX = (windowWidth - scaledWidth) / 2;
 	scaledOffsetY = (windowHeight - scaledHeight) / 2;
 
-	//Initialise image addon
-	if(!al_init_image_addon())
-		abort_game("Failed to initialize al_init_image_addon");
-	
 	//Load bitmap files
 	//buffer = al_create_bitmap(windowWidth, windowHeight);
 	buffer = al_create_bitmap(maxX, maxY);
@@ -529,41 +549,39 @@ void update_graphics(Ship *player[])
 {
 	//Space mode
 	if (!dockingScr) {
-
-		//Set and clear the buffer first
-		al_set_target_bitmap(buffer);
-        al_clear_to_color(al_map_rgb(30, 30, 30));
+		//Clear display first
+        al_clear_to_color(al_map_rgb(0, 0, 0));
 		
-		//Draw all the sprites
-		al_draw_bitmap(backgroundSprite1,gridX,gridY,0); //Draw background first
-		al_draw_bitmap(backgroundSprite2,gridX,gridY-windowHeight,0);
-		al_draw_bitmap(backgroundSprite3,gridX,gridY+windowHeight,0);
-		al_draw_bitmap(backgroundSprite4,gridX-windowWidth,gridY,0);
-		al_draw_bitmap(backgroundSprite4,gridX-windowWidth,gridY-windowHeight,0);
-		al_draw_bitmap(backgroundSprite4,gridX-windowWidth,gridY+windowHeight,0);
-		al_draw_bitmap(backgroundSprite5,gridX+windowWidth,gridY,0);
-		al_draw_bitmap(backgroundSprite5,gridX+windowWidth,gridY-windowHeight,0);
-		al_draw_bitmap(backgroundSprite5,gridX+windowWidth,gridY+windowHeight,0);
-
+		//Draw all the background sprites, tiled around the current grid
+		al_draw_bitmap(backgroundSprite1,gridX-bgX,gridY-bgY,0); //Draw background first
+		al_draw_bitmap(backgroundSprite2,gridX-bgX,gridY-windowHeight-bgY,0);
+		al_draw_bitmap(backgroundSprite3,gridX-bgX,gridY+windowHeight-bgY,0);
+		al_draw_bitmap(backgroundSprite4,gridX-windowWidth-bgX,gridY-bgY,0);
+		al_draw_bitmap(backgroundSprite5,gridX-windowWidth-bgX,gridY-windowHeight-bgY,0);
+		al_draw_bitmap(backgroundSprite6,gridX-windowWidth-bgX,gridY+windowHeight-bgY,0);
+		al_draw_bitmap(backgroundSprite7,gridX+windowWidth-bgX,gridY-bgY,0);
+		al_draw_bitmap(backgroundSprite8,gridX+windowWidth-bgX,gridY-windowHeight-bgY,0);
+		al_draw_bitmap(backgroundSprite9,gridX+windowWidth-bgX,gridY+windowHeight-bgY,0);
+		
 		for (int i=0; i<3; i++) //Draw planets next, only if planets' positions are within current grid
-			//if (dockingX[i]>gridX && dockingX[i]<(gridX+windowWidth) && dockingY[i]>gridY && dockingY[i]<(gridY+windowHeight))
-			al_draw_rotated_bitmap(dockingStation[i], dockingWidth[i]/2, dockingHeight[i]/2, dockingX[i], dockingY[i], 0, 0); //Draw planets only if their coordinates exist within current screen
+			al_draw_rotated_bitmap(dockingStation[i], dockingWidth[i]/2, dockingHeight[i]/2, dockingX[i]-bgX, dockingY[i]-bgY, 0, 0); //Draw planets only if their coordinates exist within current screen
 		for (int p=numPlayers-1;p>=0;p--) { //Draw sprites for each Ship object
 			for (int i=0; i<maxFireballs; i++) //Draw fireballs
-				//if ((player[p]->fireX[i])>(gridX) && (player[p]->fireX[i])<(gridX+windowWidth) && (player[p]->fireY[i])>(gridY) && (player[p]->fireY[i])<(gridY+windowHeight))
-				al_draw_rotated_bitmap(player[p]->fireSprite[i], player[p]->fireWidth/2, player[p]->fireHeight/2, player[p]->fireX[i], player[p]->fireY[i], player[p]->fireAngle[i], 0);
-			//if ((player[p]->x)>(gridX) && (player[p]->x)<(gridX+windowWidth) && (player[p]->y)>(gridY) && (player[p]->y)<(gridY+windowHeight))  //If Ship object's coordinates are within the current grid, then draw sprite to buffer
+				al_draw_rotated_bitmap(player[p]->fireSprite[i], player[p]->fireWidth/2, player[p]->fireHeight/2, player[p]->fireX[i]-bgX, player[p]->fireY[i]-bgY, player[p]->fireAngle[i], 0);
 			//if (p==0)
 				//al_draw_rotated_bitmap(player[p]->shipSpriteCurrent, player[p]->width/2, player[p]->height/2, windowWidth/2, windowHeight/2, player[p]->angle, 0); 
 			//else
-				al_draw_rotated_bitmap(player[p]->shipSpriteCurrent, player[p]->width/2, player[p]->height/2, player[p]->x, player[p]->y, player[p]->angle, 0); 
-
+				al_draw_rotated_bitmap(player[p]->shipSpriteCurrent, player[p]->width/2, player[p]->height/2, player[p]->x-bgX, player[p]->y-bgY, player[p]->angle, 0); 
 		}
 
-		//After writing all the sprites to the buffer, draw buffer to display at correct position (depending on ships position, of course)
-		al_set_target_backbuffer(display);
-		al_clear_to_color(al_map_rgb(25,0,25));
-		al_draw_bitmap(buffer, -bgX, -bgY, 0);
+		//Draw bordering rectangle
+		al_draw_rectangle(0-bgX, 0-bgY, maxX-bgX, maxY-bgY, al_map_rgb(255, 255, 255), 10);
+		
+		//Draw stats to screen
+		stringstream ss;
+		ss << "Coordinates: " << player[0]->x << ", " << player[0]->y; // << "\nGrid location: " << gridX << ", " << gridY;
+		string statsString = ss.str();
+		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.9, 0, statsString.c_str());
 	}
 
 	//Docking mode
@@ -597,7 +615,7 @@ void game_loop(Ship *player[])
 			release_key(event, player);
 		}
 
-        if (redraw) {// && al_is_event_queue_empty(event_queue)) {
+        if (redraw && al_is_event_queue_empty(event_queue)) {
             redraw = false;
             update_graphics(player); //Redraw background and sprites
 			al_flip_display();
