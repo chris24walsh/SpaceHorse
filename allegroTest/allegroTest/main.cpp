@@ -44,7 +44,7 @@ int gridX = 0;
 int gridY = 0;
 int bgX = 0;
 int bgY = 0;
-int numberGrids = 1; //Number of grids along one side of the square map actually...:)
+int numberGrids = 5; //Number of grids along one side of the square map actually...:)
 int windowWidth, windowHeight, maxX, maxY, screenWidth, screenHeight;
 int backgroundWidth = 1920;
 int backgroundHeight = 1080;
