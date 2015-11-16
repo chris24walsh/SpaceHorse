@@ -44,7 +44,7 @@ int gridX = 0;
 int gridY = 0;
 int bgX = 0;
 int bgY = 0;
-int numberGrids = 5; //Number of grids along one side of the square map actually...:)
+int numberGrids = 1; //Number of grids along one side of the square map actually...:)
 int windowWidth, windowHeight, maxX, maxY, screenWidth, screenHeight;
 int backgroundWidth = 1920;
 int backgroundHeight = 1080;
@@ -108,6 +108,22 @@ public:
 	};
 };
 
+class Planet {
+public:
+	int x, y, height, width, color1, color2, color3;
+	ALLEGRO_BITMAP *planetSprite;
+
+	Planet() {
+		x = rand()%1000;
+		y = rand()%1000;
+		height = rand()%200 + 50;
+		width = rand()%200 + 50;
+		color1 = rand()%256;
+		color2 = rand()%256;
+		color3 = rand()%256;
+	}
+};
+
 
 /////////////////////////////////////////
 /////     Function Declarations     /////
@@ -141,6 +157,8 @@ int main(int argc, char* argv[])
 	Ship *player1 = &p1;
 	Ship *player2 = &p2;
 	Ship *player[2] = {player1, player2};
+
+	
 
 	cout << "Do you want to set up server(1), client(2) or play singleplayer(3)?: ";
 	cin >> choice;
@@ -552,7 +570,8 @@ void update_graphics(Ship *player[])
 		//Clear display first
         al_clear_to_color(al_map_rgb(0, 0, 0));
 		
-		//Draw all the background sprites, tiled around the current grid
+		//  Remember that all sprites drawn to the display must be drawn relative to the the current background coordinates (the camera), bgX and bgY
+		//Draw all 9 of the background sprites, tiled around, and including, the current grid
 		al_draw_bitmap(backgroundSprite1,gridX-bgX,gridY-bgY,0); //Draw background first
 		al_draw_bitmap(backgroundSprite2,gridX-bgX,gridY-windowHeight-bgY,0);
 		al_draw_bitmap(backgroundSprite3,gridX-bgX,gridY+windowHeight-bgY,0);
@@ -565,6 +584,7 @@ void update_graphics(Ship *player[])
 		
 		for (int i=0; i<3; i++) //Draw planets next, only if planets' positions are within current grid
 			al_draw_rotated_bitmap(dockingStation[i], dockingWidth[i]/2, dockingHeight[i]/2, dockingX[i]-bgX, dockingY[i]-bgY, 0, 0); //Draw planets only if their coordinates exist within current screen
+		al_draw_tinted_rotated_bitmap(dockingStation[0], al_map_rgb(136, 268, 223), dockingWidth[0]/2, dockingHeight[0]/2, 400-bgX, 300-bgY, 0, 0);
 		for (int p=numPlayers-1;p>=0;p--) { //Draw sprites for each Ship object
 			for (int i=0; i<maxFireballs; i++) //Draw fireballs
 				al_draw_rotated_bitmap(player[p]->fireSprite[i], player[p]->fireWidth/2, player[p]->fireHeight/2, player[p]->fireX[i]-bgX, player[p]->fireY[i]-bgY, player[p]->fireAngle[i], 0);
@@ -578,10 +598,13 @@ void update_graphics(Ship *player[])
 		al_draw_rectangle(0-bgX, 0-bgY, maxX-bgX, maxY-bgY, al_map_rgb(255, 255, 255), 10);
 		
 		//Draw stats to screen
-		stringstream ss;
-		ss << "Coordinates: " << player[0]->x << ", " << player[0]->y; // << "\nGrid location: " << gridX << ", " << gridY;
-		string statsString = ss.str();
-		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.9, 0, statsString.c_str());
+		stringstream s1, s2;
+		s1 << "Coordinates: " << player[0]->x;
+		s2 << player[0]->y; // << "\nGrid location: " << gridX << ", " << gridY;
+		string str1 = s1.str();
+		string str2 = s2.str();
+		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.9, 0, str1.c_str());
+		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.237, windowHeight*0.9, 0, str2.c_str());
 	}
 
 	//Docking mode
