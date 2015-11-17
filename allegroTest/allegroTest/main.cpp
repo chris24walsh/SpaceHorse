@@ -52,8 +52,11 @@ int scaledWidth, scaledHeight, scaledOffsetX, scaledOffsetY;
 bool leftPressed, rightPressed, upPressed, downPressed, firePressed;
 int FPS = 60;
 
+//Home screen vars
+int homeScreenOption = 3;
+
 //Docking station vars
-bool canDock, dockingScr;
+bool canDock = false;
 const int maxDockingStations = 3;
 int dockingX[maxDockingStations];
 int dockingY[maxDockingStations];
@@ -63,16 +66,18 @@ bool safe = true;
 bool dispUpgradeText = false;
 
 //Network vars
+bool hostSet = false;
+bool connected = false;
 ENetHost * host; //This machine
 ENetPeer * peer; //Remote machine
 ENetEvent event;
 int wait = 0;
-int pCount = 0;
 
 //Misc vars
-bool done;
-int choice;
-int numPlayers;
+bool done; //Keeps game looping
+int choice; //Choice of server/client/singleplayer
+int numPlayers = 2; //Number of players
+int screenMode = 0;
 
 //////////////////////////////////
 /////     Global Objects     /////
@@ -144,9 +149,7 @@ void update_graphics(Ship*[]);
 void game_loop(Ship*[]);
 
 //Network Functions declaration
-void connectServer();
-void sendData();
-int receiveData();
+void setUpHost();
 
 /////////////////////////////////
 /////     Main function     /////
@@ -158,13 +161,12 @@ int main(int argc, char* argv[])
 	Ship *player2 = &p2;
 	Ship *player[2] = {player1, player2};
 
-	
-
-	cout << "Do you want to set up server(1), client(2) or play singleplayer(3)?: ";
-	cin >> choice;
-	if (choice==3) numPlayers = 1;
-	else numPlayers = 2;
-	if (choice==1) wait = 60000;
+	/*cout << "Do you want to set up server(1), client(2) or play singleplayer(3)?: ";
+	cin >> homeScreenOption;
+	if (homeScreenOption==3) numPlayers = 1;
+	else numPlayers = 2;*/
+	if (homeScreenOption==1) wait = 60000;
+	if (homeScreenOption==2) wait = 5000;
 
     init(player);
     game_loop(player);
@@ -283,7 +285,6 @@ void init(Ship *player[])
     al_register_event_source(event_queue, al_get_display_event_source(display));
  
 	//Docking station initialisation
-	canDock = dockingScr = false;
 	//Random seed the dockingstations throughout the map
 	srand(6); //srand(time(NULL));
 	for (int i=0; i<3; i++) dockingX[i] = float(maxX)*(rand()%100)/100;
@@ -296,51 +297,7 @@ void init(Ship *player[])
         abort_game("An error occurred while initializing ENet.\n");
     }
 
-	//Create server (or client as below, depending on choice);
-	if (choice==1) {
-		ENetAddress address;
-		//Bind server to localhost
-		address.host = ENET_HOST_ANY;
-		// Bind server to port 1234
-		address.port = 1234;
-		host = enet_host_create (& address /* the address to bind the server host to */, 
-									 32      /* allow up to 32 clients and/or outgoing connections */,
-									  2      /* allow up to 2 channels to be used, 0 and 1 */,
-									  0      /* assume any amount of incoming bandwidth */,
-									  0      /* assume any amount of outgoing bandwidth */);
-		if (host == NULL) {
-			abort_game("An error occurred while trying to create an ENet server host.\n");
-		}
-	}
-
-	//Create client
-	else if (choice==2) {
-		host = enet_host_create (NULL /* create a client host */,
-					1 /* only allow 1 outgoing connection */,
-					2 /* allow up 2 channels to be used, 0 and 1 */,
-					0	/* 57600 / 8 /* 56K modem with 56 Kbps downstream bandwidth */,
-					0	/* 14400 / 8 /* 56K modem with 14 Kbps upstream bandwidth */);
-		if (host == NULL) {
-			abort_game("An error occurred while trying to create an ENet client host.\n");
-		}
-
-		//Begin connection to server machine
-		ENetAddress address;
-		/* Connect to server:1234. */
-		enet_address_set_host (& address, "192.168.1.101");
-		//enet_address_set_host (& address, "localhost");
-		address.port = 1234;
-		
-		/* Initiate the connection, allocating the two channels 0 and 1. */
-		peer = enet_host_connect (host, & address, 2, 0); //Bind successful connection to peer
-		if (peer == NULL)
-		{
-		   fprintf (stderr, 
-					"No available peers for initiating an ENet connection.\n");
-		   exit (EXIT_FAILURE);
-		}
-	}
-	else ; //Single player mode (just don't setup server or client!)
+	
 }
  
 void shutdown(Ship *player[])
@@ -374,17 +331,19 @@ void fire(Ship *player[])
 
 void dock(Ship *player[])
 {
-	if (dockingScr) dockingScr = false; //Undock, if already docked and docking activated
-	else if (canDock) { //Else, if able to dock, do so, stop ship and set it to safe mode
-		dockingScr = true;
-		player[0]->speed = 0;
-		safe = true;
+	if (canDock) {
+		if (screenMode == 2) screenMode = 1; //Undock, if already docked and docking activated
+		else if (screenMode == 1) { //Else, if able to dock, do so, stop ship and set it to safe mode
+			screenMode = 2;
+			player[0]->speed = 0;
+			safe = true;
+		}
 	}
 }
 
 void upgrade_weapon(Ship *player[])
 {
-	if (dockingScr) {
+	if (screenMode == 2) {
 		dispUpgradeText = true;
 		for (int i=0; i<maxFireballs; i++) player[0]->fireSprite[i] = al_load_bitmap("c:/dev/allegro/images/fireball2.png");
 		player[0]->fireHeight = 40;
@@ -393,49 +352,85 @@ void upgrade_weapon(Ship *player[])
 
 void press_key(ALLEGRO_EVENT e, Ship *player[])
 {
-	if (e.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
-		done = true;
-    }
-	if (e.keyboard.keycode == ALLEGRO_KEY_LEFT) {
-		leftPressed = true;
-    }
-	if (e.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
-        rightPressed = true;
-    }
-	if (e.keyboard.keycode == ALLEGRO_KEY_UP) {
-        upPressed = true;
-    }
-	if (e.keyboard.keycode == ALLEGRO_KEY_DOWN) {
-        downPressed = true;
-    }
-	if (e.keyboard.keycode == ALLEGRO_KEY_F) {
-		fire(player);
-	}
-	if (e.keyboard.keycode == ALLEGRO_KEY_D) {
-		dock(player);
-	}
-	if (e.keyboard.keycode == ALLEGRO_KEY_W) {
-		upgrade_weapon(player);
+	switch (screenMode) {
+	case 0: //Home mode
+		{
+			if (e.keyboard.keycode == ALLEGRO_KEY_UP) {
+				homeScreenOption--;
+				if (homeScreenOption < 1) homeScreenOption = 3;
+			}
+			if (e.keyboard.keycode == ALLEGRO_KEY_DOWN) {
+				homeScreenOption++;
+				if (homeScreenOption > 3) homeScreenOption = 1;
+			}
+			if (e.keyboard.keycode == ALLEGRO_KEY_ENTER) {
+				if (homeScreenOption==3) numPlayers = 1;
+				else numPlayers = 2;
+				setUpHost();
+				screenMode = 1;
+			}
+			break;
+		}
+
+	case 1: //Space mode
+		{
+			if (e.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+				done = true;
+			}
+			if (e.keyboard.keycode == ALLEGRO_KEY_LEFT) {
+				leftPressed = true;
+			}
+			if (e.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
+				rightPressed = true;
+			}
+			if (e.keyboard.keycode == ALLEGRO_KEY_UP) {
+				upPressed = true;
+			}
+			if (e.keyboard.keycode == ALLEGRO_KEY_DOWN) {
+				downPressed = true;
+			}
+			if (e.keyboard.keycode == ALLEGRO_KEY_F) {
+				fire(player);
+			}
+			if (e.keyboard.keycode == ALLEGRO_KEY_D) {
+				dock(player);
+			}
+			break;
+		}
+		
+	case 2: //Docking mode
+		{
+			if (e.keyboard.keycode == ALLEGRO_KEY_W) {
+				upgrade_weapon(player);
+			}
+			break;
+		}
 	}
 }
 
 void release_key(ALLEGRO_EVENT e, Ship *player[])
 {
-	if (e.keyboard.keycode == ALLEGRO_KEY_LEFT) {
-        leftPressed = false;
-    }
-	if (e.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
-        rightPressed = false;
-    }
-	if (e.keyboard.keycode == ALLEGRO_KEY_UP) {
-        upPressed = false;
-    }
-	if (e.keyboard.keycode == ALLEGRO_KEY_DOWN) {
-        downPressed = false;
-    }
-	if (e.keyboard.keycode == ALLEGRO_KEY_F) {
-		firePressed = false;
-		player[0]->fireCycle = 10;
+	switch (screenMode) {
+	case 1: //Space mode
+		{
+			if (e.keyboard.keycode == ALLEGRO_KEY_LEFT) {
+				leftPressed = false;
+			}
+			if (e.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
+				rightPressed = false;
+			}
+			if (e.keyboard.keycode == ALLEGRO_KEY_UP) {
+				upPressed = false;
+			}
+			if (e.keyboard.keycode == ALLEGRO_KEY_DOWN) {
+				downPressed = false;
+			}
+			if (e.keyboard.keycode == ALLEGRO_KEY_F) {
+				firePressed = false;
+				player[0]->fireCycle = 10;
+			}
+			break;
+		}
 	}
 }
 
@@ -522,14 +517,15 @@ void update_logic(Ship *player[])
 		else canDock = false;
 	}
 	
-	if (choice!=3) {
+	if (hostSet) {
 		//Apply remote ship's new coordinates to player2's current local coordinates
 		enet_uint8 *d = NULL;
-		while (enet_host_service(host, &event, wait)) { //Non-blocking poll to enets data buffer
+		while (enet_host_service(host, &event, wait)) { //Poll to enets data buffer
 			
 			switch(event.type) {
 			case ENET_EVENT_TYPE_CONNECT:
 				printf("Connection received from %x\n", event.peer->address.host);
+				connected = true;
 				peer = event.peer;
 				break;
 			case ENET_EVENT_TYPE_RECEIVE:
@@ -552,21 +548,45 @@ void update_logic(Ship *player[])
 			}
 		}
 
-		//Send player1's data to remote
-		stringstream ss;
-		ss << player[0]->x << "|" << player[0]->y << "|" << player[0]->angle << "|" << player[0]->speed;
-		for (int i=0;i<maxFireballs;i++)
-			ss << "|" << player[0]->fireX[i] << "|" << player[0]->fireY[i] << "|" << player[0]->fireAngle[i];
-		string data = ss.str();
-		ENetPacket *packet = enet_packet_create(data.c_str(), strlen(data.c_str())+1, 0);
-		enet_peer_send(peer, 0, packet);
+
+		//Check if connected or not before sending network data
+		if (connected) {
+			//Send player1's data to remote
+			stringstream ss;
+			ss << player[0]->x << "|" << player[0]->y << "|" << player[0]->angle << "|" << player[0]->speed;
+			for (int i=0;i<maxFireballs;i++)
+				ss << "|" << player[0]->fireX[i] << "|" << player[0]->fireY[i] << "|" << player[0]->fireAngle[i];
+			string data = ss.str();
+			ENetPacket *packet = enet_packet_create(data.c_str(), strlen(data.c_str())+1, 0);
+			enet_peer_send(peer, 0, packet);
+		}
 	}
 }
 
 void update_graphics(Ship *player[])
 {
+	switch (screenMode) {
+
+	//Home screen mode
+	case 0:
+		{
+		al_clear_to_color(al_map_rgb(30,30,30));
+		int c1R, c1G, c1B, c2R, c2G, c2B, c3R, c3G, c3B;
+		c1R = c1G = c1B = c2R = c2G = c2B = c3R = c3G = c3B = 256;
+		if (homeScreenOption == 1) c1R = c1G = c1B = 190;
+		if (homeScreenOption == 2) c2R = c2G = c2B = 190;
+		if (homeScreenOption == 3) c3R = c3G = c3B = 190;
+		al_draw_text(font, al_map_rgb(c1R,c1G,c1B), windowWidth*0.5, windowHeight*0.2, ALLEGRO_ALIGN_CENTRE, "HOST MULTIPLAYER GAME");
+		al_draw_text(font, al_map_rgb(c2R,c2G,c2B), windowWidth*0.5, windowHeight*0.4, ALLEGRO_ALIGN_CENTRE, "JOIN MULTIPLAYER GAME");
+		al_draw_text(font, al_map_rgb(c3R,c3G,c3B), windowWidth*0.5, windowHeight*0.6, ALLEGRO_ALIGN_CENTRE, "SINGLE PLAYER");
+
+		
+		break;
+		}
+
 	//Space mode
-	if (!dockingScr) {
+	case 1:
+		{
 		//Clear display first
         al_clear_to_color(al_map_rgb(0, 0, 0));
 		
@@ -599,24 +619,30 @@ void update_graphics(Ship *player[])
 		
 		//Draw stats to screen
 		stringstream s1, s2;
-		s1 << "Coordinates: " << player[0]->x;
-		s2 << player[0]->y; // << "\nGrid location: " << gridX << ", " << gridY;
+		s1 << "Coordinates: " << player[0]->x << player[0]->y;
+		//s2 << player[0]->y; // << "\nGrid location: " << gridX << ", " << gridY;
 		string str1 = s1.str();
-		string str2 = s2.str();
+		//string str2 = s2.str();
 		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.9, 0, str1.c_str());
-		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.237, windowHeight*0.9, 0, str2.c_str());
-	}
+		//al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.237, windowHeight*0.9, 0, str2.c_str());
+		
+		break;
+		}
 
 	//Docking mode
-	else {
+	case 2:
+		{
 		al_clear_to_color(al_map_rgb(25,0,25));
 		al_draw_rotated_bitmap(player[0]->shipSprite, player[0]->width/2, player[0]->height/2, 250, 250, 0, 0);
 		al_draw_rotated_bitmap(player[0]->fireSprite[0], player[0]->fireHeight/2, player[0]->fireWidth/2, 250, 250, 0, 0);
 		al_draw_bitmap(dockingText, 0, 0, 0);
 		if (dispUpgradeText) al_draw_bitmap(upgradedText, 0, windowHeight/2, 0);
+		
+		break;
+		}
 	}
 }
- 
+
 void game_loop(Ship *player[])
 {
     bool redraw = true;
@@ -644,4 +670,63 @@ void game_loop(Ship *player[])
 			al_flip_display();
         }
     }
+}
+
+
+///////////////////////////////////////////////////////
+////////////////  NETWORK FUNCTIONS  //////////////////
+
+
+void setUpHost() {
+	//Create server (or client as below, depending on homeScreenOption);
+	if (homeScreenOption==1) {
+		ENetAddress address;
+		//Bind server to localhost
+		address.host = ENET_HOST_ANY;
+		// Bind server to port 1234
+		address.port = 1234;
+		host = enet_host_create (& address /* the address to bind the server host to */, 
+									 32      /* allow up to 32 clients and/or outgoing connections */,
+									  2      /* allow up to 2 channels to be used, 0 and 1 */,
+									  0      /* assume any amount of incoming bandwidth */,
+									  0      /* assume any amount of outgoing bandwidth */);
+		if (host == NULL) {
+			abort_game("An error occurred while trying to create an ENet server host.\n");
+		}
+
+		hostSet = true;
+	}
+
+	//Create client
+	else if (homeScreenOption==2) {
+		host = enet_host_create (NULL /* create a client host */,
+					1 /* only allow 1 outgoing connection */,
+					2 /* allow up 2 channels to be used, 0 and 1 */,
+					0	/* 57600 / 8 /* 56K modem with 56 Kbps downstream bandwidth */,
+					0	/* 14400 / 8 /* 56K modem with 14 Kbps upstream bandwidth */);
+		if (host == NULL) {
+			abort_game("An error occurred while trying to create an ENet client host.\n");
+		}
+
+		//Begin connection to server machine
+		ENetAddress address;
+		/* Connect to server:1234. */
+		//enet_address_set_host (& address, "192.168.1.101");
+		enet_address_set_host (& address, "localhost");
+		address.port = 1234;
+		
+		/* Initiate the connection, allocating the two channels 0 and 1. */
+		peer = enet_host_connect (host, & address, 2, 2500); //Bind successful connection to peer
+		if (peer == NULL)
+		{
+		   abort_game("No server available at this address.\n");
+		}
+		/*else {
+			cout << "Connected." << endl;
+			connected = true;
+		}*/
+
+		hostSet = true;
+	}
+	else ; //Single player mode (just don't setup server or client!)
 }
