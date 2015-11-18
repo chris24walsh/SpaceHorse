@@ -44,7 +44,7 @@ int gridX = 0;
 int gridY = 0;
 int bgX = 0;
 int bgY = 0;
-int numberGrids = 1; //Number of grids along one side of the square map actually...:)
+int numberGrids = 4; //Number of grids along one side of the square map actually...:)
 int windowWidth, windowHeight, maxX, maxY, screenWidth, screenHeight;
 int backgroundWidth = 1920;
 int backgroundHeight = 1080;
@@ -75,6 +75,8 @@ int wait = 0;
 
 //Misc vars
 bool done; //Keeps game looping
+bool paused = false;
+bool gameOver = false;
 int choice; //Choice of server/client/singleplayer
 int numPlayers = 2; //Number of players
 int screenMode = 0;
@@ -84,7 +86,7 @@ int screenMode = 0;
 
 class Ship {
 public:
-	int x, y, height, width, speed, speedX, speedY, maxSpeed, flipflop, fireballNumber, fireX[maxFireballs], fireY[maxFireballs], fireHeight, fireWidth, fireSpeed, fireCycle;
+	int x, y, height, width, speed, speedX, speedY, maxSpeed, health, flipflop, fireballNumber, fireX[maxFireballs], fireY[maxFireballs], fireHeight, fireWidth, fireSpeed, fireCycle;
 	float angle, fireAngle[maxFireballs];
 	ALLEGRO_BITMAP *shipSprite, *shipSprite1, *shipSprite2, *shipSpriteCurrent;
 	ALLEGRO_BITMAP *fireSprite[maxFireballs];
@@ -97,6 +99,7 @@ public:
 		speed = speedX = speedY = 0;
 		maxSpeed = 7;
 		angle = 0;
+		health = 6;
 		flipflop = 0;
 		shipSprite = shipSprite1 = shipSprite2 = shipSpriteCurrent = NULL;
 		fireWidth = 30;
@@ -140,6 +143,7 @@ void shutdown(Ship*[]);
 
 //Game Functions declaration
 void fire(Ship*[]);
+void triggerCollision(Ship *player[]);
 void dock(Ship*[]);
 void upgrade_weapon(Ship*[]);
 void press_key(ALLEGRO_EVENT, Ship*[]);
@@ -147,6 +151,7 @@ void release_key(ALLEGRO_EVENT, Ship*[]);
 void update_logic(Ship*[]);
 void update_graphics(Ship*[]);
 void game_loop(Ship*[]);
+
 
 //Network Functions declaration
 void setUpHost();
@@ -341,6 +346,10 @@ void dock(Ship *player[])
 	}
 }
 
+void triggerCollision(Ship *player[]) {
+	player[0]->health--;
+}
+
 void upgrade_weapon(Ship *player[])
 {
 	if (screenMode == 2) {
@@ -395,6 +404,16 @@ void press_key(ALLEGRO_EVENT e, Ship *player[])
 			}
 			if (e.keyboard.keycode == ALLEGRO_KEY_D) {
 				dock(player);
+			}
+			if (e.keyboard.keycode == ALLEGRO_KEY_P) {
+				if (paused && !gameOver) paused = false;
+				else paused = true;
+			}
+			if (e.keyboard.keycode == ALLEGRO_KEY_T) {
+				triggerCollision(player);
+			}
+			if (e.keyboard.keycode == ALLEGRO_KEY_ENTER) {
+				if (gameOver) done = true;
 			}
 			break;
 		}
@@ -565,6 +584,18 @@ void update_logic(Ship *player[])
 			enet_peer_send(peer, 0, packet);
 		}
 	}
+	//Collision detection
+	for (int i=0; i<maxFireballs; i++ ) { //Checking all enemy fireballs
+		if (abs(player[0]->x - player[1]->fireX[i]) < abs(player[0]->width/2 - player[1]->fireWidth/2))
+			if (abs(player[0]->y - player[1]->fireY[i]) < abs(player[0]->height/2 - player[1]->fireHeight/2))
+				triggerCollision(player);
+	}
+
+	//Check for gameover
+	if (player[0]->health == 0) {
+		gameOver = true;
+		paused = true;
+	}
 }
 
 void update_graphics(Ship *player[])
@@ -625,13 +656,16 @@ void update_graphics(Ship *player[])
 		
 		//Draw stats to screen
 		stringstream s1, s2;
-		s1 << "Coordinates: " << player[0]->x << player[0]->y;
-		//s2 << player[0]->y; // << "\nGrid location: " << gridX << ", " << gridY;
+		s1 << "Coordinates: " << player[0]->x << "  " << player[0]->y;
+		s2 << "Health: " << player[0]->health;
 		string str1 = s1.str();
-		//string str2 = s2.str();
+		string str2 = s2.str();
 		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.9, 0, str1.c_str());
-		//al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.237, windowHeight*0.9, 0, str2.c_str());
+		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.1, 0, str2.c_str());
 		
+		//Game over
+		if (gameOver) al_draw_text(font, al_map_rgb(250, 0, 20), windowWidth*0.5, windowHeight*0.5, ALLEGRO_ALIGN_CENTRE, "GAME OVER");
+
 		break;
 		}
 
@@ -661,7 +695,7 @@ void game_loop(Ship *player[])
  
         if (event.type == ALLEGRO_EVENT_TIMER) {
             redraw = true;
-            update_logic(player);
+            if (!paused) update_logic(player);
         }
         else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
             press_key(event, player);
