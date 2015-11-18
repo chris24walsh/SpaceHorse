@@ -44,7 +44,7 @@ int gridX = 0;
 int gridY = 0;
 int bgX = 0;
 int bgY = 0;
-int numberGrids = 5; //Number of grids along one side of the square map actually...:)
+int numberGrids = 1; //Number of grids along one side of the square map actually...:)
 int windowWidth, windowHeight, maxX, maxY, screenWidth, screenHeight;
 int backgroundWidth = 1920;
 int backgroundHeight = 1080;
@@ -357,13 +357,14 @@ void press_key(ALLEGRO_EVENT e, Ship *player[])
 		{
 			if (e.keyboard.keycode == ALLEGRO_KEY_UP) {
 				homeScreenOption--;
-				if (homeScreenOption < 1) homeScreenOption = 3;
+				if (homeScreenOption < 1) homeScreenOption = 4;
 			}
 			if (e.keyboard.keycode == ALLEGRO_KEY_DOWN) {
 				homeScreenOption++;
-				if (homeScreenOption > 3) homeScreenOption = 1;
+				if (homeScreenOption > 4) homeScreenOption = 1;
 			}
 			if (e.keyboard.keycode == ALLEGRO_KEY_ENTER) {
+				if (homeScreenOption==4) done = true;
 				if (homeScreenOption==3) numPlayers = 1;
 				else numPlayers = 2;
 				setUpHost();
@@ -402,6 +403,9 @@ void press_key(ALLEGRO_EVENT e, Ship *player[])
 		{
 			if (e.keyboard.keycode == ALLEGRO_KEY_W) {
 				upgrade_weapon(player);
+			}
+			if (e.keyboard.keycode == ALLEGRO_KEY_D) {
+				dock(player);
 			}
 			break;
 		}
@@ -571,14 +575,16 @@ void update_graphics(Ship *player[])
 	case 0:
 		{
 		al_clear_to_color(al_map_rgb(30,30,30));
-		int c1R, c1G, c1B, c2R, c2G, c2B, c3R, c3G, c3B;
-		c1R = c1G = c1B = c2R = c2G = c2B = c3R = c3G = c3B = 256;
+		int c1R, c1G, c1B, c2R, c2G, c2B, c3R, c3G, c3B, c4R, c4G, c4B;
+		c1R = c1G = c1B = c2R = c2G = c2B = c3R = c3G = c3B = c4R = c4G = c4B = 256;
 		if (homeScreenOption == 1) c1R = c1G = c1B = 190;
 		if (homeScreenOption == 2) c2R = c2G = c2B = 190;
 		if (homeScreenOption == 3) c3R = c3G = c3B = 190;
+		if (homeScreenOption == 4) c4R = c4G = c4B = 190;
 		al_draw_text(font, al_map_rgb(c1R,c1G,c1B), windowWidth*0.5, windowHeight*0.2, ALLEGRO_ALIGN_CENTRE, "HOST MULTIPLAYER GAME");
 		al_draw_text(font, al_map_rgb(c2R,c2G,c2B), windowWidth*0.5, windowHeight*0.4, ALLEGRO_ALIGN_CENTRE, "JOIN MULTIPLAYER GAME");
 		al_draw_text(font, al_map_rgb(c3R,c3G,c3B), windowWidth*0.5, windowHeight*0.6, ALLEGRO_ALIGN_CENTRE, "SINGLE PLAYER");
+		al_draw_text(font, al_map_rgb(c4R,c4G,c4B), windowWidth*0.5, windowHeight*0.8, ALLEGRO_ALIGN_CENTRE, "QUIT");
 
 		
 		break;
@@ -711,8 +717,8 @@ void setUpHost() {
 		//Begin connection to server machine
 		ENetAddress address;
 		/* Connect to server:1234. */
-		//enet_address_set_host (& address, "192.168.1.101");
-		enet_address_set_host (& address, "localhost");
+		enet_address_set_host (& address, "192.168.0.3");
+		//enet_address_set_host (& address, "localhost");
 		address.port = 1234;
 		
 		/* Initiate the connection, allocating the two channels 0 and 1. */
