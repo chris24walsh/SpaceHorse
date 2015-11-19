@@ -44,7 +44,7 @@ int gridX = 0;
 int gridY = 0;
 int bgX = 0;
 int bgY = 0;
-int numberGrids = 4; //Number of grids along one side of the square map actually...:)
+int numberGrids = 5; //Number of grids along one side of the square map actually...:)
 int windowWidth, windowHeight, maxX, maxY, screenWidth, screenHeight;
 int backgroundWidth = 1920;
 int backgroundHeight = 1080;
@@ -80,6 +80,14 @@ bool gameOver = false;
 int choice; //Choice of server/client/singleplayer
 int numPlayers = 2; //Number of players
 int screenMode = 0;
+bool collided = true;
+bool hyperDrive = false;
+int startTime = 0;
+float oldAngle, newAngle;
+int distanceTravelX = 0;
+int distanceTravelY = 0;
+int x2 = 3000;
+int y2 = 3000;
 
 //////////////////////////////////
 /////     Global Objects     /////
@@ -146,6 +154,7 @@ void fire(Ship*[]);
 void triggerCollision(Ship *player[]);
 void dock(Ship*[]);
 void upgrade_weapon(Ship*[]);
+void hyperdrive(Ship*[]);
 void press_key(ALLEGRO_EVENT, Ship*[]);
 void release_key(ALLEGRO_EVENT, Ship*[]);
 void update_logic(Ship*[]);
@@ -294,6 +303,10 @@ void init(Ship *player[])
 	srand(6); //srand(time(NULL));
 	for (int i=0; i<3; i++) dockingX[i] = float(maxX)*(rand()%100)/100;
 	for (int i=0; i<3; i++) dockingY[i] = float(maxY)*(rand()%100)/100;
+	player[0]->x = 2600;
+	player[0]->y = 2600;
+	dockingX[0] = 3000;
+	dockingY[0] = 3000;
 
 
 	//Initialise the network library
@@ -359,6 +372,20 @@ void upgrade_weapon(Ship *player[])
 	}
 }
 
+void hyperdrive(Ship *player[])
+{
+	player[0]->speed = 0;
+	hyperDrive = true;
+	startTime = 0;
+	oldAngle = player[0]->angle;
+	cout << "old angle: " << oldAngle << endl;
+	newAngle = atan(abs(y2 - player[0]->y) / abs(x2 - player[0]->x));
+	cout << "new angle: " << newAngle;
+	distanceTravelX = (x2 - player[0]->x);
+	distanceTravelY = (y2 - player[0]->y);
+	cout << "distance: " << distanceTravelX;
+}
+
 void press_key(ALLEGRO_EVENT e, Ship *player[])
 {
 	switch (screenMode) {
@@ -409,12 +436,10 @@ void press_key(ALLEGRO_EVENT e, Ship *player[])
 				if (paused && !gameOver) paused = false;
 				else paused = true;
 			}
-			if (e.keyboard.keycode == ALLEGRO_KEY_T) {
-				triggerCollision(player);
+			if (e.keyboard.keycode == ALLEGRO_KEY_H) {
+				hyperdrive(player);
 			}
-			if (e.keyboard.keycode == ALLEGRO_KEY_ENTER) {
-				if (gameOver) done = true;
-			}
+			//if (gameOver) done = true;
 			break;
 		}
 		
@@ -459,142 +484,158 @@ void release_key(ALLEGRO_EVENT e, Ship *player[])
 
 void update_logic(Ship *player[])
 {
-	//Rotate clockwise or anti-clockwise
-	if (leftPressed) {
-		player[0]->angle-=0.05;
-	}
-	if (rightPressed) {
-		player[0]->angle+=0.05;
-	}
-
-	//Cycle between different rocket sprites, to give effect of rocket blasting
-	for (int p=0;p<numPlayers;p++) {
-		if (player[p]->speed>0) {
-			if (player[p]->flipflop<5) player[p]->shipSpriteCurrent = player[p]->shipSprite1;
-			else if (player[p]->flipflop>=5) player[p]->shipSpriteCurrent = player[p]->shipSprite2;
-			player[p]->flipflop++;
-			if (player[p]->flipflop==10) player[p]->flipflop=0;
+	if (!paused) {
+		//Rotate clockwise or anti-clockwise
+		if (leftPressed) {
+			player[0]->angle-=0.05;
 		}
-		else player[p]->shipSpriteCurrent = player[p]->shipSprite;
-	}
+		if (rightPressed) {
+			player[0]->angle+=0.05;
+		}
 
-	//Increase or decrease player[0]->speed
-	if (upPressed) {
-		if (player[0]->speed<player[0]->maxSpeed) player[0]->speed += 1;
-	}
-	else if (downPressed) {
-		if (player[0]->speed>0) player[0]->speed -= 1;
-	}
-
-	//Resolve translations for x and y axis
-	player[0]->speedX = player[0]->speed * cos(player[0]->angle);
-	player[0]->speedY = player[0]->speed * sin(player[0]->angle);
-
-	//Apply translation to ship
-	//Restrict map in X axis (can't travel below 0, above maxX)
-	if ((player[0]->x<player[0]->width/2 && player[0]->speedX<0) || (player[0]->x>maxX-(player[0]->width/2) && player[0]->speedX>0)) ; //Can't travel
-	else player[0]->x += player[0]->speedX;
-	
-	//Restrict map in Y axis (can't travel below 0, above maxY)
-	if ((player[0]->y<player[0]->height/2 && player[0]->speedY<0) || (player[0]->y>maxY-(player[0]->height/2) && player[0]->speedY>0)) ; //Can't travel
-	else player[0]->y += player[0]->speedY;
-
-	//Set which grid the ship is currently in
-	gridX = int(float(player[0]->x)/windowWidth)*windowWidth;
-	gridY = int(float(player[0]->y)/windowHeight)*windowHeight;
-
-	//Set background coordinates
-	bgX = player[0]->x - windowWidth/2;
-	bgY = player[0]->y - windowHeight/2;
-	
-	//Set fireball position
-	for (int p=0;p<numPlayers;p++) {
-		for (int i=0; i<maxFireballs; i++) player[p]->fireX[i] += player[p]->fireSpeed * cos(player[p]->fireAngle[i]);
-		for (int i=0; i<maxFireballs; i++) player[p]->fireY[i] += player[p]->fireSpeed * sin(player[p]->fireAngle[i]);
-	}
-
-	//Set fire cycle
-	if (firePressed) {
-		if (player[0]->fireCycle >= 10) {
-			int x = player[0]->fireballNumber++; //Cycled through available fireballs (having a high upper threshold of fireballs prevents onscreen fireballs being recycled)
-			player[0]->fireX[x] = player[0]->x;
-			player[0]->fireY[x] = player[0]->y;
-			player[0]->fireAngle[x] = player[0]->angle;
-			if (player[0]->fireballNumber>=maxFireballs){
-				player[0]->fireballNumber = 0;
+		//Cycle between different rocket sprites, to give effect of rocket blasting
+		for (int p=0;p<numPlayers;p++) {
+			if (player[p]->speed>0) {
+				if (player[p]->flipflop<5) player[p]->shipSpriteCurrent = player[p]->shipSprite1;
+				else if (player[p]->flipflop>=5) player[p]->shipSpriteCurrent = player[p]->shipSprite2;
+				player[p]->flipflop++;
+				if (player[p]->flipflop==10) player[p]->flipflop=0;
 			}
-			player[0]->fireCycle = 0;
+			else player[p]->shipSpriteCurrent = player[p]->shipSprite;
 		}
-		player[0]->fireCycle++;
-	}
-	
-	//Check if near docking station, and if so allow docking
-	int proxX, proxY;
-	for (int i=0; i<3; i++) {
-		proxX = abs(player[0]->x - dockingX[i]);
-		proxY = abs(player[0]->y - dockingY[i]);
-		if (proxX<dockingWidth[i]/2 && proxY<dockingHeight[i]/2) {
-			canDock = true;
-			break;
+
+		//Increase or decrease player[0]->speed
+		if (upPressed) {
+			if (player[0]->speed<player[0]->maxSpeed) player[0]->speed += 1;
 		}
-		else canDock = false;
-	}
+		else if (downPressed) {
+			if (player[0]->speed>0) player[0]->speed -= 1;
+		}
+
+		//Resolve translations for x and y axis
+		player[0]->speedX = player[0]->speed * cos(player[0]->angle);
+		player[0]->speedY = player[0]->speed * sin(player[0]->angle);
+
+		//Apply translation to ship
+		//Restrict map in X axis (can't travel below 0, above maxX)
+		if ((player[0]->x<player[0]->width/2 && player[0]->speedX<0) || (player[0]->x>maxX-(player[0]->width/2) && player[0]->speedX>0)) ; //Can't travel
+		else player[0]->x += player[0]->speedX;
 	
-	if (hostSet) {
-		//Apply remote ship's new coordinates to player2's current local coordinates
-		enet_uint8 *d = NULL;
-		while (enet_host_service(host, &event, wait)) { //Poll to enets data buffer
-			
-			switch(event.type) {
-			case ENET_EVENT_TYPE_CONNECT:
-				printf("Connection received from %x\n", event.peer->address.host);
-				connected = true;
-				peer = event.peer;
-				break;
-			case ENET_EVENT_TYPE_RECEIVE:
-				wait = 0;
-				d = event.packet->data;
-				player[1]->x = atoi(strtok((char*)d,"|"));
-				player[1]->y = atoi(strtok(NULL,"|"));
-				player[1]->angle = atof(strtok(NULL,"|"));
-				player[1]->speed = atoi(strtok(NULL,"|"));
-				for (int i=0;i<maxFireballs;i++) {
-					player[1]->fireX[i] = atoi(strtok(NULL,"|"));
-					player[1]->fireY[i] = atoi(strtok(NULL,"|"));
-					player[1]->fireAngle[i] = atof(strtok(NULL,"|"));
+		//Restrict map in Y axis (can't travel below 0, above maxY)
+		if ((player[0]->y<player[0]->height/2 && player[0]->speedY<0) || (player[0]->y>maxY-(player[0]->height/2) && player[0]->speedY>0)) ; //Can't travel
+		else player[0]->y += player[0]->speedY;
+
+		//Set which grid the ship is currently in
+		gridX = int(float(player[0]->x)/windowWidth)*windowWidth;
+		gridY = int(float(player[0]->y)/windowHeight)*windowHeight;
+
+		//Set background coordinates
+		bgX = player[0]->x - windowWidth/2;
+		bgY = player[0]->y - windowHeight/2;
+	
+		//Set fireball position
+		for (int p=0;p<numPlayers;p++) {
+			for (int i=0; i<maxFireballs; i++) player[p]->fireX[i] += player[p]->fireSpeed * cos(player[p]->fireAngle[i]);
+			for (int i=0; i<maxFireballs; i++) player[p]->fireY[i] += player[p]->fireSpeed * sin(player[p]->fireAngle[i]);
+		}
+
+		//Set fire cycle
+		if (firePressed) {
+			if (player[0]->fireCycle >= 10) {
+				int x = player[0]->fireballNumber++; //Cycled through available fireballs (having a high upper threshold of fireballs prevents onscreen fireballs being recycled)
+				player[0]->fireX[x] = player[0]->x;
+				player[0]->fireY[x] = player[0]->y;
+				player[0]->fireAngle[x] = player[0]->angle;
+				if (player[0]->fireballNumber>=maxFireballs){
+					player[0]->fireballNumber = 0;
 				}
-
-				break;
-			case ENET_EVENT_TYPE_DISCONNECT:
-				printf("%s disconnected.\n", event.peer->data);
+				player[0]->fireCycle = 0;
+			}
+			player[0]->fireCycle++;
+		}
+	
+		//Check if near docking station, and if so allow docking
+		int proxX, proxY;
+		for (int i=0; i<3; i++) {
+			proxX = abs(player[0]->x - dockingX[i]);
+			proxY = abs(player[0]->y - dockingY[i]);
+			if (proxX<dockingWidth[i]/2 && proxY<dockingHeight[i]/2) {
+				canDock = true;
 				break;
 			}
+			else canDock = false;
+		}
+	
+		if (hostSet) {
+			//Apply remote ship's new coordinates to player2's current local coordinates
+			enet_uint8 *d = NULL;
+			while (enet_host_service(host, &event, wait)) { //Poll to enets data buffer
+			
+				switch(event.type) {
+				case ENET_EVENT_TYPE_CONNECT:
+					printf("Connection received from %x\n", event.peer->address.host);
+					connected = true;
+					peer = event.peer;
+					break;
+				case ENET_EVENT_TYPE_RECEIVE:
+					wait = 0;
+					d = event.packet->data;
+					player[1]->x = atoi(strtok((char*)d,"|"));
+					player[1]->y = atoi(strtok(NULL,"|"));
+					player[1]->angle = atof(strtok(NULL,"|"));
+					player[1]->speed = atoi(strtok(NULL,"|"));
+					for (int i=0;i<maxFireballs;i++) {
+						player[1]->fireX[i] = atoi(strtok(NULL,"|"));
+						player[1]->fireY[i] = atoi(strtok(NULL,"|"));
+						player[1]->fireAngle[i] = atof(strtok(NULL,"|"));
+					}
+
+					break;
+				case ENET_EVENT_TYPE_DISCONNECT:
+					printf("%s disconnected.\n", event.peer->data);
+					break;
+				}
+			}
+
+
+			//Check if connected or not before sending network data
+			if (connected) {
+				//Send player1's data to remote
+				stringstream ss;
+				ss << player[0]->x << "|" << player[0]->y << "|" << player[0]->angle << "|" << player[0]->speed;
+				for (int i=0;i<maxFireballs;i++)
+					ss << "|" << player[0]->fireX[i] << "|" << player[0]->fireY[i] << "|" << player[0]->fireAngle[i];
+				string data = ss.str();
+				ENetPacket *packet = enet_packet_create(data.c_str(), strlen(data.c_str())+1, 0);
+				enet_peer_send(peer, 0, packet);
+			}
+		}
+		//Collision detection
+		for (int i=0; i<maxFireballs; i++ ) { //Checking all enemy fireballs
+			if (abs(player[0]->x - player[1]->fireX[i]) < abs(player[0]->width/2 - player[1]->fireWidth/2))
+				if (abs(player[0]->y - player[1]->fireY[i]) < abs(player[0]->height/2 - player[1]->fireHeight/2))
+					triggerCollision(player);
 		}
 
-
-		//Check if connected or not before sending network data
-		if (connected) {
-			//Send player1's data to remote
-			stringstream ss;
-			ss << player[0]->x << "|" << player[0]->y << "|" << player[0]->angle << "|" << player[0]->speed;
-			for (int i=0;i<maxFireballs;i++)
-				ss << "|" << player[0]->fireX[i] << "|" << player[0]->fireY[i] << "|" << player[0]->fireAngle[i];
-			string data = ss.str();
-			ENetPacket *packet = enet_packet_create(data.c_str(), strlen(data.c_str())+1, 0);
-			enet_peer_send(peer, 0, packet);
+		//Check for gameover
+		if (player[0]->health == 0) {
+			gameOver = true;
+			paused = true;
 		}
 	}
-	//Collision detection
-	for (int i=0; i<maxFireballs; i++ ) { //Checking all enemy fireballs
-		if (abs(player[0]->x - player[1]->fireX[i]) < abs(player[0]->width/2 - player[1]->fireWidth/2))
-			if (abs(player[0]->y - player[1]->fireY[i]) < abs(player[0]->height/2 - player[1]->fireHeight/2))
-				triggerCollision(player);
-	}
 
-	//Check for gameover
-	if (player[0]->health == 0) {
-		gameOver = true;
-		paused = true;
+	if (hyperDrive) {
+		startTime++;
+		//float slope = 1;
+		if (startTime < 60 ) player[0]->angle = newAngle;
+		else if (startTime < 120) {
+			player[0]->x += distanceTravelX/60;
+			player[0]->y += distanceTravelY/60;
+		}
+		else {
+			paused = hyperDrive = false;
+			startTime = 0;
+		}
 	}
 }
 
@@ -695,7 +736,7 @@ void game_loop(Ship *player[])
  
         if (event.type == ALLEGRO_EVENT_TIMER) {
             redraw = true;
-            if (!paused) update_logic(player);
+            update_logic(player);
         }
         else if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
             press_key(event, player);
@@ -751,8 +792,8 @@ void setUpHost() {
 		//Begin connection to server machine
 		ENetAddress address;
 		/* Connect to server:1234. */
-		enet_address_set_host (& address, "192.168.0.3");
-		//enet_address_set_host (& address, "localhost");
+		//enet_address_set_host (& address, "192.168.0.3");
+		enet_address_set_host (& address, "localhost");
 		address.port = 1234;
 		
 		/* Initiate the connection, allocating the two channels 0 and 1. */
