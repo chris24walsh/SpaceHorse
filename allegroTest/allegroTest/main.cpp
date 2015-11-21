@@ -88,6 +88,7 @@ int distanceTravelX = 0;
 int distanceTravelY = 0;
 int x2 = 3000;
 int y2 = 3000;
+bool angleAligned, distanceAligned = true;
 
 //////////////////////////////////
 /////     Global Objects     /////
@@ -224,8 +225,10 @@ void init(Ship *player[])
  
 	//Setup Display
 	al_get_display_mode(al_get_num_display_modes() - 1, &disp_data); //Set resolution to max
-	windowWidth = backgroundWidth;
-	windowHeight = backgroundHeight;
+	//windowWidth = backgroundWidth;
+	//windowHeight = backgroundHeight;
+	windowWidth = 700;
+	windowHeight = 700;
 	//windowWidth = disp_data.width;
 	//windowHeight = disp_data.height;
 	maxX = windowWidth*numberGrids;
@@ -378,12 +381,9 @@ void hyperdrive(Ship *player[])
 	hyperDrive = true;
 	startTime = 0;
 	oldAngle = player[0]->angle;
-	cout << "old angle: " << oldAngle << endl;
-	newAngle = atan(abs(y2 - player[0]->y) / abs(x2 - player[0]->x));
-	cout << "new angle: " << newAngle;
+	newAngle = atan2( (y2 - player[0]->y),  (x2 - player[0]->x) );
 	distanceTravelX = (x2 - player[0]->x);
 	distanceTravelY = (y2 - player[0]->y);
-	cout << "distance: " << distanceTravelX;
 }
 
 void press_key(ALLEGRO_EVENT e, Ship *player[])
@@ -492,6 +492,8 @@ void update_logic(Ship *player[])
 		if (rightPressed) {
 			player[0]->angle+=0.05;
 		}
+		if (player[0]->angle > 6.28) player[0]->angle = 0;
+		else if (player[0]->angle < 0) player[0]->angle = 6.25;
 
 		//Cycle between different rocket sprites, to give effect of rocket blasting
 		for (int p=0;p<numPlayers;p++) {
@@ -626,15 +628,29 @@ void update_logic(Ship *player[])
 
 	if (hyperDrive) {
 		startTime++;
-		//float slope = 1;
-		if (startTime < 60 ) player[0]->angle = newAngle;
-		else if (startTime < 120) {
-			player[0]->x += distanceTravelX/60;
-			player[0]->y += distanceTravelY/60;
+		if (!angleAligned) { //Get angle right first
+			player[0]->angle += 0.05; //Incrementally rotate
+			if (player[0]->angle > 6.28) player[0]->angle = 0; //Keep angle under 6.28
+			cout << "New angle: " << newAngle << endl;
+			cout << "Angle: " << player[0]->angle << endl;
+			if (abs(abs(player[0]->angle) - abs(newAngle)) < 0.05) { //Check for nearness then align angle exactly
+				player[0]->angle = newAngle;
+				angleAligned = true;
+			}
 		}
-		else {
-			paused = hyperDrive = false;
-			startTime = 0;
+		if (angleAligned) { //Then check distance
+			if (!distanceAligned) { //If distance greater than 5
+				player[0]->x += player[0]->maxSpeed * 5 * cos(player[0]->angle);
+				player[0]->y += player[0]->maxSpeed * 5 * sin(player[0]->angle);
+				cout << "Distance to destination: " << sqrt( pow((player[0]->x - x2), 2) + pow((player[0]->y - y2), 2) ) << endl;
+				if ( abs(player[0]->x - x2) > 10 && abs(player[0]->y - y2) > 10) { //Check for nearness, then align distance exactly
+					player[0]->x = x2;
+					player[0]->y = y2;
+					distanceAligned = true;
+					paused = hyperDrive = angleAligned = false; //Reset flags
+					startTime = 0;
+				}
+			}
 		}
 	}
 }
@@ -697,7 +713,7 @@ void update_graphics(Ship *player[])
 		
 		//Draw stats to screen
 		stringstream s1, s2;
-		s1 << "Coordinates: " << player[0]->x << "  " << player[0]->y;
+		s1 << "Coordinates: " << player[0]->x << "  " << player[0]->y << " A: " << player[0]->angle;
 		s2 << "Health: " << player[0]->health;
 		string str1 = s1.str();
 		string str2 = s2.str();
