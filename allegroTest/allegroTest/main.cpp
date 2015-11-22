@@ -764,7 +764,10 @@ void update_graphics(Ship *player[])
 
 
 		//Hyper Drive input
-		if (hyperDrive) al_draw_text(font, al_map_rgb(255, 255, 255), windowWidth*0.5, windowHeight*0.5, ALLEGRO_ALIGN_CENTRE, editText.c_str());
+		if (hyperDrive){
+			al_draw_text(font, al_map_rgb(255, 255, 255), windowWidth*0.5, windowHeight*0.35, ALLEGRO_ALIGN_CENTRE, "Enter coordinates: ");
+			al_draw_text(font, al_map_rgb(255, 255, 255), windowWidth*0.5, windowHeight*0.4, ALLEGRO_ALIGN_CENTRE, editText.c_str());
+		}
 		break;
 		}
 
