@@ -44,7 +44,7 @@ int gridX = 0;
 int gridY = 0;
 int bgX = 0;
 int bgY = 0;
-int numberGrids = 5; //Number of grids along one side of the square map actually...:)
+int numberGrids = 1000000; //Number of grids along one side of the square map actually...:)
 int windowWidth, windowHeight, maxX, maxY, screenWidth, screenHeight;
 int backgroundWidth = 1920;
 int backgroundHeight = 1080;
@@ -88,7 +88,12 @@ int distanceTravelX = 0;
 int distanceTravelY = 0;
 int x2 = 3000;
 int y2 = 3000;
-bool angleAligned, distanceAligned = true;
+int hyperSpeed = 50;
+bool angleAligned, distanceAligned = false;
+int newKey;
+stringstream enterCoordinates;
+string editText;
+bool textEntered = false;
 
 //////////////////////////////////
 /////     Global Objects     /////
@@ -106,14 +111,15 @@ public:
 		y = rand()%1000;
 		height = width = 100;
 		speed = speedX = speedY = 0;
-		maxSpeed = 7;
+		//maxSpeed = 7;
+		maxSpeed = 10;
 		angle = 0;
 		health = 6;
 		flipflop = 0;
 		shipSprite = shipSprite1 = shipSprite2 = shipSpriteCurrent = NULL;
 		fireWidth = 30;
 		fireHeight = 20;
-		fireSpeed = 17;
+		fireSpeed = maxSpeed + 10;
 		fireballNumber = 0;
 		for (int i=0;i<maxFireballs;i++) {
 			fireSprite[i] = NULL;
@@ -225,10 +231,10 @@ void init(Ship *player[])
  
 	//Setup Display
 	al_get_display_mode(al_get_num_display_modes() - 1, &disp_data); //Set resolution to max
-	//windowWidth = backgroundWidth;
-	//windowHeight = backgroundHeight;
-	windowWidth = 700;
-	windowHeight = 700;
+	windowWidth = backgroundWidth;
+	windowHeight = backgroundHeight;
+	//windowWidth = 700;
+	//windowHeight = 700;
 	//windowWidth = disp_data.width;
 	//windowHeight = disp_data.height;
 	maxX = windowWidth*numberGrids;
@@ -378,12 +384,11 @@ void upgrade_weapon(Ship *player[])
 void hyperdrive(Ship *player[])
 {
 	player[0]->speed = 0;
+	paused = true;
 	hyperDrive = true;
-	startTime = 0;
+	enterCoordinates.str("");
+	editText = "";
 	oldAngle = player[0]->angle;
-	newAngle = atan2( (y2 - player[0]->y),  (x2 - player[0]->x) );
-	distanceTravelX = (x2 - player[0]->x);
-	distanceTravelY = (y2 - player[0]->y);
 }
 
 void press_key(ALLEGRO_EVENT e, Ship *player[])
@@ -411,35 +416,59 @@ void press_key(ALLEGRO_EVENT e, Ship *player[])
 
 	case 1: //Space mode
 		{
-			if (e.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
-				done = true;
-			}
-			if (e.keyboard.keycode == ALLEGRO_KEY_LEFT) {
-				leftPressed = true;
-			}
-			if (e.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
-				rightPressed = true;
-			}
-			if (e.keyboard.keycode == ALLEGRO_KEY_UP) {
-				upPressed = true;
-			}
-			if (e.keyboard.keycode == ALLEGRO_KEY_DOWN) {
-				downPressed = true;
-			}
-			if (e.keyboard.keycode == ALLEGRO_KEY_F) {
-				fire(player);
-			}
-			if (e.keyboard.keycode == ALLEGRO_KEY_D) {
-				dock(player);
-			}
-			if (e.keyboard.keycode == ALLEGRO_KEY_P) {
-				if (paused && !gameOver) paused = false;
-				else paused = true;
-			}
-			if (e.keyboard.keycode == ALLEGRO_KEY_H) {
-				hyperdrive(player);
+			if (!hyperDrive) {
+				if (e.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+					done = true;
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_LEFT) {
+					leftPressed = true;
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
+					rightPressed = true;
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_UP) {
+					upPressed = true;
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_DOWN) {
+					downPressed = true;
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_F) {
+					fire(player);
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_D) {
+					dock(player);
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_P) {
+					if (paused && !gameOver) paused = false;
+					else paused = true;
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_H) {
+					hyperdrive(player);
+				}
 			}
 			//if (gameOver) done = true;
+			if (hyperDrive) {
+				if (e.keyboard.keycode >= 27 && e.keyboard.keycode <= 36) {
+					newKey = e.keyboard.keycode;
+					newKey -= 27;
+					enterCoordinates << newKey;
+					editText = enterCoordinates.str();
+				}
+				if (e.keyboard.keycode == 75) {
+					enterCoordinates << " ";
+					editText = enterCoordinates.str();
+				}
+				else if (e.keyboard.keycode == ALLEGRO_KEY_ENTER) {
+					textEntered = true;
+					x2 = atoi(strtok((char*)editText.c_str(), " "));
+					y2 = atoi(strtok(NULL, " "));
+					newAngle = atan2( (y2 - player[0]->y),  (x2 - player[0]->x) );
+					if (newAngle<0) newAngle += 3.14*2;
+					distanceTravelX = abs(abs(x2) - abs(player[0]->x));
+					distanceTravelY = abs(abs(y2) - abs(player[0]->y));
+					if (x2==player[0]->x && y2==player[0]->y) hyperDrive = paused = false;
+				}
+			}
 			break;
 		}
 		
@@ -626,32 +655,41 @@ void update_logic(Ship *player[])
 		}
 	}
 
-	if (hyperDrive) {
-		startTime++;
+	if (hyperDrive && textEntered) {
 		if (!angleAligned) { //Get angle right first
-			player[0]->angle += 0.05; //Incrementally rotate
+			if (newAngle > player[0]->angle) {
+				if (newAngle - player[0]->angle < 3.14) player[0]->angle += 0.05;
+				else player[0]->angle -= 0.05;
+			}
+			else {
+				if (player[0]->angle - newAngle > 3.14) player[0]->angle += 0.05;
+				else player[0]->angle -= 0.05;
+			}
+			//if (abs(player[0]->angle - newAngle) < 3.14) player[0]->angle += 0.05; //Incrementally rotate
+			//else player[0]->angle -= 0.05; //Incrementally rotate
 			if (player[0]->angle > 6.28) player[0]->angle = 0; //Keep angle under 6.28
-			cout << "New angle: " << newAngle << endl;
-			cout << "Angle: " << player[0]->angle << endl;
+			if (player[0]->angle < 0) player[0]->angle = 6.25; //Keep angle under 6.28
 			if (abs(abs(player[0]->angle) - abs(newAngle)) < 0.05) { //Check for nearness then align angle exactly
 				player[0]->angle = newAngle;
 				angleAligned = true;
 			}
 		}
 		if (angleAligned) { //Then check distance
-			if (!distanceAligned) { //If distance greater than 5
-				player[0]->x += player[0]->maxSpeed * 5 * cos(player[0]->angle);
-				player[0]->y += player[0]->maxSpeed * 5 * sin(player[0]->angle);
-				cout << "Distance to destination: " << sqrt( pow((player[0]->x - x2), 2) + pow((player[0]->y - y2), 2) ) << endl;
-				if ( abs(player[0]->x - x2) > 10 && abs(player[0]->y - y2) > 10) { //Check for nearness, then align distance exactly
-					player[0]->x = x2;
-					player[0]->y = y2;
-					distanceAligned = true;
-					paused = hyperDrive = angleAligned = false; //Reset flags
-					startTime = 0;
-				}
+			player[0]->x += player[0]->maxSpeed * hyperSpeed * cos(player[0]->angle);
+			player[0]->y += player[0]->maxSpeed * hyperSpeed * sin(player[0]->angle);
+			if ( abs(abs(player[0]->x) - abs(x2)) < 100 && abs(abs(player[0]->y) - abs(y2)) < 100) { //Check for nearness, then align distance exactly
+				player[0]->x = x2;
+				player[0]->y = y2;
+				paused = hyperDrive = angleAligned = textEntered = false; //Reset flags
 			}
 		}
+		//Set which grid the ship is currently in
+		gridX = int(float(player[0]->x)/windowWidth)*windowWidth;
+		gridY = int(float(player[0]->y)/windowHeight)*windowHeight;
+
+		//Set background coordinates
+		bgX = player[0]->x - windowWidth/2;
+		bgY = player[0]->y - windowHeight/2;
 	}
 }
 
@@ -684,9 +722,10 @@ void update_graphics(Ship *player[])
 		//Clear display first
         al_clear_to_color(al_map_rgb(0, 0, 0));
 		
-		//  Remember that all sprites drawn to the display must be drawn relative to the the current background coordinates (the camera), bgX and bgY
+		//Remember that all sprites drawn to the display must be drawn relative to the the current background coordinates (the camera), bgX and bgY
+		
 		//Draw all 9 of the background sprites, tiled around, and including, the current grid
-		al_draw_bitmap(backgroundSprite1,gridX-bgX,gridY-bgY,0); //Draw background first
+		al_draw_bitmap(backgroundSprite1,gridX-bgX,gridY-bgY,0);
 		al_draw_bitmap(backgroundSprite2,gridX-bgX,gridY-windowHeight-bgY,0);
 		al_draw_bitmap(backgroundSprite3,gridX-bgX,gridY+windowHeight-bgY,0);
 		al_draw_bitmap(backgroundSprite4,gridX-windowWidth-bgX,gridY-bgY,0);
@@ -696,16 +735,16 @@ void update_graphics(Ship *player[])
 		al_draw_bitmap(backgroundSprite8,gridX+windowWidth-bgX,gridY-windowHeight-bgY,0);
 		al_draw_bitmap(backgroundSprite9,gridX+windowWidth-bgX,gridY+windowHeight-bgY,0);
 		
-		for (int i=0; i<3; i++) //Draw planets next, only if planets' positions are within current grid
+		//Draw planets
+		for (int i=0; i<3; i++)
 			al_draw_rotated_bitmap(dockingStation[i], dockingWidth[i]/2, dockingHeight[i]/2, dockingX[i]-bgX, dockingY[i]-bgY, 0, 0); //Draw planets only if their coordinates exist within current screen
-		al_draw_tinted_rotated_bitmap(dockingStation[0], al_map_rgb(136, 268, 223), dockingWidth[0]/2, dockingHeight[0]/2, 400-bgX, 300-bgY, 0, 0);
-		for (int p=numPlayers-1;p>=0;p--) { //Draw sprites for each Ship object
-			for (int i=0; i<maxFireballs; i++) //Draw fireballs
-				al_draw_rotated_bitmap(player[p]->fireSprite[i], player[p]->fireWidth/2, player[p]->fireHeight/2, player[p]->fireX[i]-bgX, player[p]->fireY[i]-bgY, player[p]->fireAngle[i], 0);
-			//if (p==0)
-				//al_draw_rotated_bitmap(player[p]->shipSpriteCurrent, player[p]->width/2, player[p]->height/2, windowWidth/2, windowHeight/2, player[p]->angle, 0); 
-			//else
-				al_draw_rotated_bitmap(player[p]->shipSpriteCurrent, player[p]->width/2, player[p]->height/2, player[p]->x-bgX, player[p]->y-bgY, player[p]->angle, 0); 
+		//Draw sprites for each Ship object
+		for (int p=numPlayers-1;p>=0;p--) {
+			//Draw fireballs
+			for (int i=0; i<maxFireballs; i++)
+				al_draw_tinted_rotated_bitmap(player[p]->fireSprite[i], al_map_rgb(255,255,255), player[p]->fireWidth/2, player[p]->fireHeight/2, player[p]->fireX[i]-bgX, player[p]->fireY[i]-bgY, player[p]->fireAngle[i], 0);
+			//Draw ships
+			al_draw_rotated_bitmap(player[p]->shipSpriteCurrent, player[p]->width/2, player[p]->height/2, player[p]->x-bgX, player[p]->y-bgY, player[p]->angle, 0); 
 		}
 
 		//Draw bordering rectangle
@@ -713,16 +752,19 @@ void update_graphics(Ship *player[])
 		
 		//Draw stats to screen
 		stringstream s1, s2;
-		s1 << "Coordinates: " << player[0]->x << "  " << player[0]->y << " A: " << player[0]->angle;
-		s2 << "Health: " << player[0]->health;
+		s1 << "Health: " << player[0]->health;
+		s2 << "Coordinates: " << player[0]->x << " , " << player[0]->y;
 		string str1 = s1.str();
 		string str2 = s2.str();
-		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.9, 0, str1.c_str());
-		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.1, 0, str2.c_str());
+		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.1, 0, str1.c_str());
+		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.9, 0, str2.c_str());
 		
 		//Game over
 		if (gameOver) al_draw_text(font, al_map_rgb(250, 0, 20), windowWidth*0.5, windowHeight*0.5, ALLEGRO_ALIGN_CENTRE, "GAME OVER");
 
+
+		//Hyper Drive input
+		if (hyperDrive) al_draw_text(font, al_map_rgb(255, 255, 255), windowWidth*0.5, windowHeight*0.5, ALLEGRO_ALIGN_CENTRE, editText.c_str());
 		break;
 		}
 
