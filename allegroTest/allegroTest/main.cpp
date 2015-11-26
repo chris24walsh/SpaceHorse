@@ -32,7 +32,7 @@ ALLEGRO_BITMAP *backgroundSprite8 = NULL;
 ALLEGRO_BITMAP *backgroundSprite9 = NULL;
 ALLEGRO_FONT *font;
 const int maxFireballs = 15;
-ALLEGRO_BITMAP *dockingStation[3];
+ALLEGRO_BITMAP *planets[8];
 ALLEGRO_BITMAP *dockingText = NULL;
 ALLEGRO_BITMAP *upgradedText = NULL;
 ALLEGRO_BITMAP *buffer = NULL;
@@ -57,11 +57,11 @@ int homeScreenOption = 3;
 
 //Docking station vars
 bool canDock = false;
-const int maxDockingStations = 3;
-int dockingX[maxDockingStations];
-int dockingY[maxDockingStations];
-int dockingWidth[maxDockingStations] = {250, 525, 190};
-int dockingHeight[maxDockingStations] = {250, 525, 190};
+const int maxPlanets = 8;
+int planetX[maxPlanets];
+int planetY[maxPlanets];
+int planetWidth[maxPlanets] = {28, 56, 64, 58, 127, 218, 76, 88};
+int planetHeight[maxPlanets] = {28, 58, 64, 58, 130, 142, 75, 152};
 bool safe = true;
 bool dispUpgradeText = false;
 
@@ -84,6 +84,7 @@ bool collided = true;
 bool hyperDrive = false;
 int startTime = 0;
 float oldAngle, newAngle;
+int distance;
 int distanceTravelX = 0;
 int distanceTravelY = 0;
 int x2 = 3000;
@@ -280,9 +281,9 @@ void init(Ship *player[])
 		player[p]->shipSpriteCurrent = player[p]->shipSprite;
 		for (int i=0; i<maxFireballs; i++) player[p]->fireSprite[i]= al_load_bitmap("c:/dev/allegro/images/fireball.png");
 	}
-	dockingStation[0] = al_load_bitmap("c:/dev/allegro/images/dockingStation1.png");
-	dockingStation[1] = al_load_bitmap("c:/dev/allegro/images/dockingStation2.png");
-	dockingStation[2] = al_load_bitmap("c:/dev/allegro/images/dockingStation3.png");
+	planets[0] = al_load_bitmap("c:/dev/allegro/images/planets1.png");
+	planets[1] = al_load_bitmap("c:/dev/allegro/images/planets2.png");
+	planets[2] = al_load_bitmap("c:/dev/allegro/images/planets3.png");
 	dockingText = al_load_bitmap("c:/dev/allegro/images/dockingText.png");
 	upgradedText = al_load_bitmap("c:/dev/allegro/images/upgradedText.png");
 	
@@ -294,9 +295,9 @@ void init(Ship *player[])
 		if(!player[p]->shipSprite2) abort_game("Failed to load the shipSprite2 image");
 		if(!player[p]->fireSprite[0]) abort_game("Failed to load the fireball image");
 	}
-	if(!dockingStation[0]) abort_game("Failed to load the dockingStation1 image");
-	if(!dockingStation[1]) abort_game("Failed to load the dockingStation2 image");
-	if(!dockingStation[2]) abort_game("Failed to load the dockingStation3 image");
+	if(!planets[0]) abort_game("Failed to load the planets1 image");
+	if(!planets[1]) abort_game("Failed to load the planets2 image");
+	if(!planets[2]) abort_game("Failed to load the planets3 image");
 	if(!dockingText) abort_game("Failed to load the dockingText image");
 	if(!upgradedText) abort_game("Failed to load the upgradedText image");
 	
@@ -308,14 +309,14 @@ void init(Ship *player[])
     al_register_event_source(event_queue, al_get_display_event_source(display));
  
 	//Docking station initialisation
-	//Random seed the dockingstations throughout the map
+	//Random seed the planetss throughout the map
 	srand(6); //srand(time(NULL));
-	for (int i=0; i<3; i++) dockingX[i] = float(maxX)*(rand()%100)/100;
-	for (int i=0; i<3; i++) dockingY[i] = float(maxY)*(rand()%100)/100;
+	for (int i=0; i<3; i++) planetX[i] = float(maxX)*(rand()%100)/100;
+	for (int i=0; i<3; i++) planetY[i] = float(maxY)*(rand()%100)/100;
 	player[0]->x = 2600;
 	player[0]->y = 2600;
-	dockingX[0] = 3000;
-	dockingY[0] = 3000;
+	planetX[0] = 3000;
+	planetY[0] = 3000;
 
 
 	//Initialise the network library
@@ -389,6 +390,8 @@ void hyperdrive(Ship *player[])
 	enterCoordinates.str("");
 	editText = "";
 	oldAngle = player[0]->angle;
+	distanceTravelX = abs(abs(x2) - abs(player[0]->x));
+	distanceTravelY = abs(abs(y2) - abs(player[0]->y));
 }
 
 void press_key(ALLEGRO_EVENT e, Ship *player[])
@@ -446,7 +449,6 @@ void press_key(ALLEGRO_EVENT e, Ship *player[])
 					hyperdrive(player);
 				}
 			}
-			//if (gameOver) done = true;
 			if (hyperDrive) {
 				if (e.keyboard.keycode >= 27 && e.keyboard.keycode <= 36) {
 					newKey = e.keyboard.keycode;
@@ -521,8 +523,8 @@ void update_logic(Ship *player[])
 		if (rightPressed) {
 			player[0]->angle+=0.05;
 		}
-		if (player[0]->angle > 6.28) player[0]->angle = 0;
-		else if (player[0]->angle < 0) player[0]->angle = 6.25;
+		if (player[0]->angle > 6.25) player[0]->angle = 0;
+		if (player[0]->angle < 0) player[0]->angle = 6.25;
 
 		//Cycle between different rocket sprites, to give effect of rocket blasting
 		for (int p=0;p<numPlayers;p++) {
@@ -588,9 +590,9 @@ void update_logic(Ship *player[])
 		//Check if near docking station, and if so allow docking
 		int proxX, proxY;
 		for (int i=0; i<3; i++) {
-			proxX = abs(player[0]->x - dockingX[i]);
-			proxY = abs(player[0]->y - dockingY[i]);
-			if (proxX<dockingWidth[i]/2 && proxY<dockingHeight[i]/2) {
+			proxX = abs(player[0]->x - planetX[i]);
+			proxY = abs(player[0]->y - planetY[i]);
+			if (proxX<planetWidth[i]/2 && proxY<planetHeight[i]/2) {
 				canDock = true;
 				break;
 			}
@@ -649,7 +651,7 @@ void update_logic(Ship *player[])
 		}
 
 		//Check for gameover
-		if (player[0]->health == 0) {
+		if (player[0]->health <= 0) {
 			gameOver = true;
 			paused = true;
 		}
@@ -657,6 +659,7 @@ void update_logic(Ship *player[])
 
 	if (hyperDrive && textEntered) {
 		if (!angleAligned) { //Get angle right first
+			//Decide if better to rotate clockwise or anticlockwise
 			if (newAngle > player[0]->angle) {
 				if (newAngle - player[0]->angle < 3.14) player[0]->angle += 0.05;
 				else player[0]->angle -= 0.05;
@@ -665,10 +668,8 @@ void update_logic(Ship *player[])
 				if (player[0]->angle - newAngle > 3.14) player[0]->angle += 0.05;
 				else player[0]->angle -= 0.05;
 			}
-			//if (abs(player[0]->angle - newAngle) < 3.14) player[0]->angle += 0.05; //Incrementally rotate
-			//else player[0]->angle -= 0.05; //Incrementally rotate
-			if (player[0]->angle > 6.28) player[0]->angle = 0; //Keep angle under 6.28
-			if (player[0]->angle < 0) player[0]->angle = 6.25; //Keep angle under 6.28
+			if (player[0]->angle > 6.25) player[0]->angle = 0; //Keep angle under 6.28
+			if (player[0]->angle < 0) player[0]->angle = 6.25; //Keep angle above 0
 			if (abs(abs(player[0]->angle) - abs(newAngle)) < 0.05) { //Check for nearness then align angle exactly
 				player[0]->angle = newAngle;
 				angleAligned = true;
@@ -677,7 +678,10 @@ void update_logic(Ship *player[])
 		if (angleAligned) { //Then check distance
 			player[0]->x += player[0]->maxSpeed * hyperSpeed * cos(player[0]->angle);
 			player[0]->y += player[0]->maxSpeed * hyperSpeed * sin(player[0]->angle);
-			if ( abs(abs(player[0]->x) - abs(x2)) < 100 && abs(abs(player[0]->y) - abs(y2)) < 100) { //Check for nearness, then align distance exactly
+			distanceTravelX -= player[0]->maxSpeed * hyperSpeed * cos(player[0]->angle);
+			distanceTravelY -= player[0]->maxSpeed * hyperSpeed * sin(player[0]->angle);
+			//if ( abs(abs(player[0]->x) - abs(x2)) < 1000 && abs(abs(player[0]->y) - abs(y2)) < 1000) { //Check for nearness, then align distance exactly
+			if (distanceTravelX <= 1000 || distanceTravelY <= 1000) {
 				player[0]->x = x2;
 				player[0]->y = y2;
 				paused = hyperDrive = angleAligned = textEntered = false; //Reset flags
@@ -737,7 +741,7 @@ void update_graphics(Ship *player[])
 		
 		//Draw planets
 		for (int i=0; i<3; i++)
-			al_draw_rotated_bitmap(dockingStation[i], dockingWidth[i]/2, dockingHeight[i]/2, dockingX[i]-bgX, dockingY[i]-bgY, 0, 0); //Draw planets only if their coordinates exist within current screen
+			al_draw_rotated_bitmap(planets[i], planetWidth[i]/2, planetHeight[i]/2, planetX[i]-bgX, planetY[i]-bgY, 0, 0); //Draw planets only if their coordinates exist within current screen
 		//Draw sprites for each Ship object
 		for (int p=numPlayers-1;p>=0;p--) {
 			//Draw fireballs
