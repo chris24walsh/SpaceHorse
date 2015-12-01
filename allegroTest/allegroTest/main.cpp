@@ -32,7 +32,8 @@ ALLEGRO_BITMAP *backgroundSprite8 = NULL;
 ALLEGRO_BITMAP *backgroundSprite9 = NULL;
 ALLEGRO_FONT *font;
 const int maxFireballs = 15;
-ALLEGRO_BITMAP *planets[8];
+const int maxPlanets = 9;
+ALLEGRO_BITMAP *planets[maxPlanets];
 ALLEGRO_BITMAP *dockingText = NULL;
 ALLEGRO_BITMAP *upgradedText = NULL;
 ALLEGRO_BITMAP *buffer = NULL;
@@ -55,13 +56,13 @@ int FPS = 60;
 //Home screen vars
 int homeScreenOption = 3;
 
-//Docking station vars
+//Planet vars
 bool canDock = false;
-const int maxPlanets = 8;
+int planetScale = 1;
 int planetX[maxPlanets];
 int planetY[maxPlanets];
-int planetWidth[maxPlanets] = {28, 56, 64, 58, 127, 218, 76, 88};
-int planetHeight[maxPlanets] = {28, 58, 64, 58, 130, 142, 75, 152};
+int planetWidth[maxPlanets] = {800, 28*planetScale, 56*planetScale, 64*planetScale, 58*planetScale, 127*planetScale, 218*planetScale, 76*planetScale, 88*planetScale};
+int planetHeight[maxPlanets] = {800, 28*planetScale, 56*planetScale, 64*planetScale, 58*planetScale, 127*planetScale, 218*planetScale, 76*planetScale, 88*planetScale};
 bool safe = true;
 bool dispUpgradeText = false;
 
@@ -108,8 +109,10 @@ public:
 
 	Ship() {
 		srand(time(NULL));
-		x = rand()%1000;
-		y = rand()%1000;
+		//x = rand()%1000;
+		//y = rand()%1000;
+		x = 500000;
+		y = 500000;
 		height = width = 100;
 		speed = speedX = speedY = 0;
 		//maxSpeed = 7;
@@ -183,10 +186,6 @@ int main(int argc, char* argv[])
 	Ship *player2 = &p2;
 	Ship *player[2] = {player1, player2};
 
-	/*cout << "Do you want to set up server(1), client(2) or play singleplayer(3)?: ";
-	cin >> homeScreenOption;
-	if (homeScreenOption==3) numPlayers = 1;
-	else numPlayers = 2;*/
 	if (homeScreenOption==1) wait = 60000;
 	if (homeScreenOption==2) wait = 5000;
 
@@ -232,12 +231,12 @@ void init(Ship *player[])
  
 	//Setup Display
 	al_get_display_mode(al_get_num_display_modes() - 1, &disp_data); //Set resolution to max
-	windowWidth = backgroundWidth;
-	windowHeight = backgroundHeight;
+	//windowWidth = backgroundWidth;
+	//windowHeight = backgroundHeight;
 	//windowWidth = 700;
 	//windowHeight = 700;
-	//windowWidth = disp_data.width;
-	//windowHeight = disp_data.height;
+	windowWidth = disp_data.width;
+	windowHeight = disp_data.height;
 	maxX = windowWidth*numberGrids;
 	maxY = windowHeight*numberGrids;
     //al_set_new_display_flags(ALLEGRO_FULLSCREEN);
@@ -281,9 +280,15 @@ void init(Ship *player[])
 		player[p]->shipSpriteCurrent = player[p]->shipSprite;
 		for (int i=0; i<maxFireballs; i++) player[p]->fireSprite[i]= al_load_bitmap("c:/dev/allegro/images/fireball.png");
 	}
-	planets[0] = al_load_bitmap("c:/dev/allegro/images/planets1.png");
-	planets[1] = al_load_bitmap("c:/dev/allegro/images/planets2.png");
-	planets[2] = al_load_bitmap("c:/dev/allegro/images/planets3.png");
+	planets[0] = al_load_bitmap("c:/dev/allegro/images/sun.png");
+	planets[1] = al_load_bitmap("c:/dev/allegro/images/mercury.png");
+	planets[2] = al_load_bitmap("c:/dev/allegro/images/venus.png");
+	planets[3] = al_load_bitmap("c:/dev/allegro/images/earth.png");
+	planets[4] = al_load_bitmap("c:/dev/allegro/images/mars.png");
+	planets[5] = al_load_bitmap("c:/dev/allegro/images/jupiter.png");
+	planets[6] = al_load_bitmap("c:/dev/allegro/images/saturn.png");
+	planets[7] = al_load_bitmap("c:/dev/allegro/images/neptune.png");
+	planets[8] = al_load_bitmap("c:/dev/allegro/images/uranus.png");
 	dockingText = al_load_bitmap("c:/dev/allegro/images/dockingText.png");
 	upgradedText = al_load_bitmap("c:/dev/allegro/images/upgradedText.png");
 	
@@ -310,14 +315,13 @@ void init(Ship *player[])
  
 	//Docking station initialisation
 	//Random seed the planetss throughout the map
+	float distance[maxPlanets] = {0, 1, 2, 3, 4, 13, 24, 49, 76};
 	srand(6); //srand(time(NULL));
-	for (int i=0; i<3; i++) planetX[i] = float(maxX)*(rand()%100)/100;
-	for (int i=0; i<3; i++) planetY[i] = float(maxY)*(rand()%100)/100;
-	player[0]->x = 2600;
-	player[0]->y = 2600;
-	planetX[0] = 3000;
-	planetY[0] = 3000;
-
+	for (int i=0; i<maxPlanets; i++) {
+		float angle = float(6.25)*(rand()%100)/100;
+		planetX[i] = distance[i] * 10 * planetScale * cos(angle) + 500000;
+		planetY[i] = distance[i] * 10 * planetScale * sin(angle) + 500000;
+	}
 
 	//Initialise the network library
 	if (enet_initialize () != 0)
@@ -740,8 +744,8 @@ void update_graphics(Ship *player[])
 		al_draw_bitmap(backgroundSprite9,gridX+windowWidth-bgX,gridY+windowHeight-bgY,0);
 		
 		//Draw planets
-		for (int i=0; i<3; i++)
-			al_draw_rotated_bitmap(planets[i], planetWidth[i]/2, planetHeight[i]/2, planetX[i]-bgX, planetY[i]-bgY, 0, 0); //Draw planets only if their coordinates exist within current screen
+		for (int i=0; i<maxPlanets; i++)
+			al_draw_scaled_rotated_bitmap(planets[i], planetWidth[i]/2, planetHeight[i]/2, planetX[i]-bgX, planetY[i]-bgY, planetScale, planetScale, 0, 0); //Draw planets only if their coordinates exist within current screen
 		//Draw sprites for each Ship object
 		for (int p=numPlayers-1;p>=0;p--) {
 			//Draw fireballs
