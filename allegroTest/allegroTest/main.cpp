@@ -30,6 +30,9 @@ ALLEGRO_BITMAP *backgroundSprite6 = NULL;
 ALLEGRO_BITMAP *backgroundSprite7 = NULL;
 ALLEGRO_BITMAP *backgroundSprite8 = NULL;
 ALLEGRO_BITMAP *backgroundSprite9 = NULL;
+ALLEGRO_BITMAP *radarBuffer = NULL;
+ALLEGRO_BITMAP *radarSprite = NULL;
+ALLEGRO_BITMAP *radarDotSprite = NULL;
 ALLEGRO_FONT *font;
 const int maxFireballs = 15;
 const int maxPlanets = 9;
@@ -96,6 +99,11 @@ int newKey;
 stringstream enterCoordinates;
 string editText;
 bool textEntered = false;
+
+//Radar vars
+int radarScreenWidth;
+int radarScreenHeight;
+float radarScale;
 
 //////////////////////////////////
 /////     Global Objects     /////
@@ -264,15 +272,16 @@ void init(Ship *player[])
 	//Load bitmap files
 	//buffer = al_create_bitmap(windowWidth, windowHeight);
 	buffer = al_create_bitmap(maxX, maxY);
-	backgroundSprite1 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
-	backgroundSprite2 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
-	backgroundSprite3 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
-	backgroundSprite4 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
-	backgroundSprite5 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
-	backgroundSprite6 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
-	backgroundSprite7 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
-	backgroundSprite8 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
-	backgroundSprite9 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite.png"); //Load background image
+
+	backgroundSprite1 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
+	backgroundSprite2 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
+	backgroundSprite3 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
+	backgroundSprite4 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
+	backgroundSprite5 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
+	backgroundSprite6 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
+	backgroundSprite7 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
+	backgroundSprite8 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
+	backgroundSprite9 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
 	for (int p=0;p<numPlayers;p++) {
 		player[p]->shipSprite = al_load_bitmap("c:/dev/allegro/images/shipSprite.png"); //Stationary ship sprite
 		player[p]->shipSprite1 = al_load_bitmap("c:/dev/allegro/images/shipSprite1.png"); //Moving ship sprite 1
@@ -292,6 +301,14 @@ void init(Ship *player[])
 	dockingText = al_load_bitmap("c:/dev/allegro/images/dockingText.png");
 	upgradedText = al_load_bitmap("c:/dev/allegro/images/upgradedText.png");
 	
+	//Radar
+	radarBuffer = al_create_bitmap(windowWidth*3, windowHeight*3);
+	radarSprite = al_load_bitmap("c:/dev/allegro/images/radar1.png");
+	radarDotSprite = al_load_bitmap("c:/dev/allegro/images/radarDot.png");
+	radarScreenWidth = 1920;
+	radarScreenHeight = 1080;
+	radarScale = 0.05;
+
 	//Check if bitmaps loaded properly
 	if(!backgroundSprite1) abort_game("Failed to load the background image");
 	for (int p=0;p<numPlayers;p++) {
@@ -305,6 +322,8 @@ void init(Ship *player[])
 	if(!planets[2]) abort_game("Failed to load the planets3 image");
 	if(!dockingText) abort_game("Failed to load the dockingText image");
 	if(!upgradedText) abort_game("Failed to load the upgradedText image");
+	if(!radarSprite) abort_game("Failed to load the radar image");
+	if(!radarDotSprite) abort_game("Failed to load the radar dot image");
 	
 	//Initisatise the event queue
 	event_queue = al_create_event_queue();
@@ -728,7 +747,8 @@ void update_graphics(Ship *player[])
 	case 1:
 		{
 		//Clear display first
-        al_clear_to_color(al_map_rgb(0, 0, 0));
+        //if (!hyperDrive) al_clear_to_color(al_map_rgb(0, 0, 0));
+		al_clear_to_color(al_map_rgb(0, 0, 0));
 		
 		//Remember that all sprites drawn to the display must be drawn relative to the the current background coordinates (the camera), bgX and bgY
 		
@@ -766,7 +786,24 @@ void update_graphics(Ship *player[])
 		string str2 = s2.str();
 		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.1, 0, str1.c_str());
 		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.9, 0, str2.c_str());
-		
+
+		//Draw radar
+		al_draw_scaled_rotated_bitmap(radarSprite, radarScreenWidth/2, radarScreenHeight/2, windowWidth*0.85, windowHeight*0.15, 0.2, 0.2, 0, 0);
+		//Planets
+		for (int i=0; i<maxPlanets; i++) {
+			float rX = windowWidth*0.85 - (player[0]->x - planetX[i]) * radarScale;
+			float rY = windowHeight*0.15 - (player[0]->y - planetY[i]) * radarScale;
+			if ((rX > windowWidth*0.85 - windowWidth*0.1) && (rX < windowWidth*0.85 + windowWidth*0.1) && (rY > windowHeight*0.15 - windowHeight*0.1) && (rY < windowHeight*0.15 + windowHeight*0.1))
+				al_draw_rotated_bitmap(radarDotSprite, 2.5, 2.5, rX, rY, 0, 0); //Draw planets only if their coordinates exist within current screen
+		}
+		//Ships
+		for (int p=numPlayers-1;p>=0;p--) {
+			float rX = windowWidth*0.85 - (player[0]->x - player[p]->x) * radarScale;
+			float rY = windowHeight*0.15 - (player[0]->y - player[p]->y) * radarScale;
+			if ((rX > windowWidth*0.85 - windowWidth*0.1) && (rX < windowWidth*0.85 + windowWidth*0.1) && (rY > windowHeight*0.15 - windowHeight*0.1) && (rY < windowHeight*0.15 + windowHeight*0.1))
+				al_draw_rotated_bitmap(radarDotSprite, 2.5, 2.5, rX, rY, 0, 0);
+		}
+
 		//Game over
 		if (gameOver) al_draw_text(font, al_map_rgb(250, 0, 20), windowWidth*0.5, windowHeight*0.5, ALLEGRO_ALIGN_CENTRE, "GAME OVER");
 
