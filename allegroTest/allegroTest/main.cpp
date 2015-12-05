@@ -93,6 +93,9 @@ int newKey;
 stringstream enterCoordinates;
 string editText;
 bool textEntered = false;
+bool newPlayerConnected = false;
+string ipAddress;
+
 
 //Radar vars
 int radarScreenWidth;
@@ -391,14 +394,18 @@ void press_key(ALLEGRO_EVENT e)
 				if (homeScreenOption > 4) homeScreenOption = 1;
 			}
 			if (e.keyboard.keycode == ALLEGRO_KEY_ENTER) {
-				if (homeScreenOption==4) done = true;
-				if (homeScreenOption==3) ;
-				else {
-					//Ship newPlayer;
-					//players.push_back(newPlayer);
+				if (homeScreenOption==4) { //Quit
+					done = true;
+					break;
 				}
-				setUpHost();
-				screenMode = 1;
+				if (homeScreenOption==2) { //Join server
+					screenMode = 3;
+					break;
+				}
+				else { //Host on localhost or play single player
+					setUpHost();
+					screenMode = 1;
+				}
 			}
 			break;
 		}
@@ -469,6 +476,28 @@ void press_key(ALLEGRO_EVENT e)
 				dock();
 			}
 			break;
+		}
+
+	case 3: //Enter server IP
+		{
+			if (e.keyboard.keycode >= 27 && e.keyboard.keycode <= 36) { //Number
+				int newKey = e.keyboard.keycode;
+				newKey -= 27;
+				stringstream enterIp;
+				enterIp << newKey;
+				ipAddress += enterIp.str();
+			}
+			if (e.keyboard.keycode == 73) {
+				stringstream enterIp;
+				enterIp << ".";
+				ipAddress += enterIp.str();
+			}
+			else if (e.keyboard.keycode == ALLEGRO_KEY_ENTER) {
+				cout << ipAddress;
+				setUpHost();
+				screenMode = 1;
+			}
+			else cout << e.keyboard.keycode << endl;
 		}
 	}
 }
@@ -596,6 +625,7 @@ void update_logic()
 					printf("Connection received from %x\n", event.peer->address.host);
 					connected = true;
 					peer = event.peer;
+					newPlayerConnected = true;
 					break;
 				case ENET_EVENT_TYPE_RECEIVE:
 					wait = 0;
@@ -617,6 +647,11 @@ void update_logic()
 				}
 			}
 
+			if (newPlayerConnected) {
+				Ship player2("c:/dev/allegro/images/shipSprite.png", "c:/dev/allegro/images/shipSprite1.png", "c:/dev/allegro/images/shipSprite2.png", "c:/dev/allegro/images/fireball.png");
+				players.push_back(player2);
+				newPlayerConnected = false;
+			}
 
 			//Check if connected or not before sending network data
 			if (connected) {
@@ -793,6 +828,16 @@ void update_graphics()
 		
 		break;
 		}
+
+	//Join server mode
+	case 3:
+		{
+		al_clear_to_color(al_map_rgb(30,30,30));
+		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.5, windowHeight*0.4, ALLEGRO_ALIGN_CENTRE, "ENTER SERVER IP:");
+		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.5, windowHeight*0.5, ALLEGRO_ALIGN_CENTRE, ipAddress.c_str());
+		
+		break;
+		}
 	}
 }
 
@@ -864,8 +909,8 @@ void setUpHost() {
 		//Begin connection to server machine
 		ENetAddress address;
 		/* Connect to server:1234. */
-		enet_address_set_host (& address, "109.125.19.33");
-		//enet_address_set_host (& address, "192.168.8.102");
+		//enet_address_set_host (& address, "109.125.19.33");
+		enet_address_set_host (& address, ipAddress.c_str());
 		//enet_address_set_host (& address, "localhost");
 		address.port = 1234;
 		
