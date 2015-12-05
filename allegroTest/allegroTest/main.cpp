@@ -37,7 +37,7 @@ ALLEGRO_BITMAP *backgroundSprite9 = NULL;
 ALLEGRO_BITMAP *radarBuffer = NULL;
 ALLEGRO_BITMAP *radarSprite = NULL;
 ALLEGRO_BITMAP *radarDotSprite = NULL;
-ALLEGRO_FONT *font;
+ALLEGRO_FONT *font = NULL;
 ALLEGRO_BITMAP *dockingText = NULL;
 ALLEGRO_BITMAP *upgradedText = NULL;
 ALLEGRO_BITMAP *buffer = NULL;
@@ -58,7 +58,7 @@ bool leftPressed, rightPressed, upPressed, downPressed, firePressed;
 int FPS = 60;
 
 //Home screen vars
-int homeScreenOption = 3;
+int homeScreenOption = 3; //Choice is single player by default
 
 //Planet vars
 bool safe = true;
@@ -68,7 +68,7 @@ bool dispUpgradeText = false;
 bool hostSet = false;
 bool connected = false;
 ENetHost * host; //This machine
-ENetPeer * peer; //Remote machine
+vector<ENetPeer*> peers; //Remote machine
 ENetEvent event;
 int wait = 0;
 
@@ -344,7 +344,7 @@ void fire()
 void dock()
 {
 	for (int i=0; i<planets.size(); i++) {
-		if (planets.at(i).canDock) {
+		if (players.at(0).canDock) {
 			if (screenMode == 2) screenMode = 1; //Undock, if already docked and docking activated
 			else if (screenMode == 1) { //Else, if able to dock, do so, stop ship and set it to safe mode
 				screenMode = 2;
@@ -619,27 +619,33 @@ void update_logic()
 			//Apply remote ship's new coordinates to player2's current local coordinates
 			enet_uint8 *d = NULL;
 			while (enet_host_service(host, &event, wait)) { //Poll to enets data buffer
-			
+				ENetPeer * peer;
+				int id;
+				int player;
 				switch(event.type) {
 				case ENET_EVENT_TYPE_CONNECT:
 					printf("Connection received from %x\n", event.peer->address.host);
 					connected = true;
 					peer = event.peer;
+					peers.push_back(peer);
 					newPlayerConnected = true;
 					break;
 				case ENET_EVENT_TYPE_RECEIVE:
 					wait = 0;
 					d = event.packet->data;
-					players.at(1).x = atoi(strtok((char*)d,"|"));
-					players.at(1).y = atoi(strtok(NULL,"|"));
-					players.at(1).angle = atof(strtok(NULL,"|"));
-					players.at(1).speed = atoi(strtok(NULL,"|"));
-					for (int i=0;i<MAXFIREBALLS;i++) {
-						players.at(1).fireX[i] = atoi(strtok(NULL,"|"));
-						players.at(1).fireY[i] = atoi(strtok(NULL,"|"));
-						players.at(1).fireAngle[i] = atof(strtok(NULL,"|"));
+					for (int p=1; p<players.size(); p++) {
+						if (event.peer->address.host == peers.at(p-1)->address.host) {
+							players.at(p).x = atoi(strtok((char*)d,"|"));
+							players.at(p).y = atoi(strtok(NULL,"|"));
+							players.at(p).angle = atof(strtok(NULL,"|"));
+							players.at(p).speed = atoi(strtok(NULL,"|"));
+							for (int i=0;i<MAXFIREBALLS;i++) {
+								players.at(p).fireX[i] = atoi(strtok(NULL,"|"));
+								players.at(p).fireY[i] = atoi(strtok(NULL,"|"));
+								players.at(p).fireAngle[i] = atof(strtok(NULL,"|"));
+							}
+						}
 					}
-
 					break;
 				case ENET_EVENT_TYPE_DISCONNECT:
 					printf("%s disconnected.\n", event.peer->data);
@@ -655,22 +661,36 @@ void update_logic()
 
 			//Check if connected or not before sending network data
 			if (connected) {
-				//Send player1's data to remote
-				stringstream ss;
-				ss << players.at(0).x << "|" << players.at(0).y << "|" << players.at(0).angle << "|" << players.at(0).speed;
-				for (int i=0;i<MAXFIREBALLS;i++)
-					ss << "|" << players.at(0).fireX[i] << "|" << players.at(0).fireY[i] << "|" << players.at(0).fireAngle[i];
-				string data = ss.str();
-				ENetPacket *packet = enet_packet_create(data.c_str(), strlen(data.c_str())+1, 0);
-				enet_peer_send(peer, 0, packet);
+				if (homeScreenOption==1) { //If server
+					for (int p=0; p<players.size(); p++) {
+						stringstream ss;
+						ss << players.at(p).id << "|" << players.at(p).x << "|" << players.at(p).y << "|" << players.at(p).angle << "|" << players.at(p).speed;
+						for (int i=0;i<MAXFIREBALLS;i++)
+							ss << "|" << players.at(p).fireX[i] << "|" << players.at(p).fireY[i] << "|" << players.at(p).fireAngle[i];
+						string data = ss.str();
+						ENetPacket *packet = enet_packet_create(data.c_str(), strlen(data.c_str())+1, 0);
+						for (int pe=0; pe<peers.size(); pe++) enet_peer_send(peers.at(pe), 0, packet); //Send all players to all peers
+					}
+				}
+				if (homeScreenOption==2) { //If client
+					stringstream ss;
+					ss << players.at(0).id << "|" << players.at(0).x << "|" << players.at(0).y << "|" << players.at(0).angle << "|" << players.at(0).speed;
+					for (int i=0;i<MAXFIREBALLS;i++)
+						ss << "|" << players.at(0).fireX[i] << "|" << players.at(0).fireY[i] << "|" << players.at(0).fireAngle[i];
+					string data = ss.str();
+					ENetPacket *packet = enet_packet_create(data.c_str(), strlen(data.c_str())+1, 0);
+					enet_peer_send(peers.at(0), 0, packet); //Send self to only peer
+				}
 			}
 		}
 		//Collision detection
 		if (players.size() > 1) {
-			for (int i=0; i<MAXFIREBALLS; i++ ) { //Checking all enemy fireballs
-				if (abs(players.at(0).x - players.at(1).fireX[i]) < abs(players.at(0).width/2 - players.at(1).fireWidth/2))
-					if (abs(players.at(0).y - players.at(1).fireY[i]) < abs(players.at(0).height/2 - players.at(1).fireHeight/2))
-						triggerCollision();
+			for (int p=1; p<players.size(); p++) {
+				for (int i=0; i<MAXFIREBALLS; i++ ) { //Checking all enemy fireballs
+					if (abs(players.at(0).x - players.at(p).fireX[i]) < abs(players.at(0).width/2 - players.at(p).fireWidth/2))
+						if (abs(players.at(0).y - players.at(p).fireY[i]) < abs(players.at(0).height/2 - players.at(p).fireHeight/2))
+							triggerCollision();
+				}
 			}
 		}
 
@@ -915,8 +935,8 @@ void setUpHost() {
 		address.port = 1234;
 		
 		/* Initiate the connection, allocating the two channels 0 and 1. */
-		peer = enet_host_connect (host, & address, 2, 2500); //Bind successful connection to peer
-		if (peer == NULL)
+		peers.at(0) = enet_host_connect (host, & address, 2, 2500); //Bind successful connection to peer
+		if (peers.at(0) == NULL)
 		{
 		   abort_game("No server available at this address.\n");
 		}

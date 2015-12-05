@@ -4,9 +4,10 @@
 Ship::Ship(const char* filename1, const char* filename2, const char* filename3, const char* filename4) {
 //Ship::Ship() {
 	
-	//srand(time(NULL));
+	srand(time(NULL));
 	//x = rand()%1000;
 	//y = rand()%1000;
+	id = rand()%1000;
 	x = 489000;
 	y = 503800;
 	shipSprite = al_load_bitmap(filename1);
