@@ -18,10 +18,22 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Ship.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Planet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Header.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Ship.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Planet.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Allegro_init.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
