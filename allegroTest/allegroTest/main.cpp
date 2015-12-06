@@ -644,6 +644,7 @@ void update_logic()
 								players.at(p).fireY[i] = atoi(strtok(NULL,"|"));
 								players.at(p).fireAngle[i] = atof(strtok(NULL,"|"));
 							}
+							break;
 						}
 					}
 					break;
@@ -664,7 +665,7 @@ void update_logic()
 				if (homeScreenOption==1) { //If server
 					for (int p=0; p<players.size(); p++) {
 						stringstream ss;
-						ss << players.at(p).id << "|" << players.at(p).x << "|" << players.at(p).y << "|" << players.at(p).angle << "|" << players.at(p).speed;
+						ss << players.at(p).x << "|" << players.at(p).y << "|" << players.at(p).angle << "|" << players.at(p).speed;
 						for (int i=0;i<MAXFIREBALLS;i++)
 							ss << "|" << players.at(p).fireX[i] << "|" << players.at(p).fireY[i] << "|" << players.at(p).fireAngle[i];
 						string data = ss.str();
@@ -674,7 +675,7 @@ void update_logic()
 				}
 				if (homeScreenOption==2) { //If client
 					stringstream ss;
-					ss << players.at(0).id << "|" << players.at(0).x << "|" << players.at(0).y << "|" << players.at(0).angle << "|" << players.at(0).speed;
+					ss << players.at(0).x << "|" << players.at(0).y << "|" << players.at(0).angle << "|" << players.at(0).speed;
 					for (int i=0;i<MAXFIREBALLS;i++)
 						ss << "|" << players.at(0).fireX[i] << "|" << players.at(0).fireY[i] << "|" << players.at(0).fireAngle[i];
 					string data = ss.str();
@@ -935,7 +936,9 @@ void setUpHost() {
 		address.port = 1234;
 		
 		/* Initiate the connection, allocating the two channels 0 and 1. */
-		peers.at(0) = enet_host_connect (host, & address, 2, 2500); //Bind successful connection to peer
+		ENetPeer * peer = enet_host_connect (host, & address, 2, 2500); //Bind successful connection to peer
+		peers.push_back(peer);
+
 		if (peers.at(0) == NULL)
 		{
 		   abort_game("No server available at this address.\n");
