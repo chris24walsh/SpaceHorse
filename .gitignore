@@ -1,4 +1,7 @@
-allegroTest/allegroTest.*
-allegroTest/allegroTest/allegro*
-allegroTest/Debug/*
+allegroTest/Debug/allegro.log
+allegroTest/Debug/allegroTest.*
+
+allegroTest/allegroTest.sdf
+allegroTest/allegroTest.v*
+
 allegroTest/allegroTest/Debug/*
