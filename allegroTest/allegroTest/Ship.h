@@ -13,8 +13,8 @@ public:
 	ALLEGRO_BITMAP *fireSprite[MAXFIREBALLS];
 	bool canDock;
 
+	Ship();
 	Ship(const char*, const char*, const char*, const char*);
-	//Ship();
 };
 
 #endif
