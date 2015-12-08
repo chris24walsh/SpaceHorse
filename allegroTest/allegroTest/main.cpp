@@ -608,9 +608,12 @@ void update_logic()
 					connected = true;
 					peer = event.peer;
 					peers.push_back(peer);
+					Ship player;
+					players.push_back(player);
 					//newPlayerConnected = true;
+					break;
 				}
-				else if (event.type == ENET_EVENT_TYPE_RECEIVE) {
+				if (event.type == ENET_EVENT_TYPE_RECEIVE) {
 					wait = 0;
 					d = event.packet->data;
 					int numPlayers = atoi(strtok((char*)d,"|")); //Parse the packets information
@@ -627,9 +630,13 @@ void update_logic()
 						fireY[i] = atoi(strtok(NULL,"|"));
 						fireAngle[i] = atof(strtok(NULL,"|"));
 					}
-					while (numPlayers>players.size()) { //Add empty players as necessary
-						Ship player;
-						players.push_back(player);
+					//cout << "Number players: " << numPlayers << endl;
+					if (numPlayers != 0) { //Client listens to server
+						while (numPlayers>players.size()) { //Add empty players as necessary
+							Ship player;
+							players.push_back(player);
+							cout << "New player added from server" << endl;
+						}
 					}
 					for (int p=1; p<players.size(); p++) { //Check all current players
 						if (players.at(p).id == id) { //If received id matches theirs
@@ -642,10 +649,11 @@ void update_logic()
 								players.at(p).fireY[i] = fireY[i];
 								players.at(p).fireAngle[i] = fireAngle[i];
 							}
+						break;
 						}
 					}
-					//Else assign parsed info to last player in vector (the spare player)
-					while (players.at(players.size()-1).id == 0) { //While there are still empty players
+					//Else
+					//if (players.at(players.size()-1).id == 0) { //While there are still empty players
 						players.at(players.size()-1).id = id; //Assign all the parsed information
 						players.at(players.size()-1).x = x;
 						players.at(players.size()-1).y = y;
@@ -656,15 +664,16 @@ void update_logic()
 							players.at(players.size()-1).fireY[i] = fireY[i];
 							players.at(players.size()-1).fireAngle[i] = fireAngle[i];
 						}
-						players.push_back(players.at(players.size()-2)); //Move second-last to last place
+						players.push_back(players.at(players.size()-2)); //Add second-last to last place
 						players.erase(players.begin() + players.size()-3); //Delete the now-third-last
-					}
+						cout << "Number of players: " << players.size() << endl;
+					//}
 				}
-				else if (event.type == ENET_EVENT_TYPE_DISCONNECT) {
+				if (event.type == ENET_EVENT_TYPE_DISCONNECT) {
 					printf("%s disconnected.\n", event.peer->data);
+					break;
 				}
 			}
-			cout << "Number of players: " << players.size() << endl;
 
 			
 			/*if (newPlayerConnected) { //Add a new spare
@@ -688,7 +697,7 @@ void update_logic()
 				}
 				if (homeScreenOption==2) { //If client
 					stringstream ss;
-					ss << players.size() << "|" << players.at(0).id << "|" << players.at(0).x << "|" << players.at(0).y << "|" << players.at(0).angle << "|" << players.at(0).speed;
+					ss << 0 << "|" << players.at(0).id << "|" << players.at(0).x << "|" << players.at(0).y << "|" << players.at(0).angle << "|" << players.at(0).speed;
 					for (int i=0;i<MAXFIREBALLS;i++)
 						ss << "|" << players.at(0).fireX[i] << "|" << players.at(0).fireY[i] << "|" << players.at(0).fireAngle[i];
 					string data = ss.str();
