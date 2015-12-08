@@ -25,15 +25,7 @@ using namespace std;
 //Allegro objects
 ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 ALLEGRO_TIMER *timer = NULL;
-ALLEGRO_BITMAP *backgroundSprite1 = NULL;
-ALLEGRO_BITMAP *backgroundSprite2 = NULL;
-ALLEGRO_BITMAP *backgroundSprite3 = NULL;
-ALLEGRO_BITMAP *backgroundSprite4 = NULL;
-ALLEGRO_BITMAP *backgroundSprite5 = NULL;
-ALLEGRO_BITMAP *backgroundSprite6 = NULL;
-ALLEGRO_BITMAP *backgroundSprite7 = NULL;
-ALLEGRO_BITMAP *backgroundSprite8 = NULL;
-ALLEGRO_BITMAP *backgroundSprite9 = NULL;
+ALLEGRO_BITMAP *backgroundSprites[9];
 ALLEGRO_BITMAP *radarBuffer = NULL;
 ALLEGRO_BITMAP *radarSprite = NULL;
 ALLEGRO_BITMAP *radarDotSprite = NULL;
@@ -67,9 +59,6 @@ bool dispUpgradeText = false;
 //Network vars
 bool hostSet = false;
 bool connected = false;
-ENetHost * host; //This machine
-vector<ENetPeer*> peers; //Remote machine
-ENetEvent event;
 int wait = 0;
 
 //Misc vars
@@ -103,8 +92,6 @@ int radarScreenHeight;
 float radarScale;
 
 
-
-
 /////////////////////////////////////////
 /////     Function Declarations     /////
 
@@ -134,6 +121,10 @@ void setUpHost();
 
 vector<Ship> players;
 vector<Planet> planets;
+
+ENetHost * host; //This machine
+vector<ENetPeer*> peers; //Dynamic list of host's network peers
+ENetEvent event;
 
 
 /////////////////////////////////
@@ -208,37 +199,21 @@ void init()
 	players.push_back(player1);
 
 	//Calculate scaling factor
-	float sx = float(windowWidth)/backgroundWidth;
+	/*float sx = float(windowWidth)/backgroundWidth;
 	float sy = float(windowHeight)/backgroundHeight;
 	float scale = sx<sy?sx:sy;
 	scaledWidth = windowWidth * scale;
 	scaledHeight = windowHeight * scale;
 	scaledOffsetX = (windowWidth - scaledWidth) / 2;
-	scaledOffsetY = (windowHeight - scaledHeight) / 2;
+	scaledOffsetY = (windowHeight - scaledHeight) / 2;*/
 
 	//Load bitmap files
-	//buffer = al_create_bitmap(windowWidth, windowHeight);
-	//buffer = al_create_bitmap(maxX, maxY);
-	backgroundSprite1 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
-	backgroundSprite2 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
-	backgroundSprite3 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
-	backgroundSprite4 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
-	backgroundSprite5 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
-	backgroundSprite6 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
-	backgroundSprite7 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
-	backgroundSprite8 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
-	backgroundSprite9 = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png"); //Load background image
-	
-	for (int p=0;p<players.size();p++) {
-		/*players.at(p).shipSprite = al_load_bitmap("c:/dev/allegro/images/shipSprite.png"); //Stationary ship sprite
-		players.at(p).shipSprite1 = al_load_bitmap("c:/dev/allegro/images/shipSprite1.png"); //Moving ship sprite 1
-		players.at(p).shipSprite2 = al_load_bitmap("c:/dev/allegro/images/shipSprite2.png"); // Moving ship sprite 2
-		players.at(p).shipSpriteCurrent = players.at(p).shipSprite;
-		for (int i=0; i<MAXFIREBALLS; i++) players.at(p).fireSprite[i]= al_load_bitmap("c:/dev/allegro/images/fireball.png");*/
+	for (int i=0; i<9; i++) {
+		backgroundSprites[i] = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png");
 	}
 
-	//Set a known random nonce before seeding planets
-	srand(6);
+	//Create solar system
+	srand(6); //Set a known random nonce before seeding planets, so I know how the planets will be dispersed "randomly" :)
 	Planet planet1("c:/dev/allegro/images/sun.png", 0);
 	Planet planet2("c:/dev/allegro/images/mercury.png", 1);
 	Planet planet3("c:/dev/allegro/images/venus.png", 2);
@@ -270,7 +245,7 @@ void init()
 	radarScale = 0.005;
 
 	//Check if bitmaps loaded properly
-	if(!backgroundSprite1) abort_game("Failed to load the background image");
+	if(!backgroundSprites[0]) abort_game("Failed to load the background image");
 	for (int p=0;p<players.size();p++) {
 		if(!players.at(p).shipSprite) abort_game("Failed to load the shipSprite image");
 		if(!players.at(p).shipSprite1) abort_game("Failed to load the shipSprite1 image");
@@ -292,17 +267,7 @@ void init()
     al_register_event_source(event_queue, al_get_keyboard_event_source());
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
     al_register_event_source(event_queue, al_get_display_event_source(display));
- 
-	//Docking station initialisation
-	//Random seed the planetss throughout the map
-	//float distance[planets.size()] = {0, 1, 2, 3, 4, 13, 24, 49, 76};
-	/*srand(6); //srand(time(NULL));
-	for (int i=0; i<planets.size(); i++) {
-		float angle = float(6.25)*(rand()%100)/100;
-		planets.at(i).x = planets.at(i).distance * 10 * planets.at(i).planetScale * cos(angle) + 500000;
-		planets.at(i).y = planets.at(i).distance * 10 * planets.at(i).planetScale * sin(angle) + 500000;
-	}*/
-
+	
 	//Initialise the network library
 	if (enet_initialize () != 0)
     {
@@ -317,7 +282,7 @@ void shutdown()
 	//Allegro shutdown
     if (timer) al_destroy_timer(timer);
     if (display) al_destroy_display(display);
-	if (backgroundSprite1)	al_destroy_bitmap(backgroundSprite1);
+	if (backgroundSprites[0])	al_destroy_bitmap(backgroundSprites[0]);
 	for (int p=0;p<players.size();p++) {
 		if (players.at(p).shipSprite) al_destroy_bitmap(players.at(p).shipSprite);
 		if (players.at(p).shipSprite1) al_destroy_bitmap(players.at(p).shipSprite1);
@@ -371,7 +336,7 @@ void upgrade_weapon()
 void hyperdrive()
 {
 	players.at(0).speed = 0;
-	paused = true;
+	//paused = true;
 	hyperDrive = true;
 	enterCoordinates.str("");
 	editText = "";
@@ -453,15 +418,22 @@ void press_key(ALLEGRO_EVENT e)
 					enterCoordinates << " ";
 					editText = enterCoordinates.str();
 				}
+				if (e.keyboard.keycode == 63) {
+					if (editText.length() > 0)
+						editText.pop_back();
+				}
 				else if (e.keyboard.keycode == ALLEGRO_KEY_ENTER) {
-					textEntered = true;
-					x2 = atoi(strtok((char*)editText.c_str(), " "));
-					y2 = atoi(strtok(NULL, " "));
-					newAngle = atan2( (y2 - players.at(0).y),  (x2 - players.at(0).x) );
-					if (newAngle<0) newAngle += 3.14*2;
-					distanceTravelX = abs(abs(x2) - abs(players.at(0).x));
-					distanceTravelY = abs(abs(y2) - abs(players.at(0).y));
-					if (x2==players.at(0).x && y2==players.at(0).y) hyperDrive = paused = false;
+					if (!editText.empty()) {
+						textEntered = true;
+						x2 = atoi(strtok((char*)editText.c_str(), " "));
+						y2 = atoi(strtok(NULL, " "));
+						newAngle = atan2( (y2 - players.at(0).y),  (x2 - players.at(0).x) );
+						if (newAngle<0) newAngle += 3.14*2;
+						distanceTravelX = abs(abs(x2) - abs(players.at(0).x));
+						distanceTravelY = abs(abs(y2) - abs(players.at(0).y));
+						if (x2==players.at(0).x && y2==players.at(0).y) hyperDrive = paused = false;
+					}
+					else hyperDrive = paused = false;
 				}
 			}
 			break;
@@ -491,6 +463,10 @@ void press_key(ALLEGRO_EVENT e)
 				stringstream enterIp;
 				enterIp << ".";
 				ipAddress += enterIp.str();
+			}
+			if (e.keyboard.keycode == 63) {
+				if (ipAddress.length() > 0)
+					ipAddress.pop_back();
 			}
 			else if (e.keyboard.keycode == ALLEGRO_KEY_ENTER) {
 				cout << ipAddress;
@@ -801,21 +777,16 @@ void update_graphics()
 	case 1:
 		{
 		//Clear display first
-        //if (!hyperDrive) al_clear_to_color(al_map_rgb(0, 0, 0));
 		al_clear_to_color(al_map_rgb(0, 0, 0));
 		
-		//Remember that all sprites drawn to the display must be drawn relative to the the current background coordinates (the camera), bgX and bgY
+		//Remember that all sprites drawn to the display must be drawn relative to the the current background coordinates (the camera), bgX and bgY - so subtract their x and y coordinates from bgX and bgY
 		
 		//Draw all 9 of the background sprites, tiled around, and including, the current grid
-		al_draw_bitmap(backgroundSprite1,gridX-bgX,gridY-bgY,0);
-		al_draw_bitmap(backgroundSprite2,gridX-bgX,gridY-windowHeight-bgY,0);
-		al_draw_bitmap(backgroundSprite3,gridX-bgX,gridY+windowHeight-bgY,0);
-		al_draw_bitmap(backgroundSprite4,gridX-windowWidth-bgX,gridY-bgY,0);
-		al_draw_bitmap(backgroundSprite5,gridX-windowWidth-bgX,gridY-windowHeight-bgY,0);
-		al_draw_bitmap(backgroundSprite6,gridX-windowWidth-bgX,gridY+windowHeight-bgY,0);
-		al_draw_bitmap(backgroundSprite7,gridX+windowWidth-bgX,gridY-bgY,0);
-		al_draw_bitmap(backgroundSprite8,gridX+windowWidth-bgX,gridY-windowHeight-bgY,0);
-		al_draw_bitmap(backgroundSprite9,gridX+windowWidth-bgX,gridY+windowHeight-bgY,0);
+		int backX = gridX-windowWidth; //X coordinate of top left corner tile of the 9 tiles
+		int backY = gridY-windowHeight; //Y coordinate of top left corner tile of the 9 tiles
+		for (int x=0; x<3; x++)
+			for (int y=0; y<3; y++)
+				al_draw_bitmap(backgroundSprites[x+y],backX + windowWidth*x - bgX, backY + windowHeight*y - bgY,0);
 		
 		//Draw planets
 		for (int i=0; i<planets.size(); i++)
@@ -829,8 +800,8 @@ void update_graphics()
 			al_draw_rotated_bitmap(players.at(p).shipSpriteCurrent, players.at(p).width/2, players.at(p).height/2, players.at(p).x-bgX, players.at(p).y-bgY, players.at(p).angle, 0); 
 		}
 
-		//Draw bordering rectangle
-		al_draw_rectangle(0-bgX, 0-bgY, maxX-bgX, maxY-bgY, al_map_rgb(255, 255, 255), 10);
+		//Draw bordering rectangle //Not necessary with current gigantic map, but useful to debug a small bounded area
+		//al_draw_rectangle(0-bgX, 0-bgY, maxX-bgX, maxY-bgY, al_map_rgb(255, 255, 255), 10);
 		
 		//Draw stats to screen
 		stringstream s1, s2;
@@ -843,14 +814,14 @@ void update_graphics()
 
 		//Draw radar
 		al_draw_scaled_rotated_bitmap(radarSprite, radarScreenWidth/2, radarScreenHeight/2, windowWidth*0.85, windowHeight*0.15, 0.2, 0.2, 0, 0);
-		//Planets
+		//Planets on radar
 		for (int i=0; i<planets.size(); i++) {
 			float rX = windowWidth*0.85 - (players.at(0).x - planets.at(i).x) * radarScale;
 			float rY = windowHeight*0.15 - (players.at(0).y - planets.at(i).y) * radarScale;
 			if ((rX > windowWidth*0.85 - windowWidth*0.1) && (rX < windowWidth*0.85 + windowWidth*0.1) && (rY > windowHeight*0.15 - windowHeight*0.1) && (rY < windowHeight*0.15 + windowHeight*0.1))
 				al_draw_rotated_bitmap(radarDotSprite, 2.5, 2.5, rX, rY, 0, 0); //Draw planets only if their coordinates exist within current screen
 		}
-		//Ships
+		//Ships on radar
 		for (int p=players.size()-1;p>=0;p--) {
 			float rX = windowWidth*0.85 - (players.at(0).x - players.at(p).x) * radarScale;
 			float rY = windowHeight*0.15 - (players.at(0).y - players.at(p).y) * radarScale;
@@ -860,13 +831,13 @@ void update_graphics()
 
 		//Game over
 		if (gameOver) al_draw_text(font, al_map_rgb(250, 0, 20), windowWidth*0.5, windowHeight*0.5, ALLEGRO_ALIGN_CENTRE, "GAME OVER");
-
-
+		
 		//Hyper Drive input
 		if (hyperDrive){
 			al_draw_text(font, al_map_rgb(255, 255, 255), windowWidth*0.5, windowHeight*0.35, ALLEGRO_ALIGN_CENTRE, "Enter coordinates: ");
 			al_draw_text(font, al_map_rgb(255, 255, 255), windowWidth*0.5, windowHeight*0.4, ALLEGRO_ALIGN_CENTRE, editText.c_str());
 		}
+
 		break;
 		}
 
@@ -887,7 +858,8 @@ void update_graphics()
 		{
 		al_clear_to_color(al_map_rgb(30,30,30));
 		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.5, windowHeight*0.4, ALLEGRO_ALIGN_CENTRE, "ENTER SERVER IP:");
-		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.5, windowHeight*0.5, ALLEGRO_ALIGN_CENTRE, ipAddress.c_str());
+		if (ipAddress.empty()) al_draw_text(font, al_map_rgb(50,50,50), windowWidth*0.5, windowHeight*0.5, ALLEGRO_ALIGN_CENTRE, "localhost");
+		else al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.5, windowHeight*0.5, ALLEGRO_ALIGN_CENTRE, ipAddress.c_str());
 		
 		break;
 		}
@@ -969,16 +941,11 @@ void setUpHost() {
 		
 		/* Initiate the connection, allocating the two channels 0 and 1. */
 		ENetPeer * peer = enet_host_connect (host, & address, 2, 2500); //Bind successful connection to peer
-		//peers.push_back(peer);
 
 		if (peer == NULL)
 		{
 		   abort_game("No server available at this address.\n");
 		}
-		/*else {
-			cout << "Connected." << endl;
-			connected = true;
-		}*/
 
 		hostSet = true;
 	}

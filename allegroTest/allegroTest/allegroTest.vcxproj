@@ -72,6 +72,7 @@
   <ItemGroup>
     <ClInclude Include="Allegro_init.h" />
     <ClInclude Include="Planet.h" />
+    <ClInclude Include="Radar.h" />
     <ClInclude Include="Ship.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
