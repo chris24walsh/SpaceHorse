@@ -631,7 +631,6 @@ void update_logic()
 						Ship player;
 						players.push_back(player);
 					}
-					cout << "Number of players: " << players.size() << endl;
 					for (int p=1; p<players.size(); p++) { //Check all current players
 						if (players.at(p).id == id) { //If received id matches theirs
 							players.at(p).x = x; //Assign all the parsed information
@@ -665,6 +664,7 @@ void update_logic()
 					printf("%s disconnected.\n", event.peer->data);
 				}
 			}
+			cout << "Number of players: " << players.size() << endl;
 
 			
 			/*if (newPlayerConnected) { //Add a new spare
