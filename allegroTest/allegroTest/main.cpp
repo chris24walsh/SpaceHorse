@@ -205,7 +205,9 @@ void init()
 
 	//Create player1
 	Ship player1("c:/dev/allegro/images/shipSprite.png", "c:/dev/allegro/images/shipSprite1.png", "c:/dev/allegro/images/shipSprite2.png", "c:/dev/allegro/images/fireball.png");
-	players.push_back(player1);
+	players.push_back(player1); //Add player1 to players
+	//Ship sparePlayer;
+	//players.push_back(sparePlayer); //Add a spare player for initialisation with network data
 
 	//Calculate scaling factor
 	float sx = float(windowWidth)/backgroundWidth;
@@ -412,7 +414,7 @@ void press_key(ALLEGRO_EVENT e)
 
 	case 1: //Space mode
 		{
-			if (!hyperDrive) {
+			if (!hyperDrive && !gameOver) {
 				if (e.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
 					done = true;
 				}
@@ -463,6 +465,9 @@ void press_key(ALLEGRO_EVENT e)
 					distanceTravelY = abs(abs(y2) - abs(players.at(0).y));
 					if (x2==players.at(0).x && y2==players.at(0).y) hyperDrive = paused = false;
 				}
+			}
+			if (gameOver) {
+				if (e.keyboard.keycode == ALLEGRO_KEY_ENTER || e.keyboard.keycode == ALLEGRO_KEY_ESCAPE) done = true;
 			}
 			break;
 		}
@@ -621,37 +626,36 @@ void update_logic()
 			enet_uint8 *d = NULL;
 			while (enet_host_service(host, &event, 0)) { //Poll to enets data buffer
 				ENetPeer * peer;
-				int id;
-				int x;
-				int y;
-				float angle;
-				int speed;
-				int fireX[MAXFIREBALLS];
-				int fireY[MAXFIREBALLS];
-				float fireAngle[MAXFIREBALLS];
-				
-				switch(event.type) {
-				case ENET_EVENT_TYPE_CONNECT:
+				//switch(event.type) {
+				if (event.type == ENET_EVENT_TYPE_CONNECT) {
 					printf("Connection received from %x\n", event.peer->address.host);
 					connected = true;
 					peer = event.peer;
 					peers.push_back(peer);
-					newPlayerConnected = true;
-					break;
-				case ENET_EVENT_TYPE_RECEIVE:
+					//newPlayerConnected = true;
+				}
+				else if (event.type == ENET_EVENT_TYPE_RECEIVE) {
 					wait = 0;
 					d = event.packet->data;
-					id = atoi(strtok((char*)d,"|")); //Parse the packets information
-					x = atoi(strtok(NULL,"|"));
-					y = atoi(strtok(NULL,"|"));
-					angle = atof(strtok(NULL,"|"));
-					speed = atoi(strtok(NULL,"|"));
-					fireAngle[MAXFIREBALLS];
+					int numPlayers = atoi(strtok((char*)d,"|")); //Parse the packets information
+					int id = atoi(strtok(NULL,"|"));
+					int x = atoi(strtok(NULL,"|"));
+					int y = atoi(strtok(NULL,"|"));
+					float angle = atof(strtok(NULL,"|"));
+					int speed = atoi(strtok(NULL,"|"));
+					int fireX[MAXFIREBALLS];
+					int fireY[MAXFIREBALLS];
+					float fireAngle[MAXFIREBALLS];
 					for (int i=0;i<MAXFIREBALLS;i++) {
 						fireX[i] = atoi(strtok(NULL,"|"));
 						fireY[i] = atoi(strtok(NULL,"|"));
 						fireAngle[i] = atof(strtok(NULL,"|"));
 					}
+					while (numPlayers>players.size()) { //Add empty players as necessary
+						Ship player;
+						players.push_back(player);
+					}
+					cout << "Number of players: " << players.size() << endl;
 					for (int p=1; p<players.size(); p++) { //Check all current players
 						if (players.at(p).id == id) { //If received id matches theirs
 							players.at(p).x = x; //Assign all the parsed information
@@ -663,11 +667,10 @@ void update_logic()
 								players.at(p).fireY[i] = fireY[i];
 								players.at(p).fireAngle[i] = fireAngle[i];
 							}
-							break; //Then break from case
 						}
 					}
-					//Else assign parsed info to last player in vector
-					if (players.at(players.size()-1).id == 0) {
+					//Else assign parsed info to last player in vector (the spare player)
+					while (players.at(players.size()-1).id == 0) { //While there are still empty players
 						players.at(players.size()-1).id = id; //Assign all the parsed information
 						players.at(players.size()-1).x = x;
 						players.at(players.size()-1).y = y;
@@ -678,26 +681,28 @@ void update_logic()
 							players.at(players.size()-1).fireY[i] = fireY[i];
 							players.at(players.size()-1).fireAngle[i] = fireAngle[i];
 						}
+						players.push_back(players.at(players.size()-2)); //Move second-last to last place
+						players.erase(players.begin() + players.size()-3); //Delete the now-third-last
 					}
-					break; //Then break from case
-				case ENET_EVENT_TYPE_DISCONNECT:
+				}
+				else if (event.type == ENET_EVENT_TYPE_DISCONNECT) {
 					printf("%s disconnected.\n", event.peer->data);
-					break;
 				}
 			}
 
-			if (newPlayerConnected) {
+			
+			/*if (newPlayerConnected) { //Add a new spare
 				Ship newPlayer; //"c:/dev/allegro/images/shipSprite.png", "c:/dev/allegro/images/shipSprite1.png", "c:/dev/allegro/images/shipSprite2.png", "c:/dev/allegro/images/fireball.png");
 				players.push_back(newPlayer);
 				newPlayerConnected = false;
-			}
+			}*/
 
 			//Check if connected or not before sending network data
 			if (connected) {
 				if (homeScreenOption==1) { //If server
 					for (int p=0; p<players.size(); p++) {
 						stringstream ss;
-						ss << players.at(p).id << "|" << players.at(p).x << "|" << players.at(p).y << "|" << players.at(p).angle << "|" << players.at(p).speed;
+						ss << players.size() << "|" << players.at(p).id << "|" << players.at(p).x << "|" << players.at(p).y << "|" << players.at(p).angle << "|" << players.at(p).speed;
 						for (int i=0;i<MAXFIREBALLS;i++)
 							ss << "|" << players.at(p).fireX[i] << "|" << players.at(p).fireY[i] << "|" << players.at(p).fireAngle[i];
 						string data = ss.str();
@@ -707,7 +712,7 @@ void update_logic()
 				}
 				if (homeScreenOption==2) { //If client
 					stringstream ss;
-					ss << players.at(0).id << "|" << players.at(0).x << "|" << players.at(0).y << "|" << players.at(0).angle << "|" << players.at(0).speed;
+					ss << players.size() << "|" << players.at(0).id << "|" << players.at(0).x << "|" << players.at(0).y << "|" << players.at(0).angle << "|" << players.at(0).speed;
 					for (int i=0;i<MAXFIREBALLS;i++)
 						ss << "|" << players.at(0).fireX[i] << "|" << players.at(0).fireY[i] << "|" << players.at(0).fireAngle[i];
 					string data = ss.str();
@@ -730,7 +735,8 @@ void update_logic()
 		//Check for gameover
 		if (players.at(0).health <= 0) {
 			gameOver = true;
-			paused = true;
+			players.at(0).speed = 0;
+			//paused = true;
 		}
 	}
 
@@ -851,7 +857,7 @@ void update_graphics()
 				al_draw_rotated_bitmap(radarDotSprite, 2.5, 2.5, rX, rY, 0, 0); //Draw planets only if their coordinates exist within current screen
 		}
 		//Ships
-		for (int p=players.size()-1;p>=0;p--) {
+		for (int p=players.size();p>=0;p--) {
 			float rX = windowWidth*0.85 - (players.at(0).x - players.at(p).x) * radarScale;
 			float rY = windowHeight*0.15 - (players.at(0).y - players.at(p).y) * radarScale;
 			if ((rX > windowWidth*0.85 - windowWidth*0.1) && (rX < windowWidth*0.85 + windowWidth*0.1) && (rY > windowHeight*0.15 - windowHeight*0.1) && (rY < windowHeight*0.15 + windowHeight*0.1))
