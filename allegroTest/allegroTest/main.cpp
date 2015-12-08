@@ -653,7 +653,7 @@ void update_logic()
 						}
 					}
 					//Else
-					//if (players.at(players.size()-1).id == 0) { //While there are still empty players
+					if (players.at(players.size()-1).id == 0) { //While there are still empty players
 						players.at(players.size()-1).id = id; //Assign all the parsed information
 						players.at(players.size()-1).x = x;
 						players.at(players.size()-1).y = y;
@@ -667,7 +667,7 @@ void update_logic()
 						players.push_back(players.at(players.size()-2)); //Add second-last to last place
 						players.erase(players.begin() + players.size()-3); //Delete the now-third-last
 						cout << "Number of players: " << players.size() << endl;
-					//}
+					}
 				}
 				if (event.type == ENET_EVENT_TYPE_DISCONNECT) {
 					printf("%s disconnected.\n", event.peer->data);
