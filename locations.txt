@@ -1,0 +1,24 @@
+Type A location: Sun/Star of whatever sort
+Causes damage if too close.
+
+Type B location: Planet/Moon
+Can be landed on, but costs fuel to take-off depending on planet size.
+
+Type C location: Asteroid/Comet
+Causes damage if collision without higher level engines. Usually only a mining spot.
+
+Type D location: Space station/outpost
+Can be docked at. Never a mining spot and never low tech level.
+
+Type E location: Gas giants/clouds/nebulae
+Can refuel with gas scoops but may cause damage if too close and may disable scanner/radar.
+
+Type F location: Other starships
+Like a space station but smaller and not stationary. Possibly hostile.
+
+Things that can be found (limited by tech level):
+1. Spaceport (never at low tech level; to refill fuel tanks, recharge batteries, and assisted take-off)
+2. Goods Trader (to buy/sell commodities)
+3. Equipment Trader (never at low tech level; to buy/sell equipment)
+4. Free stuff (goods/info/equipment)
+5. Mining spot (if low tech level, i.e. if high tech presume already mined or claimed)

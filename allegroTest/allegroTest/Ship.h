@@ -7,7 +7,8 @@
 
 class Ship {
 public:
-	int id, x, y, height, width, speed, speedX, speedY, maxSpeed, health, flipflop, fireballNumber, fireX[MAXFIREBALLS], fireY[MAXFIREBALLS], fireHeight, fireWidth, fireSpeed, fireCycle;
+	int id, x, y, height, width, speed, speedX, speedY, maxSpeed, health, flipflop, fireballNumber, 
+		fireX[MAXFIREBALLS], fireY[MAXFIREBALLS], fireHeight, fireWidth, fireSpeed, fireCycle, armour, energy, fuel;
 	float angle, fireAngle[MAXFIREBALLS];
 	ALLEGRO_BITMAP *shipSprite, *shipSprite1, *shipSprite2, *shipSpriteCurrent;
 	ALLEGRO_BITMAP *fireSprite[MAXFIREBALLS];

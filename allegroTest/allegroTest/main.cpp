@@ -104,6 +104,7 @@ void shutdown();
 void fire();
 void triggerCollision();
 void dock();
+void refuel();
 void upgrade_weapon();
 void hyperdrive();
 void press_key(ALLEGRO_EVENT);
@@ -311,15 +312,20 @@ void fire()
 void dock()
 {
 	for (int i=0; i<planets.size(); i++) {
-		if (players.at(0).canDock) {
+		if (players.at(0).canDock && players.at(0).speed==0) {  //also requires the ship to stop
 			if (screenMode == 2) screenMode = 1; //Undock, if already docked and docking activated
 			else if (screenMode == 1) { //Else, if able to dock, do so, stop ship and set it to safe mode
 				screenMode = 2;
-				players.at(0).speed = 0;
+				//players.at(0).speed = 0; Unnecessary if the ship is required to stop first
 				safe = true;
 			}
 		}
 	}
+}
+
+void refuel()
+{
+	players.at(0).fuel = 100;
 }
 
 void triggerCollision() {
@@ -452,6 +458,9 @@ void press_key(ALLEGRO_EVENT e)
 			if (e.keyboard.keycode == ALLEGRO_KEY_D) {
 				dock();
 			}
+			if (e.keyboard.keycode == ALLEGRO_KEY_R) {
+				refuel();
+			}
 			break;
 		}
 
@@ -536,10 +545,19 @@ void update_logic()
 
 		//Increase or decrease players.at(0).speed
 		if (upPressed) {
-			if (players.at(0).speed<players.at(0).maxSpeed) players.at(0).speed += 1;
+			if (players.at(0).speed>=2 && players.at(0).speed<players.at(0).maxSpeed && players.at(0).fuel>0) {
+				players.at(0).speed += 1; 
+				players.at(0).fuel -= 1;
+			}
+			if (players.at(0).speed<=1) players.at(0).speed += 1;
 		}
 		else if (downPressed) {
-			if (players.at(0).speed>0) players.at(0).speed -= 1;
+			if (players.at(0).speed>2 && players.at(0).fuel>0) {
+				players.at(0).speed -= 1;
+				players.at(0).fuel -= 1;
+			}
+			if (players.at(0).speed>0 && players.at(0).fuel==0) players.at(0).speed -= 1;
+			if (players.at(0).speed>0 && players.at(0).speed<=2 && players.at(0).fuel>0) players.at(0).speed -= 1;
 		}
 
 		//Resolve translations for x and y axis
@@ -819,13 +837,22 @@ void update_graphics()
 		//al_draw_rectangle(0-bgX, 0-bgY, maxX-bgX, maxY-bgY, al_map_rgb(255, 255, 255), 10);
 		
 		//Draw stats to screen
-		stringstream s1, s2;
+		stringstream s1, s2, s3, s4, s5;
 		s1 << "Health: " << players.at(0).health;
 		s2 << "Coordinates: " << players.at(0).x << " , " << players.at(0).y;
+		s3 << "Armour: " << players.at(0).armour;
+		s4 << "Fuel: " << players.at(0).fuel;
+		//s5 << "Energy: " << players.at(0).energy;
 		string str1 = s1.str();
 		string str2 = s2.str();
+		string str3 = s3.str();
+		string str4 = s4.str();
+		//string str5 = s5.str();
 		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.1, 0, str1.c_str());
 		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.9, 0, str2.c_str());
+		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.15, 0, str3.c_str());
+		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.2, 0, str4.c_str());
+		//al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.25, 0, str5.c_str());
 
 		//Draw radar
 		al_draw_scaled_rotated_bitmap(radarSprite, radarScreenWidth/2, radarScreenHeight/2, windowWidth*0.85, windowHeight*0.15, 0.2, 0.2, 0, 0);
