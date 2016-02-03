@@ -524,10 +524,18 @@ void update_logic()
 	if (!paused) {
 		//Rotate clockwise or anti-clockwise
 		if (leftPressed) {
-			players.at(0).angle-=0.05;
+			if (players.at(0).speed>2 && players.at(0).fuel>0) {
+				players.at(0).angle-=0.05;
+				players.at(0).fuel -= 1;
+			}
+			if (players.at(0).speed<=2) players.at(0).angle-=0.05;
 		}
 		if (rightPressed) {
-			players.at(0).angle+=0.05;
+			if (players.at(0).speed>2 && players.at(0).fuel>0) {
+				players.at(0).angle+=0.05;
+				players.at(0).fuel -= 1;
+			}
+			if (players.at(0).speed<=2) players.at(0).angle+=0.05;
 		}
 		if (players.at(0).angle > 6.25) players.at(0).angle = 0;
 		if (players.at(0).angle < 0) players.at(0).angle = 6.25;
@@ -547,14 +555,14 @@ void update_logic()
 		if (upPressed) {
 			if (players.at(0).speed>=2 && players.at(0).speed<players.at(0).maxSpeed && players.at(0).fuel>0) {
 				players.at(0).speed += 1; 
-				players.at(0).fuel -= 1;
+				players.at(0).fuel -= 4;
 			}
 			if (players.at(0).speed<=1) players.at(0).speed += 1;
 		}
 		else if (downPressed) {
 			if (players.at(0).speed>2 && players.at(0).fuel>0) {
 				players.at(0).speed -= 1;
-				players.at(0).fuel -= 1;
+				players.at(0).fuel -= 4;
 			}
 			if (players.at(0).speed>0 && players.at(0).fuel==0) players.at(0).speed -= 1;
 			if (players.at(0).speed>0 && players.at(0).speed<=2 && players.at(0).fuel>0) players.at(0).speed -= 1;

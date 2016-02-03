@@ -14,7 +14,7 @@ Ship::Ship() {
 	angle = 0;
 	health = 6;
 	armour = 0;
-	fuel = 100;
+	fuel = 1000;
 	energy = 0;
 	flipflop = 0;
 	fireWidth = 30;
@@ -48,7 +48,7 @@ Ship::Ship(const char* filename1, const char* filename2, const char* filename3, 
 	angle = 0;
 	health = 6;
 	armour = 0;
-	fuel = 100;
+	fuel = 1000;
 	energy = 0;
 	flipflop = 0;
 	fireWidth = 30;
