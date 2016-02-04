@@ -55,6 +55,7 @@ int homeScreenOption = 3; //Choice is single player by default
 //Planet vars
 bool safe = true;
 bool dispUpgradeText = false;
+bool dispnotenoughcredits = false;
 
 //Network vars
 bool hostSet = false;
@@ -313,7 +314,11 @@ void dock()
 {
 	for (int i=0; i<planets.size(); i++) {
 		if (players.at(0).canDock && players.at(0).speed==0) {  //also requires the ship to stop
-			if (screenMode == 2) screenMode = 1; //Undock, if already docked and docking activated
+			if (screenMode == 2) {
+				dispnotenoughcredits = false;
+				dispUpgradeText = false;
+				screenMode = 1; //Undock, if already docked and docking activated
+			}
 			else if (screenMode == 1) { //Else, if able to dock, do so, stop ship and set it to safe mode
 				screenMode = 2;
 				//players.at(0).speed = 0; Unnecessary if the ship is required to stop first
@@ -325,19 +330,33 @@ void dock()
 
 void refuel()
 {
-	players.at(0).fuel = 100;
+	if (screenMode == 2) {
+		if (players.at(0).credits>=10) {
+			players.at(0).credits -= 10;
+			players.at(0).fuel = 1000;
+		}
+		if (players.at(0).credits<10) {
+			dispnotenoughcredits = true;
+		}
+	}
 }
 
 void triggerCollision() {
-	players.at(0).health--;
+	players.at(0).armour--;
 }
 
 void upgrade_weapon()
 {
 	if (screenMode == 2) {
-		dispUpgradeText = true;
-		for (int i=0; i<MAXFIREBALLS; i++) players.at(0).fireSprite[i] = al_load_bitmap("c:/dev/allegro/images/fireball2.png");
-		players.at(0).fireHeight = 40;
+		if (players.at(0).credits>=50) {
+			players.at(0).credits -= 50;
+			dispUpgradeText = true;
+			for (int i=0; i<MAXFIREBALLS; i++) players.at(0).fireSprite[i] = al_load_bitmap("c:/dev/allegro/images/fireball2.png");
+			players.at(0).fireHeight = 40;
+		}
+		if (players.at(0).credits<50) {
+			dispnotenoughcredits = true;
+		}
 	}
 }
 
@@ -455,10 +474,10 @@ void press_key(ALLEGRO_EVENT e)
 			if (e.keyboard.keycode == ALLEGRO_KEY_W) {
 				upgrade_weapon();
 			}
-			if (e.keyboard.keycode == ALLEGRO_KEY_D) {
+			if (e.keyboard.keycode == ALLEGRO_KEY_L) {
 				dock();
 			}
-			if (e.keyboard.keycode == ALLEGRO_KEY_R) {
+			if (e.keyboard.keycode == ALLEGRO_KEY_F) {
 				refuel();
 			}
 			break;
@@ -555,14 +574,14 @@ void update_logic()
 		if (upPressed) {
 			if (players.at(0).speed>=2 && players.at(0).speed<players.at(0).maxSpeed && players.at(0).fuel>0) {
 				players.at(0).speed += 1; 
-				players.at(0).fuel -= 4;
+				players.at(0).fuel -= 8;
 			}
 			if (players.at(0).speed<=1) players.at(0).speed += 1;
 		}
 		else if (downPressed) {
 			if (players.at(0).speed>2 && players.at(0).fuel>0) {
 				players.at(0).speed -= 1;
-				players.at(0).fuel -= 4;
+				players.at(0).fuel -= 8;
 			}
 			if (players.at(0).speed>0 && players.at(0).fuel==0) players.at(0).speed -= 1;
 			if (players.at(0).speed>0 && players.at(0).speed<=2 && players.at(0).fuel>0) players.at(0).speed -= 1;
@@ -744,7 +763,7 @@ void update_logic()
 		}
 
 		//Check for gameover
-		if (players.at(0).health <= 0) {
+		if (players.at(0).armour <= 0) {
 			gameOver = true;
 			players.at(0).speed = 0;
 			//paused = true;
@@ -846,21 +865,21 @@ void update_graphics()
 		
 		//Draw stats to screen
 		stringstream s1, s2, s3, s4, s5;
-		s1 << "Health: " << players.at(0).health;
+		s1 << "Armour: " << players.at(0).armour;
 		s2 << "Coordinates: " << players.at(0).x << " , " << players.at(0).y;
-		s3 << "Armour: " << players.at(0).armour;
+		s3 << "Shields: " << players.at(0).shields;
 		s4 << "Fuel: " << players.at(0).fuel;
-		//s5 << "Energy: " << players.at(0).energy;
+		s5 << "Energy: " << players.at(0).energy;
 		string str1 = s1.str();
 		string str2 = s2.str();
 		string str3 = s3.str();
 		string str4 = s4.str();
-		//string str5 = s5.str();
+		string str5 = s5.str();
 		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.1, 0, str1.c_str());
 		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.9, 0, str2.c_str());
 		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.15, 0, str3.c_str());
 		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.2, 0, str4.c_str());
-		//al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.25, 0, str5.c_str());
+		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.25, 0, str5.c_str());
 
 		//Draw radar
 		al_draw_scaled_rotated_bitmap(radarSprite, radarScreenWidth/2, radarScreenHeight/2, windowWidth*0.85, windowHeight*0.15, 0.2, 0.2, 0, 0);
@@ -898,7 +917,17 @@ void update_graphics()
 		al_draw_rotated_bitmap(players.at(0).shipSprite, players.at(0).width/2, players.at(0).height/2, 250, 250, 0, 0);
 		al_draw_rotated_bitmap(players.at(0).fireSprite[0], players.at(0).fireHeight/2, players.at(0).fireWidth/2, 250, 250, 0, 0);
 		al_draw_bitmap(dockingText, 0, 0, 0);
+		stringstream s7;
+		s7 << players.at(0).credits;
+		string str7 = s7.str();
+		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.8, windowHeight*0.72, 0, str7.c_str());
 		if (dispUpgradeText) al_draw_bitmap(upgradedText, 0, windowHeight/2, 0);
+		if (dispnotenoughcredits) {
+			stringstream s6;
+			s6 << "Not enough credits!";
+			string str6 = s6.str();
+			al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.9, 0, str6.c_str());
+		}
 		
 		break;
 		}
