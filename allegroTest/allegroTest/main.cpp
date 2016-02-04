@@ -331,12 +331,12 @@ void dock()
 void refuel()
 {
 	if (screenMode == 2) {
+		if (players.at(0).credits<10) {
+			dispnotenoughcredits = true;
+		}
 		if (players.at(0).credits>=10) {
 			players.at(0).credits -= 10;
 			players.at(0).fuel = 1000;
-		}
-		if (players.at(0).credits<10) {
-			dispnotenoughcredits = true;
 		}
 	}
 }
@@ -348,14 +348,14 @@ void triggerCollision() {
 void upgrade_weapon()
 {
 	if (screenMode == 2) {
+		if (players.at(0).credits<50) {
+			dispnotenoughcredits = true;
+		}
 		if (players.at(0).credits>=50) {
 			players.at(0).credits -= 50;
 			dispUpgradeText = true;
 			for (int i=0; i<MAXFIREBALLS; i++) players.at(0).fireSprite[i] = al_load_bitmap("c:/dev/allegro/images/fireball2.png");
 			players.at(0).fireHeight = 40;
-		}
-		if (players.at(0).credits<50) {
-			dispnotenoughcredits = true;
 		}
 	}
 }
