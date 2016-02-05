@@ -350,7 +350,7 @@ void hyperdrive()
 void press_key(ALLEGRO_EVENT e)
 {
 	switch (screenMode) {
-	case 0: //Home mode
+	case 0: //Home mode 1
 		{
 			if (e.keyboard.keycode == ALLEGRO_KEY_UP) {
 				homeScreenOption--;
