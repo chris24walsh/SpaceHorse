@@ -55,7 +55,11 @@ int homeScreenOption = 3; //Choice is single player by default
 //Planet vars
 bool safe = true;
 bool dispUpgradeText = false;
-bool dispnotenoughcredits = false;
+bool dispNotEnoughCredits = false;
+bool dispFullyRefueled = false;
+bool askBuySell = false;
+bool dispNoCargoSpace = false;
+bool dispNoCargo = true;
 
 //Network vars
 bool hostSet = false;
@@ -106,6 +110,9 @@ void fire();
 void triggerCollision();
 void dock();
 void refuel();
+void buyCargo();
+void sellCargo();
+void updateCargoSpace();
 void upgrade_weapon();
 void hyperdrive();
 void press_key(ALLEGRO_EVENT);
@@ -315,12 +322,18 @@ void dock()
 	for (int i=0; i<planets.size(); i++) {
 		if (players.at(0).canDock && players.at(0).speed==0) {  //also requires the ship to stop
 			if (screenMode == 2) {
-				dispnotenoughcredits = false;
-				dispUpgradeText = false;
 				screenMode = 1; //Undock, if already docked and docking activated
+				dispFullyRefueled = false;
+				dispNotEnoughCredits = false;
 			}
 			else if (screenMode == 1) { //Else, if able to dock, do so, stop ship and set it to safe mode
 				screenMode = 2;
+				if (players.at(0).fuel==players.at(0).maxFuel) {
+					dispFullyRefueled = true;
+				}
+				if (players.at(0).fireHeight==40) {
+					dispUpgradeText = true;
+				}
 				//players.at(0).speed = 0; Unnecessary if the ship is required to stop first
 				safe = true;
 			}
@@ -331,14 +344,57 @@ void dock()
 void refuel()
 {
 	if (screenMode == 2) {
-		if (players.at(0).credits<10) {
-			dispnotenoughcredits = true;
+		if (players.at(0).fuel==players.at(0).maxFuel) {
+			dispFullyRefueled = true;
 		}
-		if (players.at(0).credits>=10) {
+		if (players.at(0).credits<10 && players.at(0).fuel<players.at(0).maxFuel) {
+			dispNotEnoughCredits = true;
+		}
+		if (players.at(0).credits>=10 && players.at(0).fuel<players.at(0).maxFuel) {
+			dispNotEnoughCredits = false;
 			players.at(0).credits -= 10;
-			players.at(0).fuel = 1000;
+			players.at(0).fuel = players.at(0).maxFuel;
+			dispFullyRefueled = true;
 		}
 	}
+}
+
+void buyCargo()
+{
+	if (screenMode == 2) {
+		askBuySell = false;
+		if (players.at(0).credits<10 && players.at(0).cargoUsed<players.at(0).maxCargo) {
+			dispNotEnoughCredits = true;
+		}
+		if (players.at(0).credits>=10 && players.at(0).cargoUsed<players.at(0).maxCargo) {
+			dispNotEnoughCredits = false;
+			dispNoCargo = false;
+			players.at(0).credits -= 10;
+			players.at(0).minerals ++;
+			updateCargoSpace();
+		}
+	}
+}
+
+void sellCargo()
+{
+	if (screenMode == 2) {
+		askBuySell = false;
+		if (players.at(0).minerals>=1) {
+			players.at(0).minerals --;
+			players.at(0).credits += 5;
+			updateCargoSpace();
+		}
+	}
+}
+
+void updateCargoSpace()
+{
+	players.at(0).cargoUsed = players.at(0).minerals;
+	if (players.at(0).cargoUsed==0) dispNoCargo = true;
+	if (players.at(0).cargoUsed>0) dispNoCargo = false;
+	if (players.at(0).cargoUsed==players.at(0).maxCargo) dispNoCargoSpace = true;
+	if (players.at(0).cargoUsed<players.at(0).maxCargo) dispNoCargoSpace = false;
 }
 
 void triggerCollision() {
@@ -348,10 +404,17 @@ void triggerCollision() {
 void upgrade_weapon()
 {
 	if (screenMode == 2) {
-		if (players.at(0).credits<50) {
-			dispnotenoughcredits = true;
+		//if already upgraded
+		if (players.at(0).fireHeight==40) {
+			dispUpgradeText = true;
 		}
-		if (players.at(0).credits>=50) {
+		//if not enough credits
+		if (players.at(0).credits<50 && players.at(0).fireHeight<40) {
+			dispNotEnoughCredits = true;
+		}
+
+		if (players.at(0).credits>=50 && players.at(0).fireHeight<40) {
+			dispNotEnoughCredits = false;
 			players.at(0).credits -= 50;
 			dispUpgradeText = true;
 			for (int i=0; i<MAXFIREBALLS; i++) players.at(0).fireSprite[i] = al_load_bitmap("c:/dev/allegro/images/fireball2.png");
@@ -471,14 +534,34 @@ void press_key(ALLEGRO_EVENT e)
 		
 	case 2: //Docking mode
 		{
-			if (e.keyboard.keycode == ALLEGRO_KEY_W) {
-				upgrade_weapon();
+			if (!askBuySell) {
+				if (e.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+					done = true;
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_W) {
+					upgrade_weapon();
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_L) {
+					dock();
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_F) {
+					refuel();
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_C) {
+					dispNotEnoughCredits = false;
+					askBuySell = true;
+				}
 			}
-			if (e.keyboard.keycode == ALLEGRO_KEY_L) {
-				dock();
-			}
-			if (e.keyboard.keycode == ALLEGRO_KEY_F) {
-				refuel();
+			if (askBuySell) {
+				if (e.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+					done = true;
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_B) {
+					buyCargo();
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_S) {
+					sellCargo();
+				}
 			}
 			break;
 		}
@@ -912,22 +995,64 @@ void update_graphics()
 
 	//Docking mode
 	case 2:
-		{
-		al_clear_to_color(al_map_rgb(25,0,25));
-		al_draw_rotated_bitmap(players.at(0).shipSprite, players.at(0).width/2, players.at(0).height/2, 250, 250, 0, 0);
-		al_draw_rotated_bitmap(players.at(0).fireSprite[0], players.at(0).fireHeight/2, players.at(0).fireWidth/2, 250, 250, 0, 0);
-		al_draw_bitmap(dockingText, 0, 0, 0);
-		stringstream s7;
-		s7 << players.at(0).credits;
-		string str7 = s7.str();
-		al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.8, windowHeight*0.72, 0, str7.c_str());
-		if (dispUpgradeText) al_draw_bitmap(upgradedText, 0, windowHeight/2, 0);
-		if (dispnotenoughcredits) {
-			stringstream s6;
-			s6 << "Not enough credits!";
-			string str6 = s6.str();
-			al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.9, 0, str6.c_str());
-		}
+		{			
+			//Load docking screen
+			al_clear_to_color(al_map_rgb(25,0,25));
+			al_draw_bitmap(dockingText, 0, 0, 0);
+			al_draw_rotated_bitmap(players.at(0).shipSprite, players.at(0).width/2, players.at(0).height/2, 806, 422, 0, 0);
+			al_draw_rotated_bitmap(players.at(0).fireSprite[0], players.at(0).fireWidth/2, players.at(0).fireHeight/2, 425, 225, 0, 0);
+
+			//display stats on right
+			stringstream s1, s7, s3, s4, s5;
+			s1 << players.at(0).armour;
+			s3 << players.at(0).shields;
+			s4 << players.at(0).fuel;
+			s5 << players.at(0).energy;
+			s7 << players.at(0).credits << "cr";
+			string str7 = s7.str();
+			string str1 = s1.str();
+			string str3 = s3.str();
+			string str4 = s4.str();
+			string str5 = s5.str();
+			al_draw_text(font, al_map_rgb(255,255,255), 1340, 100, 0, str1.c_str());
+			al_draw_text(font, al_map_rgb(255,255,255), 1340, 263, 0, str3.c_str());
+			al_draw_text(font, al_map_rgb(255,255,255), 1340, 590, 0, str4.c_str());
+			al_draw_text(font, al_map_rgb(255,255,255), 1340, 424, 0, str5.c_str());
+			al_draw_text(font, al_map_rgb(255,255,255), 1340, 751, 0, str7.c_str()); //good position for now
+
+			//display list of cargo
+			if (!dispNoCargo) {
+				stringstream s6;
+				s6 << "Minerals: " << players.at(0).minerals << "t";
+				string str6 = s6.str();
+				al_draw_text(font, al_map_rgb(255,255,255), 680, 607, 0, str6.c_str());
+			}
+			
+			//Check to display feedback messages
+			if (askBuySell) {
+				al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.9, 0, "(B)uy or (S)ell cargo? Minerals 10cr/t");
+			}	
+			if (dispNoCargo) {
+				al_draw_text(font, al_map_rgb(255,255,255), 715, 715, 0, "No cargo!");
+			}
+			if (dispNoCargoSpace) {
+				al_draw_text(font, al_map_rgb(255,255,255), 715, 715, 0, "No space!");
+			}
+			if (!dispUpgradeText) {
+				al_draw_text(font, al_map_rgb(255,255,255), 450, 214, 0, "50cr");
+			}
+			if (dispUpgradeText) {
+				al_draw_text(font, al_map_rgb(255,255,255), 450, 214, 0, "Bought!");
+			}
+			if (!dispFullyRefueled) {
+				al_draw_text(font, al_map_rgb(255,255,255), 990, 651, 0, "Refuel: 10cr");
+			}
+			if (dispFullyRefueled) {
+				al_draw_text(font, al_map_rgb(255,255,255), 990, 651, 0, "Refueled!");
+			}
+			if (dispNotEnoughCredits) {
+				al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.9, 0, "Not enough credits!");
+			}
 		
 		break;
 		}
