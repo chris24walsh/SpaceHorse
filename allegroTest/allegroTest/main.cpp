@@ -66,6 +66,9 @@ bool tradeMinerals = false;
 bool tradeLuxuries = false;
 bool dispNoCargoSpace = false;
 bool dispNoCargo = true;
+bool explored = false;
+bool mined = false;
+bool harvested = false;
 
 //Network vars
 //bool hostSet = false;
@@ -118,6 +121,9 @@ void dock();
 void refuel();
 void recharge();
 void trade();
+void explore();
+void mine();
+void harvest();
 void updateCargoSpace();
 void upgrade_weapon();
 void hyperdrive();
@@ -332,6 +338,9 @@ void dock()
 				dispFullyRefueled = false;
 				dispRecharged = false;
 				dispNotEnoughCredits = false;
+				explored = false;
+				mined = false;
+				harvested = false;
 			}
 			else if (screenMode == 1) { //Else, if able to dock, do so, stop ship and set it to safe mode
 				screenMode = 2;
@@ -415,6 +424,38 @@ void trade()
 				players.at(0).credits += 10;
 				updateCargoSpace();
 			}
+		}
+	}
+}
+
+void explore()
+{
+	if (screenMode == 2) {
+		if (!explored) {
+			players.at(0).credits += 5;
+			explored = true;
+		}
+	}
+}
+
+void mine()
+{
+	if (screenMode == 2) {
+		if (players.at(0).cargoUsed<players.at(0).maxCargo && !mined) {
+			players.at(0).minerals ++;
+			updateCargoSpace();
+			mined = true;
+		}
+	}
+}
+
+void harvest()
+{
+	if (screenMode == 2) {
+		if (players.at(0).cargoUsed<players.at(0).maxCargo && !harvested) {
+			players.at(0).luxuries ++;
+			updateCargoSpace();
+			harvested = true;
 		}
 	}
 }
@@ -580,6 +621,15 @@ void press_key(ALLEGRO_EVENT e)
 				}
 				if (e.keyboard.keycode == ALLEGRO_KEY_B) {
 					recharge();
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_X) {
+					explore();
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_M) {
+					mine();
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_H) {
+					harvest();
 				}
 				if (e.keyboard.keycode == ALLEGRO_KEY_C) {
 					dispNotEnoughCredits = false;
