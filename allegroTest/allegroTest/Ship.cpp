@@ -17,10 +17,12 @@ Ship::Ship() {
 	fuel = 1000;
 	maxFuel = 1000;
 	energy = 100;
+	energyCounter = 0;
 	maxEnergy = 100;
 	credits = 200;
 	minerals = 0;
-	cargoUsed = minerals;
+	luxuries = 0;
+	cargoUsed = minerals + luxuries;
 	maxCargo = 10;
 	flipflop = 0;
 	fireWidth = 30;
@@ -57,10 +59,12 @@ Ship::Ship(const char* filename1, const char* filename2, const char* filename3, 
 	fuel = 1000;
 	maxFuel = 1000;
 	energy = 100;
+	energyCounter = 0;
 	maxEnergy = 100;
 	credits = 200;
 	minerals = 0;
-	cargoUsed = minerals;
+	luxuries = 0;
+	cargoUsed = minerals + luxuries;
 	maxCargo = 10;
 	flipflop = 0;
 	fireWidth = 30;

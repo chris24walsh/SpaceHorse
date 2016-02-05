@@ -57,7 +57,13 @@ bool safe = true;
 bool dispUpgradeText = false;
 bool dispNotEnoughCredits = false;
 bool dispFullyRefueled = false;
+bool dispRecharged = false;
 bool askBuySell = false;
+bool askWhichCargo = false;
+bool buyCargo = false;
+bool sellCargo = false;
+bool tradeMinerals = false;
+bool tradeLuxuries = false;
 bool dispNoCargoSpace = false;
 bool dispNoCargo = true;
 
@@ -110,8 +116,8 @@ void fire();
 void triggerCollision();
 void dock();
 void refuel();
-void buyCargo();
-void sellCargo();
+void recharge();
+void trade();
 void updateCargoSpace();
 void upgrade_weapon();
 void hyperdrive();
@@ -324,12 +330,16 @@ void dock()
 			if (screenMode == 2) {
 				screenMode = 1; //Undock, if already docked and docking activated
 				dispFullyRefueled = false;
+				dispRecharged = false;
 				dispNotEnoughCredits = false;
 			}
 			else if (screenMode == 1) { //Else, if able to dock, do so, stop ship and set it to safe mode
 				screenMode = 2;
 				if (players.at(0).fuel==players.at(0).maxFuel) {
 					dispFullyRefueled = true;
+				}
+				if (players.at(0).energy==players.at(0).maxEnergy) {
+					dispRecharged = true;
 				}
 				if (players.at(0).fireHeight==40) {
 					dispUpgradeText = true;
@@ -359,38 +369,59 @@ void refuel()
 	}
 }
 
-void buyCargo()
+void recharge()
 {
 	if (screenMode == 2) {
-		askBuySell = false;
-		if (players.at(0).credits<10 && players.at(0).cargoUsed<players.at(0).maxCargo) {
+		if (players.at(0).energy==players.at(0).maxEnergy) {
+			dispRecharged = true;
+		}
+		if (players.at(0).credits<10 && players.at(0).energy<players.at(0).maxEnergy) {
 			dispNotEnoughCredits = true;
 		}
-		if (players.at(0).credits>=10 && players.at(0).cargoUsed<players.at(0).maxCargo) {
+		if (players.at(0).credits>=10 && players.at(0).energy<players.at(0).maxEnergy) {
 			dispNotEnoughCredits = false;
-			dispNoCargo = false;
 			players.at(0).credits -= 10;
-			players.at(0).minerals ++;
-			updateCargoSpace();
+			players.at(0).energy = players.at(0).maxEnergy;
+			dispRecharged = true;
 		}
 	}
 }
 
-void sellCargo()
+void trade()
 {
 	if (screenMode == 2) {
-		askBuySell = false;
-		if (players.at(0).minerals>=1) {
-			players.at(0).minerals --;
-			players.at(0).credits += 5;
-			updateCargoSpace();
+		if (buyCargo && players.at(0).cargoUsed<players.at(0).maxCargo) {
+			if (tradeMinerals && players.at(0).credits<10) dispNotEnoughCredits = true;
+			if (tradeMinerals && players.at(0).credits>=10) {
+				players.at(0).credits -= 10;
+				players.at(0).minerals ++;
+				updateCargoSpace();
+			}
+			if (tradeLuxuries && players.at(0).credits<20) dispNotEnoughCredits = true;
+			if (tradeLuxuries && players.at(0).credits>=20) {
+				players.at(0).credits -= 20;
+				players.at(0).luxuries ++;
+				updateCargoSpace();
+			}
+		}
+		if (sellCargo && players.at(0).cargoUsed>0) {
+			if (tradeMinerals && players.at(0).minerals>=1) {
+				players.at(0).minerals --;
+				players.at(0).credits += 5;
+				updateCargoSpace();
+			}
+			if (tradeLuxuries && players.at(0).luxuries>=1) {
+				players.at(0).luxuries --;
+				players.at(0).credits += 10;
+				updateCargoSpace();
+			}
 		}
 	}
 }
 
 void updateCargoSpace()
 {
-	players.at(0).cargoUsed = players.at(0).minerals;
+	players.at(0).cargoUsed = players.at(0).minerals + players.at(0).luxuries;
 	if (players.at(0).cargoUsed==0) dispNoCargo = true;
 	if (players.at(0).cargoUsed>0) dispNoCargo = false;
 	if (players.at(0).cargoUsed==players.at(0).maxCargo) dispNoCargoSpace = true;
@@ -534,7 +565,7 @@ void press_key(ALLEGRO_EVENT e)
 		
 	case 2: //Docking mode
 		{
-			if (!askBuySell) {
+			if (!askBuySell && !askWhichCargo) {
 				if (e.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
 					done = true;
 				}
@@ -547,6 +578,9 @@ void press_key(ALLEGRO_EVENT e)
 				if (e.keyboard.keycode == ALLEGRO_KEY_F) {
 					refuel();
 				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_B) {
+					recharge();
+				}
 				if (e.keyboard.keycode == ALLEGRO_KEY_C) {
 					dispNotEnoughCredits = false;
 					askBuySell = true;
@@ -557,10 +591,33 @@ void press_key(ALLEGRO_EVENT e)
 					done = true;
 				}
 				if (e.keyboard.keycode == ALLEGRO_KEY_B) {
-					buyCargo();
+					sellCargo = false;
+					buyCargo = true;
+					askWhichCargo = true;
+					askBuySell = false;
 				}
 				if (e.keyboard.keycode == ALLEGRO_KEY_S) {
-					sellCargo();
+					buyCargo = false;
+					sellCargo = true;
+					askWhichCargo = true;
+					askBuySell = false;
+				}
+			}
+			if (askWhichCargo) {
+				if (e.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+					done = true;
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_M) {
+					tradeMinerals = true;
+					trade();
+					tradeMinerals = false;
+					askWhichCargo = false;
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_L) {
+					tradeLuxuries = true;
+					trade();
+					tradeLuxuries = false;
+					askWhichCargo = false;
 				}
 			}
 			break;
@@ -642,6 +699,15 @@ void update_logic()
 		if (players.at(0).angle > 6.25) players.at(0).angle = 0;
 		if (players.at(0).angle < 0) players.at(0).angle = 6.25;
 
+		//Recharging energy
+		if (players.at(0).energy<players.at(0).maxEnergy) {
+			players.at(0).energyCounter ++;
+		}
+		if (players.at(0).energyCounter>=60) {
+			players.at(0).energy ++;
+			players.at(0).energyCounter = 0;
+		}
+
 		//Cycle between different rocket sprites, to give effect of rocket blasting
 		for (int p=0;p<players.size();p++) {
 			if (players.at(p).speed>0) {
@@ -666,8 +732,8 @@ void update_logic()
 				players.at(0).speed -= 1;
 				players.at(0).fuel -= 8;
 			}
-			if (players.at(0).speed>0 && players.at(0).fuel==0) players.at(0).speed -= 1;
-			if (players.at(0).speed>0 && players.at(0).speed<=2 && players.at(0).fuel>0) players.at(0).speed -= 1;
+			if (players.at(0).speed>2 && players.at(0).fuel==0) players.at(0).speed -= 1;
+			if (players.at(0).speed>0 && players.at(0).speed<=2) players.at(0).speed -= 1;
 		}
 
 		//Resolve translations for x and y axis
@@ -700,14 +766,28 @@ void update_logic()
 		//Set fire cycle
 		if (firePressed) {
 			if (players.at(0).fireCycle >= 10) {
-				int x = players.at(0).fireballNumber++; //Cycled through available fireballs (having a high upper threshold of fireballs prevents onscreen fireballs being recycled)
-				players.at(0).fireX[x] = players.at(0).x;
-				players.at(0).fireY[x] = players.at(0).y;
-				players.at(0).fireAngle[x] = players.at(0).angle;
-				if (players.at(0).fireballNumber>=MAXFIREBALLS){
-					players.at(0).fireballNumber = 0;
+				if (players.at(0).fireHeight==20 && players.at(0).energy>=3) {
+					int x = players.at(0).fireballNumber++; //Cycled through available fireballs (having a high upper threshold of fireballs prevents onscreen fireballs being recycled)
+					players.at(0).fireX[x] = players.at(0).x;
+					players.at(0).fireY[x] = players.at(0).y;
+					players.at(0).fireAngle[x] = players.at(0).angle;
+					if (players.at(0).fireballNumber>=MAXFIREBALLS){
+						players.at(0).fireballNumber = 0;
+					}
+					players.at(0).fireCycle = 0;
+					players.at(0).energy -= 3;
 				}
-				players.at(0).fireCycle = 0;
+				if (players.at(0).fireHeight==40 && players.at(0).energy>=5) { //upgraded weapon costs more energy
+					int x = players.at(0).fireballNumber++;
+					players.at(0).fireX[x] = players.at(0).x;
+					players.at(0).fireY[x] = players.at(0).y;
+					players.at(0).fireAngle[x] = players.at(0).angle;
+					if (players.at(0).fireballNumber>=MAXFIREBALLS){
+						players.at(0).fireballNumber = 0;
+					}
+					players.at(0).fireCycle = 0;
+					players.at(0).energy -= 5;
+				}
 			}
 			players.at(0).fireCycle++;
 		}
@@ -1022,15 +1102,21 @@ void update_graphics()
 
 			//display list of cargo
 			if (!dispNoCargo) {
-				stringstream s6;
+				stringstream s6, s8;
 				s6 << "Minerals: " << players.at(0).minerals << "t";
+				s8 << "Luxuries: " << players.at(0).luxuries << "t";
 				string str6 = s6.str();
-				al_draw_text(font, al_map_rgb(255,255,255), 680, 607, 0, str6.c_str());
+				string str8 = s8.str();
+				if (players.at(0).minerals>0) al_draw_text(font, al_map_rgb(255,255,255), 680, 607, 0, str6.c_str());
+				if (players.at(0).luxuries>0) al_draw_text(font, al_map_rgb(255,255,255), 680, 650, 0, str8.c_str());
 			}
 			
 			//Check to display feedback messages
 			if (askBuySell) {
-				al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.9, 0, "(B)uy or (S)ell cargo? Minerals 10cr/t");
+				al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.9, 0, "(B)uy or (S)ell cargo?");
+			}	
+			if (askWhichCargo) {
+				al_draw_text(font, al_map_rgb(255,255,255), windowWidth*0.05, windowHeight*0.9, 0, "(M)inerals 10cr/t or (L)uxuries 20cr/t?");
 			}	
 			if (dispNoCargo) {
 				al_draw_text(font, al_map_rgb(255,255,255), 715, 715, 0, "No cargo!");
@@ -1043,6 +1129,12 @@ void update_graphics()
 			}
 			if (dispUpgradeText) {
 				al_draw_text(font, al_map_rgb(255,255,255), 450, 214, 0, "Bought!");
+			}
+			if (!dispRecharged) {
+				al_draw_text(font, al_map_rgb(255,255,255), 990, 506, 0, "Charge: 10cr");
+			}
+			if (dispRecharged) {
+				al_draw_text(font, al_map_rgb(255,255,255), 990, 506, 0, "Charged!");
 			}
 			if (!dispFullyRefueled) {
 				al_draw_text(font, al_map_rgb(255,255,255), 990, 651, 0, "Refuel: 10cr");
