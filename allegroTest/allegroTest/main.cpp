@@ -62,9 +62,9 @@ bool dispNoCargoSpace = false;
 bool dispNoCargo = true;
 
 //Network vars
-bool hostSet = false;
-bool connected = false;
-int wait = 0;
+//bool hostSet = false;
+//bool connected = false;
+//int wait = 0;
 
 //Misc vars
 bool done; //Keeps game looping
@@ -122,7 +122,7 @@ void update_graphics();
 void game_loop();
 
 //Network Functions declaration
-void setUpHost();
+//void setUpHost();
 
 
 //////////////////////////////////
@@ -131,9 +131,9 @@ void setUpHost();
 vector<Ship> players;
 vector<Planet> planets;
 
-ENetHost * host; //This machine
-vector<ENetPeer*> peers; //Dynamic list of host's network peers
-ENetEvent event;
+//ENetHost * host; //This machine
+//vector<ENetPeer*> peers; //Dynamic list of host's network peers
+//ENetEvent event;
 
 
 /////////////////////////////////
@@ -280,10 +280,10 @@ void init()
     al_register_event_source(event_queue, al_get_display_event_source(display));
 	
 	//Initialise the network library
-	if (enet_initialize () != 0)
+	/*if (enet_initialize () != 0)
     {
         abort_game("An error occurred while initializing ENet.\n");
-    }
+    }*/
 
 	
 }
@@ -303,9 +303,9 @@ void shutdown()
 	}
     if (event_queue) al_destroy_event_queue(event_queue);
 
-	//Networking shutdown
-	enet_deinitialize();
-	enet_host_destroy(host);
+	////Networking shutdown
+	//enet_deinitialize();
+	//enet_host_destroy(host);
 }
 
 
@@ -442,11 +442,11 @@ void press_key(ALLEGRO_EVENT e)
 		{
 			if (e.keyboard.keycode == ALLEGRO_KEY_UP) {
 				homeScreenOption--;
-				if (homeScreenOption < 1) homeScreenOption = 4;
+				if (homeScreenOption < 3) homeScreenOption = 4;
 			}
 			if (e.keyboard.keycode == ALLEGRO_KEY_DOWN) {
 				homeScreenOption++;
-				if (homeScreenOption > 4) homeScreenOption = 1;
+				if (homeScreenOption > 4) homeScreenOption = 3;
 			}
 			if (e.keyboard.keycode == ALLEGRO_KEY_ENTER) {
 				if (homeScreenOption==4) { //Quit
@@ -458,7 +458,7 @@ void press_key(ALLEGRO_EVENT e)
 					break;
 				}
 				else { //Host on localhost or play single player
-					setUpHost();
+					//setUpHost();
 					screenMode = 1;
 				}
 			}
@@ -566,32 +566,32 @@ void press_key(ALLEGRO_EVENT e)
 			break;
 		}
 
-	case 3: //Enter server IP
-		{
-			if (e.keyboard.keycode >= 27 && e.keyboard.keycode <= 36) { //Number
-				int newKey = e.keyboard.keycode;
-				newKey -= 27;
-				stringstream enterIp;
-				enterIp << newKey;
-				ipAddress += enterIp.str();
-			}
-			if (e.keyboard.keycode == 73) {
-				stringstream enterIp;
-				enterIp << ".";
-				ipAddress += enterIp.str();
-			}
-			if (e.keyboard.keycode == 63) {
-				if (ipAddress.length() > 0)
-					ipAddress.pop_back();
-			}
-			else if (e.keyboard.keycode == ALLEGRO_KEY_ENTER) {
-				cout << ipAddress;
-				if (ipAddress.empty()) ipAddress = "127.0.0.1";
-				setUpHost();
-				screenMode = 1;
-			}
-			else cout << e.keyboard.keycode << endl;
-		}
+	//case 3: //Enter server IP
+	//	{
+	//		if (e.keyboard.keycode >= 27 && e.keyboard.keycode <= 36) { //Number
+	//			int newKey = e.keyboard.keycode;
+	//			newKey -= 27;
+	//			stringstream enterIp;
+	//			enterIp << newKey;
+	//			ipAddress += enterIp.str();
+	//		}
+	//		if (e.keyboard.keycode == 73) {
+	//			stringstream enterIp;
+	//			enterIp << ".";
+	//			ipAddress += enterIp.str();
+	//		}
+	//		if (e.keyboard.keycode == 63) {
+	//			if (ipAddress.length() > 0)
+	//				ipAddress.pop_back();
+	//		}
+	//		else if (e.keyboard.keycode == ALLEGRO_KEY_ENTER) {
+	//			cout << ipAddress;
+	//			if (ipAddress.empty()) ipAddress = "127.0.0.1";
+	//			setUpHost();
+	//			screenMode = 1;
+	//		}
+	//		else cout << e.keyboard.keycode << endl;
+	//	}
 	}
 }
 
@@ -725,83 +725,83 @@ void update_logic()
 			else players.at(0).canDock = false;
 		}
 	
-		if (hostSet) {
-			//Apply remote ship's new coordinates to player2's current local coordinates
-			enet_uint8 *d = NULL;
-			while (enet_host_service(host, &event, 0)) { //Poll to enets data buffer
-				ENetPeer * peer;
-				//switch(event.type) {
-				if (event.type == ENET_EVENT_TYPE_CONNECT) {
-					printf("Connection received from %x\n", event.peer->address.host);
-					connected = true;
-					peer = event.peer;
-					peers.push_back(peer);
-					Ship player;
-					players.push_back(player);
-					//newPlayerConnected = true;
-					break;
-				}
-				if (event.type == ENET_EVENT_TYPE_RECEIVE) {
-					wait = 0;
-					d = event.packet->data;
-					int numPlayers = atoi(strtok((char*)d,"|")); //Parse the packets information
-					int id = atoi(strtok(NULL,"|"));
-					int x = atoi(strtok(NULL,"|"));
-					int y = atoi(strtok(NULL,"|"));
-					float angle = atof(strtok(NULL,"|"));
-					int speed = atoi(strtok(NULL,"|"));
-					int fireX[MAXFIREBALLS];
-					int fireY[MAXFIREBALLS];
-					float fireAngle[MAXFIREBALLS];
-					for (int i=0;i<MAXFIREBALLS;i++) {
-						fireX[i] = atoi(strtok(NULL,"|"));
-						fireY[i] = atoi(strtok(NULL,"|"));
-						fireAngle[i] = atof(strtok(NULL,"|"));
-					}
-					//cout << "Number players: " << numPlayers << endl;
-					if (numPlayers != 0) { //Client listens to server
-						while (numPlayers>players.size()) { //Add empty players as necessary
-							Ship player;
-							players.push_back(player);
-							cout << "New player added from server" << endl;
-						}
-					}
-					for (int p=1; p<players.size(); p++) { //Check all current players
-						if (players.at(p).id == id) { //If received id matches theirs
-							players.at(p).x = x; //Assign all the parsed information
-							players.at(p).y = y;
-							players.at(p).angle = angle;
-							players.at(p).speed = speed;
-							for (int i=0;i<MAXFIREBALLS;i++) {
-								players.at(p).fireX[i] = fireX[i];
-								players.at(p).fireY[i] = fireY[i];
-								players.at(p).fireAngle[i] = fireAngle[i];
-							}
-						break;
-						}
-					}
-					//Else
-					if (players.at(players.size()-1).id == 0) { //While there are still empty players
-						players.at(players.size()-1).id = id; //Assign all the parsed information
-						players.at(players.size()-1).x = x;
-						players.at(players.size()-1).y = y;
-						players.at(players.size()-1).angle = angle;
-						players.at(players.size()-1).speed = speed;
-						for (int i=0;i<MAXFIREBALLS;i++) {
-							players.at(players.size()-1).fireX[i] = fireX[i];
-							players.at(players.size()-1).fireY[i] = fireY[i];
-							players.at(players.size()-1).fireAngle[i] = fireAngle[i];
-						}
-						players.push_back(players.at(players.size()-2)); //Add second-last to last place
-						players.erase(players.begin() + players.size()-3); //Delete the now-third-last
-						cout << "Number of players: " << players.size() << endl;
-					}
-				}
-				if (event.type == ENET_EVENT_TYPE_DISCONNECT) {
-					printf("%s disconnected.\n", event.peer->data);
-					break;
-				}
-			}
+		//if (hostSet) {
+		//	//Apply remote ship's new coordinates to player2's current local coordinates
+		//	enet_uint8 *d = NULL;
+		//	while (enet_host_service(host, &event, 0)) { //Poll to enets data buffer
+		//		ENetPeer * peer;
+		//		//switch(event.type) {
+		//		if (event.type == ENET_EVENT_TYPE_CONNECT) {
+		//			printf("Connection received from %x\n", event.peer->address.host);
+		//			connected = true;
+		//			peer = event.peer;
+		//			peers.push_back(peer);
+		//			Ship player;
+		//			players.push_back(player);
+		//			//newPlayerConnected = true;
+		//			break;
+		//		}
+		//		if (event.type == ENET_EVENT_TYPE_RECEIVE) {
+		//			wait = 0;
+		//			d = event.packet->data;
+		//			int numPlayers = atoi(strtok((char*)d,"|")); //Parse the packets information
+		//			int id = atoi(strtok(NULL,"|"));
+		//			int x = atoi(strtok(NULL,"|"));
+		//			int y = atoi(strtok(NULL,"|"));
+		//			float angle = atof(strtok(NULL,"|"));
+		//			int speed = atoi(strtok(NULL,"|"));
+		//			int fireX[MAXFIREBALLS];
+		//			int fireY[MAXFIREBALLS];
+		//			float fireAngle[MAXFIREBALLS];
+		//			for (int i=0;i<MAXFIREBALLS;i++) {
+		//				fireX[i] = atoi(strtok(NULL,"|"));
+		//				fireY[i] = atoi(strtok(NULL,"|"));
+		//				fireAngle[i] = atof(strtok(NULL,"|"));
+		//			}
+		//			//cout << "Number players: " << numPlayers << endl;
+		//			if (numPlayers != 0) { //Client listens to server
+		//				while (numPlayers>players.size()) { //Add empty players as necessary
+		//					Ship player;
+		//					players.push_back(player);
+		//					cout << "New player added from server" << endl;
+		//				}
+		//			}
+		//			for (int p=1; p<players.size(); p++) { //Check all current players
+		//				if (players.at(p).id == id) { //If received id matches theirs
+		//					players.at(p).x = x; //Assign all the parsed information
+		//					players.at(p).y = y;
+		//					players.at(p).angle = angle;
+		//					players.at(p).speed = speed;
+		//					for (int i=0;i<MAXFIREBALLS;i++) {
+		//						players.at(p).fireX[i] = fireX[i];
+		//						players.at(p).fireY[i] = fireY[i];
+		//						players.at(p).fireAngle[i] = fireAngle[i];
+		//					}
+		//				break;
+		//				}
+		//			}
+		//			//Else
+		//			if (players.at(players.size()-1).id == 0) { //While there are still empty players
+		//				players.at(players.size()-1).id = id; //Assign all the parsed information
+		//				players.at(players.size()-1).x = x;
+		//				players.at(players.size()-1).y = y;
+		//				players.at(players.size()-1).angle = angle;
+		//				players.at(players.size()-1).speed = speed;
+		//				for (int i=0;i<MAXFIREBALLS;i++) {
+		//					players.at(players.size()-1).fireX[i] = fireX[i];
+		//					players.at(players.size()-1).fireY[i] = fireY[i];
+		//					players.at(players.size()-1).fireAngle[i] = fireAngle[i];
+		//				}
+		//				players.push_back(players.at(players.size()-2)); //Add second-last to last place
+		//				players.erase(players.begin() + players.size()-3); //Delete the now-third-last
+		//				cout << "Number of players: " << players.size() << endl;
+		//			}
+		//		}
+		//		if (event.type == ENET_EVENT_TYPE_DISCONNECT) {
+		//			printf("%s disconnected.\n", event.peer->data);
+		//			break;
+		//		}
+		//	}
 
 			
 			/*if (newPlayerConnected) { //Add a new spare
@@ -810,40 +810,40 @@ void update_logic()
 				newPlayerConnected = false;
 			}*/
 
-			//Check if connected or not before sending network data
-			if (connected) {
-				if (homeScreenOption==1) { //If server
-					for (int p=0; p<players.size(); p++) {
-						stringstream ss;
-						ss << players.size() << "|" << players.at(p).id << "|" << players.at(p).x << "|" << players.at(p).y << "|" << players.at(p).angle << "|" << players.at(p).speed;
-						for (int i=0;i<MAXFIREBALLS;i++)
-							ss << "|" << players.at(p).fireX[i] << "|" << players.at(p).fireY[i] << "|" << players.at(p).fireAngle[i];
-						string data = ss.str();
-						ENetPacket *packet = enet_packet_create(data.c_str(), strlen(data.c_str())+1, 0);
-						for (int pe=0; pe<peers.size(); pe++) enet_peer_send(peers.at(pe), 0, packet); //Send all players to all peers
-					}
-				}
-				if (homeScreenOption==2) { //If client
-					stringstream ss;
-					ss << 0 << "|" << players.at(0).id << "|" << players.at(0).x << "|" << players.at(0).y << "|" << players.at(0).angle << "|" << players.at(0).speed;
-					for (int i=0;i<MAXFIREBALLS;i++)
-						ss << "|" << players.at(0).fireX[i] << "|" << players.at(0).fireY[i] << "|" << players.at(0).fireAngle[i];
-					string data = ss.str();
-					ENetPacket *packet = enet_packet_create(data.c_str(), strlen(data.c_str())+1, 0);
-					enet_peer_send(peers.at(0), 0, packet); //Send self to only peer (server)
-				}
-			}
-		}
+			////Check if connected or not before sending network data
+			//if (connected) {
+			//	if (homeScreenOption==1) { //If server
+			//		for (int p=0; p<players.size(); p++) {
+			//			stringstream ss;
+			//			ss << players.size() << "|" << players.at(p).id << "|" << players.at(p).x << "|" << players.at(p).y << "|" << players.at(p).angle << "|" << players.at(p).speed;
+			//			for (int i=0;i<MAXFIREBALLS;i++)
+			//				ss << "|" << players.at(p).fireX[i] << "|" << players.at(p).fireY[i] << "|" << players.at(p).fireAngle[i];
+			//			string data = ss.str();
+			//			ENetPacket *packet = enet_packet_create(data.c_str(), strlen(data.c_str())+1, 0);
+			//			for (int pe=0; pe<peers.size(); pe++) enet_peer_send(peers.at(pe), 0, packet); //Send all players to all peers
+			//		}
+			//	}
+			//	if (homeScreenOption==2) { //If client
+			//		stringstream ss;
+			//		ss << 0 << "|" << players.at(0).id << "|" << players.at(0).x << "|" << players.at(0).y << "|" << players.at(0).angle << "|" << players.at(0).speed;
+			//		for (int i=0;i<MAXFIREBALLS;i++)
+			//			ss << "|" << players.at(0).fireX[i] << "|" << players.at(0).fireY[i] << "|" << players.at(0).fireAngle[i];
+			//		string data = ss.str();
+			//		ENetPacket *packet = enet_packet_create(data.c_str(), strlen(data.c_str())+1, 0);
+			//		enet_peer_send(peers.at(0), 0, packet); //Send self to only peer (server)
+			//	}
+			//}
+		//}
 		//Collision detection
-		if (players.size() > 1) { //Only if more than one player
-			for (int p=1; p<players.size(); p++) {
-				for (int i=0; i<MAXFIREBALLS; i++ ) { //Checking all enemy fireballs
-					if (abs(players.at(0).x - players.at(p).fireX[i]) < abs(players.at(0).width/2 - players.at(p).fireWidth/2))
-						if (abs(players.at(0).y - players.at(p).fireY[i]) < abs(players.at(0).height/2 - players.at(p).fireHeight/2))
-							triggerCollision();
-				}
-			}
-		}
+		//if (players.size() > 1) { //Only if more than one player
+		//	for (int p=1; p<players.size(); p++) {
+		//		for (int i=0; i<MAXFIREBALLS; i++ ) { //Checking all enemy fireballs
+		//			if (abs(players.at(0).x - players.at(p).fireX[i]) < abs(players.at(0).width/2 - players.at(p).fireWidth/2))
+		//				if (abs(players.at(0).y - players.at(p).fireY[i]) < abs(players.at(0).height/2 - players.at(p).fireHeight/2))
+		//					triggerCollision();
+		//		}
+		//	}
+		//}
 
 		//Check for gameover
 		if (players.at(0).armour <= 0) {
@@ -1104,54 +1104,54 @@ void game_loop()
 ////////////////  NETWORK FUNCTIONS  //////////////////
 
 
-void setUpHost() {
-	//Create server (or client as below, depending on homeScreenOption);
-	if (homeScreenOption==1) {
-		ENetAddress address;
-		//Bind server to localhost
-		address.host = ENET_HOST_ANY;
-		// Bind server to port 1234
-		address.port = 1234;
-		host = enet_host_create (& address /* the address to bind the server host to */, 
-									 32      /* allow up to 32 clients and/or outgoing connections */,
-									  2      /* allow up to 2 channels to be used, 0 and 1 */,
-									  0      /* assume any amount of incoming bandwidth */,
-									  0      /* assume any amount of outgoing bandwidth */);
-		if (host == NULL) {
-			abort_game("An error occurred while trying to create an ENet server host.\n");
-		}
-
-		hostSet = true;
-	}
-
-	//Create client
-	else if (homeScreenOption==2) {
-		host = enet_host_create (NULL /* create a client host */,
-					1 /* only allow 1 outgoing connection */,
-					2 /* allow up 2 channels to be used, 0 and 1 */,
-					0	/* 57600 / 8 /* 56K modem with 56 Kbps downstream bandwidth */,
-					0	/* 14400 / 8 /* 56K modem with 14 Kbps upstream bandwidth */);
-		if (host == NULL) {
-			abort_game("An error occurred while trying to create an ENet client host.\n");
-		}
-
-		//Begin connection to server machine
-		ENetAddress address;
-		/* Connect to server:1234. */
-		//enet_address_set_host (& address, "109.125.19.33");
-		enet_address_set_host (& address, ipAddress.c_str());
-		//enet_address_set_host (& address, "localhost");
-		address.port = 1234;
-		
-		/* Initiate the connection, allocating the two channels 0 and 1. */
-		ENetPeer * peer = enet_host_connect (host, & address, 2, 2500); //Bind successful connection to peer
-
-		if (peer == NULL)
-		{
-		   abort_game("No server available at this address.\n");
-		}
-
-		hostSet = true;
-	}
-	else ; //Single player mode (just don't setup server or client!)
-}
+//void setUpHost() {
+//	//Create server (or client as below, depending on homeScreenOption);
+//	if (homeScreenOption==1) {
+//		ENetAddress address;
+//		//Bind server to localhost
+//		address.host = ENET_HOST_ANY;
+//		// Bind server to port 1234
+//		address.port = 1234;
+//		host = enet_host_create (& address /* the address to bind the server host to */, 
+//									 32      /* allow up to 32 clients and/or outgoing connections */,
+//									  2      /* allow up to 2 channels to be used, 0 and 1 */,
+//									  0      /* assume any amount of incoming bandwidth */,
+//									  0      /* assume any amount of outgoing bandwidth */);
+//		if (host == NULL) {
+//			abort_game("An error occurred while trying to create an ENet server host.\n");
+//		}
+//
+//		hostSet = true;
+//	}
+//
+//	//Create client
+//	else if (homeScreenOption==2) {
+//		host = enet_host_create (NULL /* create a client host */,
+//					1 /* only allow 1 outgoing connection */,
+//					2 /* allow up 2 channels to be used, 0 and 1 */,
+//					0	/* 57600 / 8 /* 56K modem with 56 Kbps downstream bandwidth */,
+//					0	/* 14400 / 8 /* 56K modem with 14 Kbps upstream bandwidth */);
+//		if (host == NULL) {
+//			abort_game("An error occurred while trying to create an ENet client host.\n");
+//		}
+//
+//		//Begin connection to server machine
+//		ENetAddress address;
+//		/* Connect to server:1234. */
+//		//enet_address_set_host (& address, "109.125.19.33");
+//		enet_address_set_host (& address, ipAddress.c_str());
+//		//enet_address_set_host (& address, "localhost");
+//		address.port = 1234;
+//		
+//		/* Initiate the connection, allocating the two channels 0 and 1. */
+//		ENetPeer * peer = enet_host_connect (host, & address, 2, 2500); //Bind successful connection to peer
+//
+//		if (peer == NULL)
+//		{
+//		   abort_game("No server available at this address.\n");
+//		}
+//
+//		hostSet = true;
+//	}
+//	else ; //Single player mode (just don't setup server or client!)
+//}
