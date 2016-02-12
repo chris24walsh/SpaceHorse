@@ -1,0 +1,11 @@
+Level 1 Starship
+
+Allows only level 1 equipment, types A, C, D, E, N
+
+A. Level 1 radar shows basic area minimap with type A, B, and E locations.
+C. Level 1 weapon (basic forward firing one shot)
+D. Level 1 cargo hold (can hold maybe 10 items?)
+E. Level 1 fuel tanks (enough for a single round trip from Earth to Uranus?)
+N. Level 1 engines (basic speed, turning and fuel consumption)
+
+First goal is to find enough trade goods to upgrade ship.

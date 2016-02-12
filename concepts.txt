@@ -1,0 +1,68 @@
+2D Space Exploration Game
+
+Primary goal: Return home.
+
+1. Go to next star system:
+
+1.1. Discover exact navigational coordinates
+1.2. Install interstellar engine
+1.3. Accumulate large enough energy reserves to activate interstellar engine
+
+2. Get the stuff above from locations within the system:
+
+2.1. Travel to other locations within the system (costs fuel)
+2.2. Interact with locations
+2.3. Defend against dangers (requires equipment and energy)
+
+---
+
+2.1. Travel to other locations within the system:
+2.1.1. Speed up/down (costs fuel)
+2.1.2. Turn direction (costs fuel)
+2.1.3. Detect new locations (space radar long distance on minimap, and maybe scanner for short distance info)
+
+2.2. Interact with locations (planets/space stations/asteroids/gas clouds/other ships):
+2.2.1. Dock
+2.2.2. Leave (costs fuel depending on size of location?)
+2.2.3. Mine for fuel (or fuel ingredients?)/energy/commodities
+2.2.4. Buy/Sell/Store fuel/energy/equipment/commodities
+2.2.5. Upgrade equipment (better radar/scanner/cargo hold/engines/guns/shields/armor/mining lasers/gas scoops/etc)
+2.2.6. Get info about other locations/dangers/star system coordinates/equipment/trade opportunities/etc.
+
+2.3. Defend against dangers (pirates/enemies/police/natural hazards/artificial hazards)
+2.3.1. Run away from danger
+2.3.2. Destroy danger
+2.3.3. Take damage
+2.3.4. Lose cargo/equipment/fuel/energy/ship
+2.3.5. Get killed
+2.3.6. Detect danger in advance
+
+Types of location:
+Type A. Star (don't get too close!)
+Type B. Planet/Moon (costing more fuel to leave again)
+Type C. Asteroid/Comet (possible docking/collision difficulty?)
+Type D. Space stations/outposts (easy docking and leaving)
+Type E. Gas giants/clouds/nebulae (can be mined for fuel with the right equipment)
+Type F. Other ships (like space stations but might chase you and rob/destroy/help you)
+
+Types of cargo:
+Type A. Fuel (stored fuel tanks)
+Type B. Energy (stored in batteries necessarily)
+Type C. Equipment (either installed in suitable ship or stored in cargo hold)
+Type D. Trade goods (stored in cargo hold)
+
+Types of equipment:
+Type A. Radar (long distance visibility on minimap, maybe upgrade to show smaller type locations/ships and/or more area)
+Type B. Scanner (get short distance info on a location, maybe upgrade to better info from further away getting past interference)
+Type C. Weapon (requires energy to use, upgrading to more damage/less energy)
+Type D. Cargo hold (for storing trade goods)
+Type E. Fuel tanks (for storing fuel reserves)
+Type F. Batteries (for storing energy reserves)
+Type G. Interstellar engine (basic jump to adjacent system, maybe upgrading to jumping to further systems)
+Type H. Starship (determines basic armour/health, and limits types and levels of equipment that can be installed)
+Type I. Mining Lasers (for mining rocky stuff)
+Type J. Gas scoops (for getting fuel from gases)
+Type K. Armour (extra health)
+Type L. Shields (extra health that uses energy reserves to recharge unless disabled)
+Type M. Energy generator (basic solar, maybe upgrading to fission/fusion, etc)
+Type N. Conventional engines (for propulsion within a star system, upgrading to more speed/manoevrability/less fuel consumption)
