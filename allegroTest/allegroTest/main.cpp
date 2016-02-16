@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <conio.h>
 #include <random>
@@ -347,6 +348,24 @@ void hyperdrive()
 	distanceTravelY = abs(abs(y2) - abs(players.at(0).y));
 }
 
+void saveGame()
+{
+	ofstream file;
+	file.open("save/save_file.dat", ofstream::trunc);
+
+	file << players.at(0).x << players.at(0).y << players.at(0).health;
+	file.close();
+}
+
+void loadGame()
+{
+	ifstream file;
+	file.open("save/save_file.dat", ofstream::in);
+
+	
+	file.close();
+}
+
 void press_key(ALLEGRO_EVENT e)
 {
 	switch (screenMode) {
@@ -407,6 +426,9 @@ void press_key(ALLEGRO_EVENT e)
 				}
 				if (e.keyboard.keycode == ALLEGRO_KEY_H) {
 					hyperdrive();
+				}
+				if (e.keyboard.keycode == ALLEGRO_KEY_F1) {
+					saveGame();
 				}
 			}
 			if (hyperDrive) {
