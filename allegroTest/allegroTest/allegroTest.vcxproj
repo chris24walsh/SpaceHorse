@@ -65,13 +65,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Screen.cpp" />
-    <ClCompile Include="Ship.cpp" />
+    <ClCompile Include="old_main.cpp" />
     <ClCompile Include="Planet.cpp" />
+    <ClCompile Include="Ship.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Allegro_init.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="Screen.h" />
     <ClInclude Include="Planet.h" />
     <ClInclude Include="Radar.h" />
