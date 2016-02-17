@@ -3,6 +3,8 @@
 
 Ship::Ship() {
 	id = 0;
+	x = 489000 + rand()%100;
+	y = 503800 + rand()%100;
 	shipSprite = al_load_bitmap("c:/dev/allegro/images/shipSprite.png");
 	shipSprite1 = al_load_bitmap("c:/dev/allegro/images/shipSprite1.png");
 	shipSprite2 = al_load_bitmap("c:/dev/allegro/images/shipSprite2.png");
