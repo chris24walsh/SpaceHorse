@@ -65,19 +65,40 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Display.cpp" />
+    <ClCompile Include="Dock_display.cpp" />
+    <ClCompile Include="Dock_logic.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Logic.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="main.cpp.bak" />
+    <ClCompile Include="Map.cpp" />
+    <ClCompile Include="Menu_display.cpp" />
+    <ClCompile Include="Menu_logic.cpp" />
     <ClCompile Include="Planet.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Ship.cpp" />
+    <ClCompile Include="Space_display.cpp" />
+    <ClCompile Include="Space_logic.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Allegro_init.h" />
+    <ClInclude Include="Display.h" />
+    <ClInclude Include="Dock_display.h" />
+    <ClInclude Include="Dock_logic.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="Enum.h" />
+    <ClInclude Include="Logic.h" />
+    <ClInclude Include="Map.h" />
+    <ClInclude Include="Menu_display.h" />
+    <ClInclude Include="Menu_logic.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Screen.h" />
     <ClInclude Include="Planet.h" />
     <ClInclude Include="Radar.h" />
     <ClInclude Include="Ship.h" />
+    <ClInclude Include="Space_display.h" />
+    <ClInclude Include="Space_logic.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
