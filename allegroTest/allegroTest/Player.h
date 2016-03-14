@@ -1,7 +1,8 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include "Game.h"
+#include "Header.h"
+
 #include "Ship.h"
 
 class Player
@@ -11,7 +12,7 @@ private:
 
 public:
 	Player(void);
-	Ship getShip();
+	Ship& getShip();
 	~Player(void);
 };
 

@@ -1,4 +1,4 @@
-#include <enet\enet.h> //Must be included before the allegro library to prevent conflicts
+/*#include <enet\enet.h> //Must be included before the allegro library to prevent conflicts
 #include <allegro5/allegro5.h>
 #include "allegro5/allegro_image.h"
 #include <allegro5/allegro_font.h>
@@ -990,4 +990,4 @@ void game_loop()
 //		hostSet = true;
 //	}
 //	else ; //Single player mode (just don't setup server or client!)
-//}
+//}*/

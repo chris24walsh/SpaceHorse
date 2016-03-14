@@ -1,14 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <stdio.h>
-#include <conio.h>
-#include <sstream>
-#include <string>
-#include <vector>
+#include "Header.h"
 
-#include "Allegro_init.h"
-#include "Enum.h"
 #include "Player.h"
 #include "Map.h"
 #include "Display.h"
@@ -20,14 +14,10 @@ private:
 	Map map;
 	Display display;
 	Logic logic;
-	ALLEGRO_EVENT_QUEUE *event_queue;
-	ALLEGRO_TIMER *timer;
-	const int FPS;
 
 public:
-	Game();
-	void gameLoop();
-	void abortGame(std::string message);
+	Game(int width, int height, ALLEGRO_TIMER &timer, ALLEGRO_EVENT_QUEUE &event_queue);
+	void gameLoop(ALLEGRO_TIMER &timer, ALLEGRO_EVENT_QUEUE &event_queue);
 	~Game();
 };
 

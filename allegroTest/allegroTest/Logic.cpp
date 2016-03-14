@@ -1,16 +1,22 @@
 #include "Logic.h"
 
 
-Logic::Logic(void)
+Logic::Logic()
+	:m_players(),
+	m_map(),
+	menu(),
+	space(),
+	dock(),
+	m_screenMode(0),
+	m_done(0)
 {
 }
 
 void Logic::load(Display &display, std::vector<Player> &players, Map &map)
 {
-	m_display = &display;
 	m_players = &players;
 	m_map = &map;
-	changeScreen(); //not a case for oldScreenMode because we are initialising
+	menu.load(display.getMenu());
 }
 
 void Logic::update() 
@@ -32,7 +38,7 @@ void Logic::update()
 	}
 }
 
-void Logic::pressKey(ALLEGRO_EVENT keyPressed) 
+void Logic::pressKey(ALLEGRO_EVENT &keyPressed, Display &display)
 {
 	int screenMode;
 	switch(m_screenMode) 
@@ -44,7 +50,7 @@ void Logic::pressKey(ALLEGRO_EVENT keyPressed)
 		screenMode = space.keyPress(keyPressed);
 		break;
 	case 2: // Dock
-		screenMode = dock.keyPress(keyPressed, (*m_players).at(0));
+		screenMode = dock.keyPress(keyPressed);
 		break;
 //	case 3: // Server
 //		server.keyPress(keyPressed);
@@ -52,17 +58,18 @@ void Logic::pressKey(ALLEGRO_EVENT keyPressed)
 	}
 	if(screenMode==-1) { m_done = true; } //Quit
 
-	if(screenMode /= m_screenMode) //if screenmode is changed, load new screen
+	else if(screenMode != m_screenMode) //if screenmode is changed, load new screen
 	{ 
 		int oldScreenMode = m_screenMode;
 		m_screenMode = screenMode;
-		changeScreen(oldScreenMode);
+		changeScreen(oldScreenMode, display);
 	}
 }
 
-void Logic::releaseKey(ALLEGRO_EVENT keyReleased)
+void Logic::releaseKey(ALLEGRO_EVENT &keyReleased)
 {
-	switch(m_screenMode) {
+	switch(m_screenMode)
+	{
 	case 0: //Menu
 //		m_screenMode = menu.keyRelease(keyReleased);
 		break;
@@ -78,8 +85,9 @@ void Logic::releaseKey(ALLEGRO_EVENT keyReleased)
 	}
 }
 
-void Logic::changeScreen(int oldScreenMode=-1) // -1 for default
+void Logic::changeScreen(int oldScreenMode, Display &display)
 {
+	display.setScreenMode(m_screenMode);
 	switch(oldScreenMode)
 	{
 	case 0:
@@ -97,14 +105,14 @@ void Logic::changeScreen(int oldScreenMode=-1) // -1 for default
 	}
 	switch(m_screenMode)
 	{
-	case 0:
-		menu.load((*m_display).getMenu); //passes the display to logic (for future manipulation/control) and tells logic to tell display to load resources (e.g. bitmaps, fonts, etc)
+	case 0: //passes the display to logic (for future manipulation/control) and tells logic to tell display to load resources (e.g. bitmaps, fonts, etc)
+		menu.load(display.getMenu());
 		break;
 	case 1:
-		space.load((*m_display).getSpace);
+		space.load(display.getSpace(), display.getWindowWidth(), display.getWindowHeight(), *m_players, *m_map);
 		break;
 	case 2:
-		dock.load((*m_display).getDock);
+		dock.load(display.getDock(), (*m_players).at(0));
 		break;
 //	case 3:
 //		server;
@@ -113,8 +121,10 @@ void Logic::changeScreen(int oldScreenMode=-1) // -1 for default
 }
 
 Menu_logic& Logic::getMenu() { return menu; }
+Space_logic& Logic::getSpace() { return space; }
 Dock_logic& Logic::getDock() { return dock; }
 int Logic::getScreenMode() { return m_screenMode; }
+bool Logic::getDone() { return m_done; }
 
 Logic::~Logic(void)
 {

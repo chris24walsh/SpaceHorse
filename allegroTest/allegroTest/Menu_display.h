@@ -1,19 +1,23 @@
 #ifndef MENU_DISPLAY_H
 #define MENU_DISPLAY_H
 
-#include "Game.h"
+#include "Header.h"
 
 class Menu_display
 {
 private:
+	bool m_menuLoad;
+	int m_windowWidth,
+		m_windowHeight,
+		m_homeScreenOption;
 	ALLEGRO_FONT *font;
-	bool m_menuFail;
 
 public:
-	Menu_display(void);
+	Menu_display(int windowWidth, int windowHeight);
 	void load();
 	void unload();
-	void update(int homeScreenOption, int windowWidth, int windowHeight);
+	void update();
+	void setHomeScreenOption(int homeScreenOption);
 	void menuFail(std::string failMessage);
 	~Menu_display(void);
 };

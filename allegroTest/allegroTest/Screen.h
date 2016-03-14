@@ -1,4 +1,4 @@
-#ifndef SCREEN_H
+/*#ifndef SCREEN_H
 #define SCREEN_H
 
 #include <allegro5/allegro5.h>
@@ -96,4 +96,4 @@ public:
 	void release_9();
 }
 
-#endif
+#endif*/

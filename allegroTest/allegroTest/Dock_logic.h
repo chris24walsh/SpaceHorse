@@ -1,24 +1,24 @@
 #ifndef DOCK_LOGIC_H
 #define DOCK_LOGIC_H
 
-#include "Game.h"
+#include "Header.h"
+
 #include "Dock_display.h"
+#include "Player.h"
 
 class Dock_logic
 {
 private:
 	Dock_display *m_dock;
-	bool m_dispUpgradeText;
+	Player *m_player;
 
 public:
-	Dock_logic(void);
-	void load(Dock_display &dock);
+	Dock_logic();
+	void load(Dock_display &dock, Player &player);
 	void unload();
 	void update();
-	void upgrade_weapon(Player &player);
-	int keyPress(ALLEGRO_EVENT keyPressed, Player &player);
-	void keyRelease(ALLEGRO_EVENT keyReleased);
-	bool getDispUpgradeText();
+	void upgrade_weapon();
+	int keyPress(ALLEGRO_EVENT &keyPressed);
 	~Dock_logic(void);
 };
 

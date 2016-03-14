@@ -1,7 +1,8 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include "Game.h"
+#include "Header.h"
+
 #include "Planet.h"
 
 class Map
@@ -11,8 +12,8 @@ private:
 
 public:
 	Map(void);
-	Planet getPlanet(int index);
-	int getTotalPlanets();
+	void makeSolarSystem();
+	std::vector<Planet>& getPlanets();
 	~Map(void);
 };
 
