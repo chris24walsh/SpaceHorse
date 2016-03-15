@@ -102,10 +102,10 @@ void Ship::updateFireX(int index) { m_fireX[index] += m_fireSpeed * cos(m_fireAn
 void Ship::updateFireY(int index) { m_fireY[index] += m_fireSpeed * sin(m_fireAngle[index]); }
 double Ship::getFireAngle(int index) { return m_fireAngle[index];}
 void Ship::setFireAngle(int index, double fireAngle) { m_fireAngle[index] = fireAngle; }
-int Ship::getX() { return m_x; }
-int Ship::getY() { return m_y; }
-void Ship::setX(int x) { m_x = x; }
-void Ship::setY(int y) { m_y = y; }
+double Ship::getX() { return m_x; }
+double Ship::getY() { return m_y; }
+void Ship::setX(double x) { m_x = x; }
+void Ship::setY(double y) { m_y = y; }
 double Ship::getAngle() { return m_angle; }
 void Ship::setAngle(double angle) { m_angle = angle; }
 void Ship::setHealth(int health) { m_health = health; }

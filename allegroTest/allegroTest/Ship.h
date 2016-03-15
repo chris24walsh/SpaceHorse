@@ -6,8 +6,6 @@
 class Ship {
 private:
 	int m_id,
-		m_x,
-		m_y,
 		m_height,
 		m_width,
 		m_speed,
@@ -25,6 +23,8 @@ private:
 	double m_angle,
 		m_speedX,
 		m_speedY,
+		m_x,
+		m_y,
 		m_fireAngle[static_cast<int>(Fire::MAXFIREBALLS)];
 	std::string m_shipSprite,
 		m_shipSprite1,
@@ -60,10 +60,10 @@ public:
 	void updateFireY(int index);
 	double getFireAngle(int index);
 	void setFireAngle(int index, double fireAngle);
-	int getX();
-	int getY();
-	void setX(int x);
-	void setY(int y);
+	double getX();
+	double getY();
+	void setX(double x);
+	void setY(double y);
 	double getAngle();
 	void setAngle(double angle);
 	void setHealth(int health);

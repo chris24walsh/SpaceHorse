@@ -186,7 +186,7 @@ void Space_logic::update()
 			proxX = abs((*m_players).at(0).getShip().getX() - (*m_map).getPlanets().at(i).getX());
 			proxY = abs((*m_players).at(0).getShip().getY() - (*m_map).getPlanets().at(i).getY());
 			if ((*m_map).getPlanets().at(i).getCanDock())
-				if (proxX<(*m_map).getPlanets().at(i).getWidth()/2 && proxY<(*m_map).getPlanets().at(i).getHeight()/2)
+				if (proxX<(*m_map).getPlanets().at(i).getWidth() && proxY<(*m_map).getPlanets().at(i).getHeight())
 				{
 					(*m_players).at(0).getShip().setCanDock(true);
 					break;
@@ -294,7 +294,7 @@ int Space_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 	{
 		if (keyPressed.keyboard.keycode >= 27 && keyPressed.keyboard.keycode <= 36) //numbers 0 to 9
 		{
-			if(m_editText.length()<14)
+			if(m_editText.length()<14) // 6 = number of digits in grid coordinate + 2 for ", " separation characters
 			{
 				m_newKey = keyPressed.keyboard.keycode;
 				m_newKey -= 27;
@@ -313,7 +313,7 @@ int Space_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 			if(m_editText.length()>0)
 			{
 				if(m_editText.length()==8)
-				{ m_editText.pop_back(); m_editText.pop_back(); }
+				{ m_editText.pop_back(); m_editText.pop_back(); } //get rid of the two separator characters first ", "
 				m_editText.pop_back();
 				m_enterCoordinates.str("");
 				m_enterCoordinates.clear();
