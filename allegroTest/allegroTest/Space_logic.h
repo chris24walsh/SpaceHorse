@@ -34,7 +34,7 @@ private:
 		m_maxX,
 		m_maxY,
 		m_hyperSpeed;
-	std::stringstream *m_enterCoordinates;
+	std::stringstream m_enterCoordinates;
 	std::string m_editText;
 	double m_oldAngle,
 		m_newAngle;

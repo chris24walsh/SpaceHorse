@@ -28,7 +28,8 @@ Space_logic::Space_logic()
 	m_newAngle(0),
 	m_x2(3000),
 	m_y2(3000),
-	m_hyperSpeed(50)
+	m_hyperSpeed(50),
+	m_enterCoordinates("")
 {
 }
 
@@ -76,12 +77,13 @@ void Space_logic::triggerCollision() { (*m_players).at(0).getShip().setHealth(((
 void Space_logic::hyperDrive()
 {
 	(*m_players).at(0).getShip().toggleDocked(); //make it as if the ship were docked
-	//paused = true;
+	//m_paused = true;
 	m_hyperDrive = true;
+	m_enterCoordinates.str("");
+	m_enterCoordinates.clear();
+	m_editText = ("");
+	(*m_space).setEditText(m_editText);
 	(*m_space).toggleHyperDrive();
-	(*m_enterCoordinates).str("");
-	(*m_enterCoordinates).clear();
-	m_editText = "";
 	m_oldAngle = (*m_players).at(0).getShip().getAngle();
 	m_distanceTravelX = abs(abs(m_x2) - abs((*m_players).at(0).getShip().getX()));
 	m_distanceTravelY = abs(abs(m_y2) - abs((*m_players).at(0).getShip().getY()));
@@ -89,7 +91,8 @@ void Space_logic::hyperDrive()
 
 void Space_logic::update()
 {
-	if (!m_paused) {
+	if (!m_paused)
+	{
 		//Rotate clockwise or anti-clockwise
 		if (m_leftPressed)
 		{ (*m_players).at(0).getShip().setAngle((*m_players).at(0).getShip().getAngle()-0.05); }
@@ -199,7 +202,8 @@ void Space_logic::update()
 			//paused = true;
 		}
 	}
-	if (m_hyperDrive && m_textEntered) {
+	if (m_hyperDrive && m_textEntered)
+	{
 		if (!m_angleAligned) { //Get angle right first
 			//Decide if better to rotate clockwise or anticlockwise
 			if (m_newAngle > (*m_players).at(0).getShip().getAngle())
@@ -235,6 +239,7 @@ void Space_logic::update()
 			{
 				(*m_players).at(0).getShip().setX(m_x2);
 				(*m_players).at(0).getShip().setY(m_y2);
+				(*m_players).at(0).getShip().toggleDocked();
 				m_paused = m_hyperDrive = m_angleAligned = m_textEntered = false; //Reset flags
 			}
 		}
@@ -285,33 +290,47 @@ int Space_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 //			break;
 		}
 	}
-
-	if (m_hyperDrive)
+	else if (m_hyperDrive)
 	{
-		if (keyPressed.keyboard.keycode >= 27 && keyPressed.keyboard.keycode <= 36)
+		if (keyPressed.keyboard.keycode >= 27 && keyPressed.keyboard.keycode <= 36) //numbers 0 to 9
 		{
-			m_newKey = keyPressed.keyboard.keycode;
-			m_newKey -= 27;
-			(*m_enterCoordinates) << m_newKey;
-			m_editText = (*m_enterCoordinates).str();
+			if(m_editText.length()<14)
+			{
+				m_newKey = keyPressed.keyboard.keycode;
+				m_newKey -= 27;
+				m_enterCoordinates << m_newKey;
+				m_editText = m_enterCoordinates.str();
+				if(m_editText.length()==6)
+				{
+					m_enterCoordinates << ", ";
+					m_editText = m_enterCoordinates.str();
+				}
+				(*m_space).setEditText(m_editText);
+			}
 		}
-		if (keyPressed.keyboard.keycode == 75) //spacebar
+		else if (keyPressed.keyboard.keycode == 63) //backspace
 		{
-			(*m_enterCoordinates) << " ";
-			m_editText = (*m_enterCoordinates).str();
-		}
-		if (keyPressed.keyboard.keycode == 62) //backspace
-		{
-			if (m_editText.length() > 0)
+			if(m_editText.length()>0)
+			{
+				if(m_editText.length()==8)
+				{ m_editText.pop_back(); m_editText.pop_back(); }
 				m_editText.pop_back();
+				m_enterCoordinates.str("");
+				m_enterCoordinates.clear();
+				m_enterCoordinates << m_editText;
+			}
+			(*m_space).setEditText(m_editText);
 		}
 		else if (keyPressed.keyboard.keycode == ALLEGRO_KEY_ENTER)
 		{
-			if (!m_editText.empty())
+			if (m_editText.length()==14 && m_textEntered==false)
 			{
+				(*m_space).toggleHyperDrive();
 				m_textEntered = true;
-				m_x2 = atoi(strtok((char*)m_editText.c_str(), " "));
-				m_y2 = atoi(strtok(NULL, " "));
+//				m_x2 = atoi(strtok((char*)m_editText.c_str(), ", "));
+//				m_y2 = atoi(strtok(NULL, ", "));
+				m_x2 = atoi(m_editText.substr(0, 6).c_str()); //better I think.
+				m_y2 = atoi(m_editText.substr(8, 6).c_str());
 				m_newAngle = atan2( (m_y2 - (*m_players).at(0).getShip().getY()),  (m_x2 - (*m_players).at(0).getShip().getX()) );
 
 				if (m_newAngle<0) { m_newAngle += 3.1416*2; }
@@ -321,11 +340,25 @@ int Space_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 				if (m_x2==(*m_players).at(0).getShip().getX() && m_y2==(*m_players).at(0).getShip().getY())
 				{ m_hyperDrive = m_paused = false; }
 			}
-			else m_hyperDrive = m_paused = false;
+			else if(m_textEntered==false)
+			{
+				(*m_space).toggleHyperDrive();
+				(*m_players).at(0).getShip().toggleDocked();
+				m_hyperDrive = m_paused = false;
+			}
 		}
+		else if (keyPressed.keyboard.keycode == ALLEGRO_KEY_H)
+		{
+			if (m_textEntered==false)
+			{
+				(*m_space).toggleHyperDrive();
+				(*m_players).at(0).getShip().toggleDocked();
+				m_hyperDrive = m_paused = false;
+			}
+		}
+		else if (keyPressed.keyboard.keycode == ALLEGRO_KEY_ESCAPE) { return -1; }
 	}
-
-	if (m_gameOver)
+	else if (m_gameOver)
 	{
 		if (keyPressed.keyboard.keycode == ALLEGRO_KEY_ENTER || keyPressed.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
 		{ return -1; }

@@ -50,6 +50,7 @@ void Dock_display::unload()
 
 void Dock_display::update()
 {
+	if(!m_dockLoad) { load((*m_player)); }
 	al_clear_to_color(al_map_rgb(25,0,25));
 	al_draw_rotated_bitmap(m_shipSprite, al_get_bitmap_width(m_shipSprite)/2, al_get_bitmap_height(m_shipSprite)/2, 250, 250, 0, 0);
 	al_draw_rotated_bitmap(m_fireSprite, al_get_bitmap_width(m_fireSprite)/2, al_get_bitmap_height(m_fireSprite)/2, 250, 250, 0, 0);

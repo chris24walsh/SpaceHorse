@@ -31,6 +31,7 @@ void Menu_display::unload() //free up all the resources for this display screen
 
 void Menu_display::update()
 {
+	if(!m_menuLoad) { load(); }
 	al_clear_to_color(al_map_rgb(30,30,30));
 	int c1R, c1G, c1B, c2R, c2G, c2B, c3R, c3G, c3B, c4R, c4G, c4B;
 	c1R = c1G = c1B = c2R = c2G = c2B = c3R = c3G = c3B = c4R = c4G = c4B = 256;

@@ -1,8 +1,7 @@
 #include "Space_display.h"
 
 Space_display::Space_display(int windowWidth, int windowHeight)
-	:m_test(0),
-	m_gameOver(0),
+	:m_gameOver(0),
 	m_hyperDrive(0),
 	m_spaceLoad(0),
 	m_gridX(0),
@@ -25,7 +24,12 @@ Space_display::Space_display(int windowWidth, int windowHeight)
 	m_numberGrids(1000000), 
 	m_radarScreenWidth(1920),
 	m_radarScreenHeight(1080),
-	m_radarScale(0.005)
+	m_radarScale(0.005),
+	m_shipSprites(0),
+	m_shipSprite1s(0),
+	m_shipSprite2s(0),
+	m_fireSprites(0),
+	m_planetSprites(0)
 {
 }
 
@@ -83,7 +87,6 @@ void Space_display::load(std::vector<Player> &players, Map &map)
 		m_radarDotSprite = al_load_bitmap("c:/dev/allegro/images/radarDot.png");
 		if(!m_radarDotSprite) { spaceFail("Failed to load the radar dot image"); }
 		m_spaceLoad = true;
-		++m_test;
 	}
 }
 
@@ -92,14 +95,14 @@ void Space_display::unload()
 	if(m_spaceLoad)
 	{
 		if(m_backgroundSprite) { al_destroy_bitmap(m_backgroundSprite); } 
-		for(int i=0;i<m_shipSprites.size();++i) 
+		for(int i=(*m_players).size()-1;i>-1;--i) 
 		{
 			if(m_shipSprites.at(i)) { al_destroy_bitmap(m_shipSprites.at(i)); m_shipSprites.pop_back(); }
 			if(m_shipSprite1s.at(i)) { al_destroy_bitmap(m_shipSprite1s.at(i)); m_shipSprite1s.pop_back(); }
 			if(m_shipSprite2s.at(i)) { al_destroy_bitmap(m_shipSprite2s.at(i)); m_shipSprite2s.pop_back(); }
 			if(m_fireSprites.at(i)) { al_destroy_bitmap(m_fireSprites.at(i)); m_fireSprites.pop_back(); }
 		}
-		for(int i=0;i<m_planetSprites.size();++i)
+		for(int i=(*m_map).getPlanets().size()-1;i>-1;--i)
 		{
 			if(m_planetSprites.at(i)) { al_destroy_bitmap(m_planetSprites.at(i)); m_planetSprites.pop_back(); }
 		}
@@ -112,6 +115,7 @@ void Space_display::unload()
 
 void Space_display::update()
 {
+	if(!m_spaceLoad) { load((*m_players), (*m_map)); }
 	//Clear display first
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 	
@@ -127,8 +131,6 @@ coordinates (the camera), bgX and bgY - so subtract their x and y coordinates fr
 		{ al_draw_bitmap(m_backgroundSprite, backX + m_windowWidth*x - m_bgX, backY + m_windowHeight*y - m_bgY,0); }
 	}
 
-	if(m_test==2)
-	{m_test = 0;}
 	//Draw planets
 	for (int i=0; i<(*m_map).getPlanets().size(); i++)
 	{
@@ -264,14 +266,14 @@ Space_display::~Space_display(void)
 	if(m_spaceLoad)
 	{
 		if(m_backgroundSprite) { al_destroy_bitmap(m_backgroundSprite); } 
-		for(int i=0;i<m_shipSprites.size();++i) 
+		for(int i=(*m_players).size()-1;i>-1;--i) 
 		{
 			if(m_shipSprites.at(i)) { al_destroy_bitmap(m_shipSprites.at(i)); m_shipSprites.pop_back(); }
 			if(m_shipSprite1s.at(i)) { al_destroy_bitmap(m_shipSprite1s.at(i)); m_shipSprite1s.pop_back(); }
 			if(m_shipSprite2s.at(i)) { al_destroy_bitmap(m_shipSprite2s.at(i)); m_shipSprite2s.pop_back(); }
 			if(m_fireSprites.at(i)) { al_destroy_bitmap(m_fireSprites.at(i)); m_fireSprites.pop_back(); }
 		}
-		for(int i=0;i<m_planetSprites.size();++i)
+		for(int i=(*m_map).getPlanets().size()-1;i>-1;--i)
 		{
 			if(m_planetSprites.at(i)) { al_destroy_bitmap(m_planetSprites.at(i)); m_planetSprites.pop_back(); }
 		}

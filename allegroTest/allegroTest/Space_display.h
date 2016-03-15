@@ -12,8 +12,7 @@ private:
 	bool m_gameOver,
 		m_hyperDrive,
 		m_spaceLoad;
-	int m_test,
-		m_numberGrids,
+	int m_numberGrids,
 		m_gridX,
 		m_gridY,
 		m_bgX,
