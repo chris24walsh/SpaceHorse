@@ -26,7 +26,8 @@ Ship::Ship()
 	m_health(6),
 	//logic will also set height and width of fireball to bitmap when loading display
 	m_maxFireBalls(static_cast<int>(Fire::MAXFIREBALLS)),
-	m_fireCycle(100)
+	m_fireCycle(100),
+	m_dockPlanet(0)
 {
 	m_fireSpeed = m_maxSpeed + 10;
 	for (int i=0;i<m_maxFireBalls;++i) 
@@ -68,7 +69,8 @@ But yes, rand() is pretty poor*/
 	m_health(6),
 	//logic will also set height and width of fireball to bitmap when loading display
 	m_maxFireBalls(static_cast<int>(Fire::MAXFIREBALLS)),
-	m_fireCycle(100)
+	m_fireCycle(100),
+	m_dockPlanet(0)
 {
 	m_fireSpeed = m_maxSpeed + 10;
 	for (int i=0;i<m_maxFireBalls;++i)
@@ -108,7 +110,7 @@ void Ship::setX(double x) { m_x = x; }
 void Ship::setY(double y) { m_y = y; }
 double Ship::getAngle() { return m_angle; }
 void Ship::setAngle(double angle) { m_angle = angle; }
-void Ship::setHealth(int health) { m_health = health; }
+void Ship::setHealth(int health) { if(health>0) {m_health = health;} else m_health=0; }
 int Ship::getHealth() { return m_health; }
 int Ship::getWidth() { return m_width; }
 int Ship::getHeight() { return m_height; }
@@ -122,7 +124,8 @@ int Ship::getFlipflop() { return m_flipflop; }
 void Ship::setFlipflop(int flipflop) { m_flipflop = flipflop; }
 bool Ship::goingMaxSpeed() { return (m_speed==m_maxSpeed); }
 void Ship::setSpeed(int speed) { m_speed = speed; }
-void Ship::setCanDock(bool canDock) { m_canDock = canDock; }
+void Ship::setCanDock(bool canDock, int dockPlanet) { m_canDock = canDock; m_dockPlanet = dockPlanet; }
+int Ship::getDockPlanet() { return m_dockPlanet; }
 
 Ship::~Ship(void)
 {

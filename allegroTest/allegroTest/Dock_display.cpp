@@ -2,23 +2,29 @@
 
 
 Dock_display::Dock_display(int windowWidth, int windowHeight)
-	:m_dispUpgradeText(0),
+	:m_failedUpgrade(0),
 	m_windowWidth(windowWidth),
 	m_windowHeight(windowHeight),
 	m_shipSprite(nullptr),
 	m_fireSprite(nullptr),
 	m_dockingText(nullptr),
 	m_upgradedText(nullptr),
+	m_font(nullptr),
 	m_player(),
 	m_dockLoad(0)
 {
 }
 
-void Dock_display::load(Player &player)
+void Dock_display::load(Player &player, Planet &planet)
 {
 	if(!m_dockLoad)
 	{
 		m_player = &player;
+		m_planet = &planet;
+
+		m_font = al_load_ttf_font("C:/Dev/allegro/Font/pirulen.ttf",25,0);
+		if(!m_font) { dockFail("Could not load 'pirulen.ttf'.\n"); }
+
 		m_dockingText = al_load_bitmap("c:/dev/allegro/images/dockingText.png");
 		if(!m_dockingText) { dockFail("Failed to load the dockingText image"); }
 		if(player.getShip().getUpgraded())
@@ -40,22 +46,28 @@ void Dock_display::unload()
 {
 	if(m_dockLoad)
 	{
-		if (m_dockingText) { al_destroy_bitmap(m_dockingText); }
-		if (m_upgradedText) { al_destroy_bitmap(m_upgradedText); }
-		if (m_shipSprite) { al_destroy_bitmap(m_shipSprite); }
-		if (m_fireSprite) { al_destroy_bitmap(m_fireSprite); }
+		if (m_dockingText) { al_destroy_bitmap(m_dockingText); m_dockingText=nullptr; }
+		if (m_upgradedText) { al_destroy_bitmap(m_upgradedText); m_upgradedText=nullptr; }
+		if (m_shipSprite) { al_destroy_bitmap(m_shipSprite); m_shipSprite=nullptr; }
+		if (m_fireSprite) { al_destroy_bitmap(m_fireSprite); m_fireSprite=nullptr; }
+		if(m_font) { al_destroy_font(m_font); m_font=nullptr; }
+		m_failedUpgrade = false;
 		m_dockLoad = false;
 	}
 }
 
 void Dock_display::update()
 {
-	if(!m_dockLoad) { load((*m_player)); }
+	if(!m_dockLoad) { load(*m_player, *m_planet); }
 	al_clear_to_color(al_map_rgb(25,0,25));
 	al_draw_rotated_bitmap(m_shipSprite, al_get_bitmap_width(m_shipSprite)/2, al_get_bitmap_height(m_shipSprite)/2, 250, 250, 0, 0);
 	al_draw_rotated_bitmap(m_fireSprite, al_get_bitmap_width(m_fireSprite)/2, al_get_bitmap_height(m_fireSprite)/2, 250, 250, 0, 0);
 	al_draw_bitmap(m_dockingText, 0, 0, 0);
-	if ((*m_player).getShip().getUpgraded()) al_draw_bitmap(m_upgradedText, 0, m_windowHeight/2, 0);
+	if((*m_player).getShip().getUpgraded()) { al_draw_bitmap(m_upgradedText, 0, m_windowHeight/2, 0); }
+	if(m_failedUpgrade)
+	{
+		al_draw_text(m_font, al_map_rgb(190,190,190), m_windowWidth*0.5, m_windowHeight*0.8, ALLEGRO_ALIGN_CENTRE, "Upgrading is impossible at this planet!");
+	}
 }
 
 void Dock_display::setDispUpgradeText()
@@ -68,6 +80,7 @@ void Dock_display::setDispUpgradeText()
 	if(!m_fireSprite) { dockFail("Failed to load the fireball image"); }
 }
 
+void Dock_display::setFailedUpgrade() { m_failedUpgrade = true; }
 int Dock_display::getFireSpriteWidth() { return al_get_bitmap_width(m_fireSprite); }
 int Dock_display::getFireSpriteHeight() { return al_get_bitmap_height(m_fireSprite); }
 

@@ -15,13 +15,14 @@ private:
 		m_planetScale;
 	double m_distance;
 	bool m_canCollide,
-		m_canDock;
+		m_canDock,
+		m_canUpgrade;
 	std::string m_planetSprite;
 
 public:
 	Planet();
 	Planet(std::string planetSprite);
-	Planet(std::string planetSprite, int distance);
+	Planet(std::string planetSprite, int distance, bool canDock, bool canCollide, bool canUpgrade);
 	int getX();
 	int getY();
 	int getPlanetScale();
@@ -31,6 +32,8 @@ public:
 	int getWidth();
 	int getHeight();
 	bool getCanDock();
+	bool getCanCollide();
+	bool getCanUpgrade();
 	std::string getPlanetSprite();
 	void setPlanetSize(int planetWidth, int planetHeight);
 	~Planet();

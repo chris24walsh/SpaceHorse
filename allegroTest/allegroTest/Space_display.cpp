@@ -209,16 +209,17 @@ coordinates (the camera), bgX and bgY - so subtract their x and y coordinates fr
 	//Ships on radar
 	if((*m_players).size()>1)
 	{
-		for (int i=0; i<(*m_players).size(); ++i)
+		for (int i=1; i<(*m_players).size(); ++i)
 		{
 			double rX = m_windowWidth*0.85 - ((*m_players).at(0).getShip().getX() - (*m_players).at(i).getShip().getX()) * m_radarScale;
 			double rY = m_windowHeight*0.15 - ((*m_players).at(0).getShip().getY() - (*m_players).at(i).getShip().getY()) * m_radarScale;
 			if ((rX > m_windowWidth*0.85 - m_windowWidth*0.1) && (rX < m_windowWidth*0.85 + m_windowWidth*0.1) &&
 				(rY > m_windowHeight*0.15 - m_windowHeight*0.1) && (rY < m_windowHeight*0.15 + m_windowHeight*0.1))
-				al_draw_rotated_bitmap(m_radarDotSprite, 2.5, 2.5, rX, rY, 0, 0);
+				al_draw_tinted_rotated_bitmap(m_radarDotSprite, al_map_rgb(255,120,120), 2.5, 2.5, rX, rY, 0, 0);
 		}
 	}
-	else { al_draw_rotated_bitmap(m_radarDotSprite, 2.5, 2.5, m_windowWidth*0.85, m_windowHeight*0.15, 0, 0); } //otherwise only draw player1's ship
+	//draw player1's ship tinted green rather than red
+	al_draw_tinted_rotated_bitmap(m_radarDotSprite, al_map_rgb(100,255,100), 2.5, 2.5, m_windowWidth*0.85, m_windowHeight*0.15, 0, 0);
 
 	//Game over
 	if (m_gameOver)

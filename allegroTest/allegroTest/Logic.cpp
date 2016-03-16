@@ -112,7 +112,7 @@ void Logic::changeScreen(int oldScreenMode, Display &display)
 		space.load(display.getSpace(), display.getWindowWidth(), display.getWindowHeight(), *m_players, *m_map);
 		break;
 	case 2:
-		dock.load(display.getDock(), (*m_players).at(0));
+		dock.load(display.getDock(), (*m_players).at(0), (*m_map).getPlanets().at((*m_players).at(0).getShip().getDockPlanet()));
 		break;
 //	case 3:
 //		server;
@@ -120,10 +120,6 @@ void Logic::changeScreen(int oldScreenMode, Display &display)
 	}
 }
 
-Menu_logic& Logic::getMenu() { return menu; }
-Space_logic& Logic::getSpace() { return space; }
-Dock_logic& Logic::getDock() { return dock; }
-int Logic::getScreenMode() { return m_screenMode; }
 bool Logic::getDone() { return m_done; }
 
 Logic::~Logic(void)

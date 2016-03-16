@@ -49,6 +49,8 @@ int Menu_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 			//setUpHost();
 			}
 		}
+	case ALLEGRO_KEY_ESCAPE:
+		return -1;
 	}
 	(*m_menu).setHomeScreenOption(m_homeScreenOption); //tell display which option to light up
 	return 0; //otherwise stay in menu

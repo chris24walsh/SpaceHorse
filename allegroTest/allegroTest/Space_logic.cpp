@@ -185,14 +185,16 @@ void Space_logic::update()
 		{
 			proxX = abs((*m_players).at(0).getShip().getX() - (*m_map).getPlanets().at(i).getX());
 			proxY = abs((*m_players).at(0).getShip().getY() - (*m_map).getPlanets().at(i).getY());
-			if ((*m_map).getPlanets().at(i).getCanDock())
-				if (proxX<(*m_map).getPlanets().at(i).getWidth() && proxY<(*m_map).getPlanets().at(i).getHeight())
-				{
-					(*m_players).at(0).getShip().setCanDock(true);
-					break;
-				}
-			else (*m_players).at(0).getShip().setCanDock(false);
+			if (proxX<(*m_map).getPlanets().at(i).getWidth() && proxY<(*m_map).getPlanets().at(i).getHeight())
+			{
+				if((*m_map).getPlanets().at(i).getCanDock())
+				{ (*m_players).at(0).getShip().setCanDock(true, i); break; }
+				else if((*m_map).getPlanets().at(i).getCanCollide())
+				{ triggerCollision(); }
+			}
+			else { (*m_players).at(0).getShip().setCanDock(false, 0); }
 		}
+
 		//Check for gameover
 		if ((*m_players).at(0).getShip().getHealth() <= 0)
 		{
@@ -202,9 +204,11 @@ void Space_logic::update()
 			//paused = true;
 		}
 	}
+
 	if (m_hyperDrive && m_textEntered)
 	{
-		if (!m_angleAligned) { //Get angle right first
+		if (!m_angleAligned) //Get angle right first
+		{
 			//Decide if better to rotate clockwise or anticlockwise
 			if (m_newAngle > (*m_players).at(0).getShip().getAngle())
 			{

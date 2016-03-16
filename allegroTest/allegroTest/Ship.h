@@ -19,7 +19,8 @@ private:
 		m_fireHeight,
 		m_fireWidth,
 		m_fireSpeed,
-		m_fireCycle;
+		m_fireCycle,
+		m_dockPlanet;
 	double m_angle,
 		m_speedX,
 		m_speedY,
@@ -80,7 +81,8 @@ public:
 	void setFlipflop(int flipflop);
 	bool goingMaxSpeed();
 	void setSpeed(int speed);
-	void setCanDock(bool canDock);
+	void setCanDock(bool canDock, int dockPlanet);
+	int getDockPlanet();
 	~Ship();
 };
 

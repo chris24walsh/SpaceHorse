@@ -28,11 +28,7 @@ public:
 	void update();
 	void pressKey(ALLEGRO_EVENT &keyPressed, Display &display);
 	void releaseKey(ALLEGRO_EVENT &keyReleased);
-	Menu_logic& getMenu();
-	Space_logic& getSpace();
-	Dock_logic& getDock();
 	void changeScreen(int oldScreenMode, Display &display);
-	int getScreenMode();
 	bool getDone();
 	~Logic(void);
 };
