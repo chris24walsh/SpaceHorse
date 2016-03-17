@@ -74,7 +74,7 @@ int Space_logic::dock()
 
 void Space_logic::triggerCollision() { (*m_players).at(0).getShip().setHealth(((*m_players).at(0).getShip().getHealth()-1)); }
 
-void Space_logic::hyperDrive()
+void Space_logic::hyperDrive() //still a little buggy need to fix the calculations, etc.
 {
 	(*m_players).at(0).getShip().toggleDocked(); //make it as if the ship were docked
 	//m_paused = true;
@@ -236,10 +236,11 @@ void Space_logic::update()
 				(*m_players).at(0).getShip().getMaxSpeed() * m_hyperSpeed * cos((*m_players).at(0).getShip().getAngle()));
 			(*m_players).at(0).getShip().setY((*m_players).at(0).getShip().getY() +
 				(*m_players).at(0).getShip().getMaxSpeed() * m_hyperSpeed * sin((*m_players).at(0).getShip().getAngle()));
-			m_distanceTravelX -= (*m_players).at(0).getShip().getMaxSpeed() * m_hyperSpeed * cos((*m_players).at(0).getShip().getAngle());
-			m_distanceTravelY -= (*m_players).at(0).getShip().getMaxSpeed() * m_hyperSpeed * sin((*m_players).at(0).getShip().getAngle());
+
+			m_distanceTravelX -= abs((*m_players).at(0).getShip().getMaxSpeed() * m_hyperSpeed * cos((*m_players).at(0).getShip().getAngle()));
+			m_distanceTravelY -= abs((*m_players).at(0).getShip().getMaxSpeed() * m_hyperSpeed * sin((*m_players).at(0).getShip().getAngle()));
 			//if ( abs(abs(players.at(0).x) - abs(x2)) < 1000 && abs(abs(players.at(0).y) - abs(y2)) < 1000) { //Check for nearness, then align distance exactly
-			if (m_distanceTravelX <= 1000 || m_distanceTravelY <= 1000)
+			if (m_distanceTravelX <= 1000 && m_distanceTravelY <= 1000)
 			{
 				(*m_players).at(0).getShip().setX(m_x2);
 				(*m_players).at(0).getShip().setY(m_y2);
