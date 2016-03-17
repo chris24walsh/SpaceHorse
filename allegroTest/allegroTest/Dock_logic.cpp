@@ -41,7 +41,7 @@ int Dock_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 		upgrade_weapon();
 		break;
 	case ALLEGRO_KEY_D:
-		(*m_player).getShip().toggleDocked();
+		(*m_player).getShip().setDocked(false, 0);
 		return 1; //switch back to space screen
 	case ALLEGRO_KEY_ESCAPE:
 		return -1;

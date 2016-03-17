@@ -12,7 +12,6 @@ Ship::Ship()
 	m_angle(0),
 	m_speedX(0),
 	m_speedY(0),
-	m_canDock(0),
 	m_upgraded(0),
 	m_docked(0),
 	m_x(489000 + rand()%100),
@@ -55,7 +54,6 @@ But yes, rand() is pretty poor*/
 	m_angle(0),
 	m_speedX(0),
 	m_speedY(0),
-	m_canDock(0),
 	m_upgraded(0),
 	m_docked(0),
 	m_x(489000 + rand()%100),
@@ -81,14 +79,20 @@ But yes, rand() is pretty poor*/
 	}
 }
 
+
+void Ship::setDocked(bool docked, int dockPlanet)
+{
+	m_docked = docked;
+	if(m_docked)
+	{ m_dockPlanet = dockPlanet; m_speed = 0; }
+}
+
 void Ship::setFireCycle(int fireCycle) { m_fireCycle = fireCycle; }
 int Ship::getFireCycle() { return m_fireCycle; }
 void Ship::setShipSize(int shipWidth, int shipHeight) { m_width = shipWidth; m_height = shipHeight; }
 void Ship::setFireSize(int fireWidth, int fireHeight) { m_fireWidth = fireWidth; m_fireHeight = fireHeight; }
 void Ship::setUpgraded(std::string fireSprite) { m_fireSprite = fireSprite; m_upgraded = true; }
 bool Ship::getUpgraded() { return m_upgraded; }
-bool Ship::getCanDock() { return m_canDock; }
-void Ship::toggleDocked() { if(!m_docked) {m_docked = true; m_speed = 0;} else {m_docked = false;} }
 std::string Ship::getShipSprite() { return m_shipSprite; }
 std::string Ship::getShipSprite1() { return m_shipSprite1; }
 std::string Ship::getShipSprite2() { return m_shipSprite2; }
@@ -124,8 +128,8 @@ int Ship::getFlipflop() { return m_flipflop; }
 void Ship::setFlipflop(int flipflop) { m_flipflop = flipflop; }
 bool Ship::goingMaxSpeed() { return (m_speed==m_maxSpeed); }
 void Ship::setSpeed(int speed) { m_speed = speed; }
-void Ship::setCanDock(bool canDock, int dockPlanet) { m_canDock = canDock; m_dockPlanet = dockPlanet; }
 int Ship::getDockPlanet() { return m_dockPlanet; }
+bool Ship::getDocked() { return m_docked; }
 
 Ship::~Ship(void)
 {

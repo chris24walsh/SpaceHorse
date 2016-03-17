@@ -57,7 +57,7 @@ public:
 	void setBgY();
 	void setEditText(std::string editText);
 	void setGameOver();
-	void toggleHyperDrive();
+	void setHyperDrive(bool hyperDrive);
 	void setShipSpriteCurrents(int index, int shipSpriteCurrent);
 	void spaceFail(std::string failMessage);
 	~Space_display(void);

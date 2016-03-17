@@ -248,7 +248,7 @@ void Space_display::setBgX() { m_bgX = (*m_players).at(0).getShip().getX() - m_w
 void Space_display::setBgY() { m_bgY = (*m_players).at(0).getShip().getY() - m_windowHeight/2; }
 void Space_display::setEditText(std::string editText) { m_editText = editText;}
 void Space_display::setGameOver() { m_gameOver = true; }
-void Space_display::toggleHyperDrive() { if(m_hyperDrive) { m_hyperDrive = false; } else m_hyperDrive = true; }
+void Space_display::setHyperDrive(bool hyperDrive) { m_hyperDrive = hyperDrive; }
 void Space_display::setShipSpriteCurrents(int index, int shipSpriteCurrent)
 {
 	if(shipSpriteCurrent<0 || shipSpriteCurrent>2) { spaceFail("Invalid shipSpriteCurrent number"); }

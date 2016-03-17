@@ -31,8 +31,7 @@ private:
 		m_shipSprite1,
 		m_shipSprite2,
 		m_fireSprite; //don't need array for this, since display will take care of that.
-	bool m_canDock,
-		m_upgraded,
+	bool m_upgraded,
 		m_docked;
 
 public:
@@ -44,8 +43,6 @@ public:
 	void setFireSize(int fireWidth, int fireHeight);
 	void setUpgraded(std::string fireSprite);
 	bool getUpgraded();
-	bool getCanDock();
-	void toggleDocked();
 	std::string getShipSprite();
 	std::string getShipSprite1();
 	std::string getShipSprite2();
@@ -81,8 +78,9 @@ public:
 	void setFlipflop(int flipflop);
 	bool goingMaxSpeed();
 	void setSpeed(int speed);
-	void setCanDock(bool canDock, int dockPlanet);
+	void setDocked(bool docked, int dockPlanet);
 	int getDockPlanet();
+	bool getDocked();
 	~Ship();
 };
 

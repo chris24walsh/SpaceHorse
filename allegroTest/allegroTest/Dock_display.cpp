@@ -60,14 +60,24 @@ void Dock_display::update()
 {
 	if(!m_dockLoad) { load(*m_player, *m_planet); }
 	al_clear_to_color(al_map_rgb(25,0,25));
-	al_draw_rotated_bitmap(m_shipSprite, al_get_bitmap_width(m_shipSprite)/2, al_get_bitmap_height(m_shipSprite)/2, 250, 250, 0, 0);
-	al_draw_rotated_bitmap(m_fireSprite, al_get_bitmap_width(m_fireSprite)/2, al_get_bitmap_height(m_fireSprite)/2, 250, 250, 0, 0);
-	al_draw_bitmap(m_dockingText, 0, 0, 0);
-	if((*m_player).getShip().getUpgraded()) { al_draw_bitmap(m_upgradedText, 0, m_windowHeight/2, 0); }
-	if(m_failedUpgrade)
+	al_draw_rotated_bitmap(m_shipSprite, al_get_bitmap_width(m_shipSprite)/2, al_get_bitmap_height(m_shipSprite)/2, m_windowWidth*0.5, m_windowHeight*0.4, 0, 0);
+	al_draw_rotated_bitmap(m_fireSprite, al_get_bitmap_width(m_fireSprite)/2, al_get_bitmap_height(m_fireSprite)/2, m_windowWidth*0.5, m_windowHeight*0.4, 0, 0);
+
+//	al_draw_bitmap(m_dockingText, 0, 0, 0);
+	std::stringstream ss_planetText;
+	ss_planetText << "You have docked at " << m_planet->getPlanetName() << "."; //al_draw_text doesn't support newline (\n) so...
+	std::string planetText = ss_planetText.str();
+	al_draw_text(m_font, al_map_rgb(190,190,190), m_windowWidth*0.5, m_windowHeight*0.2, ALLEGRO_ALIGN_CENTRE, planetText.c_str());
+
+	std::string upgradeText;
+	if((*m_player).getShip().getUpgraded())
 	{
-		al_draw_text(m_font, al_map_rgb(190,190,190), m_windowWidth*0.5, m_windowHeight*0.8, ALLEGRO_ALIGN_CENTRE, "Upgrading is impossible at this planet!");
+//		al_draw_bitmap(m_upgradedText, 0, m_windowHeight/2, 0);
+		upgradeText = "Your weapon has been upgraded.";
 	}
+	else if(!m_failedUpgrade) { upgradeText = "To upgrade your weapon, press W."; }
+	else { upgradeText = "Upgrading is impossible at this planet!"; }
+	al_draw_text(m_font, al_map_rgb(190,190,190), m_windowWidth*0.5, m_windowHeight*0.3, ALLEGRO_ALIGN_CENTRE, upgradeText.c_str());
 }
 
 void Dock_display::setDispUpgradeText()
