@@ -60,8 +60,8 @@ void Dock_display::update()
 {
 	if(!m_dockLoad) { load(*m_player, *m_planet); }
 	al_clear_to_color(al_map_rgb(25,0,25));
-	al_draw_rotated_bitmap(m_shipSprite, al_get_bitmap_width(m_shipSprite)/2, al_get_bitmap_height(m_shipSprite)/2, m_windowWidth*0.5, m_windowHeight*0.4, 0, 0);
-	al_draw_rotated_bitmap(m_fireSprite, al_get_bitmap_width(m_fireSprite)/2, al_get_bitmap_height(m_fireSprite)/2, m_windowWidth*0.5, m_windowHeight*0.4, 0, 0);
+	al_draw_rotated_bitmap(m_shipSprite, al_get_bitmap_width(m_shipSprite)/2, al_get_bitmap_height(m_shipSprite)/2, m_windowWidth*0.48, m_windowHeight*0.4, 0, 0);
+	al_draw_rotated_bitmap(m_fireSprite, al_get_bitmap_width(m_fireSprite)/2, al_get_bitmap_height(m_fireSprite)/2, m_windowWidth*0.52, m_windowHeight*0.4, 0, 0);
 
 //	al_draw_bitmap(m_dockingText, 0, 0, 0);
 	std::stringstream ss_planetText;
