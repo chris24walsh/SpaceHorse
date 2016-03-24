@@ -130,7 +130,8 @@ bool Ship::goingMaxSpeed() { return (m_speed==m_maxSpeed); }
 void Ship::setSpeed(int speed) { m_speed = speed; }
 int Ship::getDockPlanet() { return m_dockPlanet; }
 bool Ship::getDocked() { return m_docked; }
-
+std::vector<Animation> Ship::getAnimations() { return m_animations ; }
+void Ship::setAnimations(Animation a1) { m_animations.push_back(a1); }
 Ship::~Ship(void)
 {
 }

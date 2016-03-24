@@ -357,6 +357,9 @@ void Space_logic::update()
 
 		//Check for gameover
 		checkGameOver();
+
+		//Check for animations
+		checkAnimations();
 	}
 
 	if (m_hyperDrive && m_textEntered)
@@ -401,6 +404,9 @@ int Space_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 //		case ALLEGRO_KEY_F1:
 //			saveGame();
 //			break;
+		case ALLEGRO_KEY_A:
+			triggerAnimation();
+			break;
 		}
 	}
 	else if (m_hyperDrive)
@@ -477,6 +483,29 @@ void Space_logic::keyRelease(ALLEGRO_EVENT &keyReleased)
 				m_firePressed = false;
 				(*m_players).at(0).getShip().setFireCycle(10);
 			}
+}
+
+void Space_logic::triggerAnimation()
+{
+	Animation a1;
+	m_players->at(0).getShip().setAnimations(a1);
+	std::cout << "# Animations: " << m_players->at(0).getShip().getAnimations().size() << std::endl;
+}
+
+void Space_logic::checkAnimations()
+{
+	//Simply check animations for player1 first off
+	//Ship s1 = m_players->at(0).getShip();
+
+	bool checkIfDone = false;
+
+	for (int i=0; i<m_players->at(0).getShip().getAnimations().size(); i++) {
+		checkIfDone = m_players->at(0).getShip().getAnimations().at(i).actionPerFrame(m_players->at(0).getShip().getX(), m_players->at(0).getShip().getY(), m_players->at(0).getShip().getAngle());
+		m_players->at(0).getShip().setX(m_players->at(0).getShip().getAnimations().at(i).getX());
+		m_players->at(0).getShip().setY(m_players->at(0).getShip().getAnimations().at(i).getY());
+		m_players->at(0).getShip().setAngle(m_players->at(0).getShip().getAnimations().at(i).getAngle());
+		if (checkIfDone == true) m_players->at(0).getShip().getAnimations().erase(m_players->at(0).getShip().getAnimations().begin() + i);
+	}
 }
 
 Space_logic::~Space_logic(void)

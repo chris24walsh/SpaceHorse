@@ -2,6 +2,8 @@
 #define SHIP_H
 
 #include "Header.h"
+#include <vector>
+#include "Animation.h"
 
 class Ship {
 private:
@@ -33,7 +35,7 @@ private:
 		m_fireSprite; //don't need array for this, since display will take care of that.
 	bool m_upgraded,
 		m_docked;
-
+	std::vector<Animation> m_animations;
 public:
 	Ship();
 	Ship(std::string shipSprite, std::string shipSprite1, std::string shipSprite2, std::string fireSprite);
@@ -81,6 +83,8 @@ public:
 	void setDocked(bool docked, int dockPlanet);
 	int getDockPlanet();
 	bool getDocked();
+	std::vector<Animation> getAnimations();
+	void setAnimations(Animation);
 	~Ship();
 };
 

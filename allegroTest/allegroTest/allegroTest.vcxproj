@@ -71,6 +71,7 @@
     <ClCompile Include="Display.cpp" />
     <ClCompile Include="Dock_display.cpp" />
     <ClCompile Include="Dock_logic.cpp" />
+    <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Logic.cpp" />
     <ClCompile Include="main.cpp" />
@@ -91,6 +92,7 @@
     <ClInclude Include="Display.h" />
     <ClInclude Include="Dock_display.h" />
     <ClInclude Include="Dock_logic.h" />
+    <ClInclude Include="Animation.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Enum.h" />
     <ClInclude Include="Header.h" />
