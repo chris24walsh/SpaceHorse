@@ -83,8 +83,8 @@ public:
 	void setDocked(bool docked, int dockPlanet);
 	int getDockPlanet();
 	bool getDocked();
-	std::vector<Animation> getAnimations();
-	void setAnimations(Animation);
+	std::vector<Animation>& getAnimations();
+	void setAnimation(Animation);
 	~Ship();
 };
 

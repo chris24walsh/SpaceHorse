@@ -1,33 +1,34 @@
 #include "Animation.h"
 
-Animation::Animation() {
-	frameCounter = 0;
+Animation::Animation(double shipX, double shipY, double shipAngle) {
+	m_frameCounter = 0;
+	m_done = false;
+	m_x = shipX;
+	m_y = shipY;
+	m_angle = shipAngle;
 }
 
 Animation::~Animation() {
 }
 
 double Animation::getX() {
-	return x;
+	return m_x;
 }
 
 double Animation::getY() {
-	return y;
+	return m_y;
 }
 
 double Animation::getAngle() {
-	return angle;
+	return m_angle;
 }
 
-bool Animation::actionPerFrame(double sx, double sy, double sangle) {
-	x = sx;
-	y = sy;
-	angle = sangle;
-	if (frameCounter<5) x++;
-	else if (frameCounter>=5 && frameCounter<10) y++;
-	else if (frameCounter>=10 && frameCounter<15) x--;
-	else if (frameCounter>=15 && frameCounter<20) y--;
-	else if (frameCounter>=20) done = true;
-	frameCounter++;
-	return done;
+bool Animation::actionPerFrame() {
+	if (m_frameCounter<50) m_x += 1;
+	else if (m_frameCounter>=50 && m_frameCounter<100) m_y += 1;
+	else if (m_frameCounter>=100 && m_frameCounter<150) m_x -= 1;
+	else if (m_frameCounter>=150 && m_frameCounter<200) m_y -= 1;
+	else if (m_frameCounter>=200) m_done = true;
+	m_frameCounter++;
+	return m_done;
 }

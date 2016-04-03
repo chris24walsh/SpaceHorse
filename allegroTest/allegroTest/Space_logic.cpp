@@ -487,24 +487,30 @@ void Space_logic::keyRelease(ALLEGRO_EVENT &keyReleased)
 
 void Space_logic::triggerAnimation()
 {
-	Animation a1;
-	m_players->at(0).getShip().setAnimations(a1);
-	std::cout << "# Animations: " << m_players->at(0).getShip().getAnimations().size() << std::endl;
+	Ship& ship = m_players->at(0).getShip(); //Get a reference to player 1 ship object
+	Animation a1(ship.getX(), ship.getY(), ship.getAngle());
+	ship.setAnimation(a1);
+	std::cout << "# Animations: " << ship.getAnimations().size() << std::endl;
 }
 
 void Space_logic::checkAnimations()
 {
-	//Simply check animations for player1 first off
-	//Ship s1 = m_players->at(0).getShip();
+	
+	bool done = false; //A check of whether the animation is done
+	Ship& ship = m_players->at(0).getShip(); //A reference to player 1 ship object
 
-	bool checkIfDone = false;
-
-	for (int i=0; i<m_players->at(0).getShip().getAnimations().size(); i++) {
-		checkIfDone = m_players->at(0).getShip().getAnimations().at(i).actionPerFrame(m_players->at(0).getShip().getX(), m_players->at(0).getShip().getY(), m_players->at(0).getShip().getAngle());
-		m_players->at(0).getShip().setX(m_players->at(0).getShip().getAnimations().at(i).getX());
-		m_players->at(0).getShip().setY(m_players->at(0).getShip().getAnimations().at(i).getY());
-		m_players->at(0).getShip().setAngle(m_players->at(0).getShip().getAnimations().at(i).getAngle());
-		if (checkIfDone == true) m_players->at(0).getShip().getAnimations().erase(m_players->at(0).getShip().getAnimations().begin() + i);
+	if (m_players->at(0).getShip().getAnimations().size() > 0) {
+		for (int i=0; i<ship.getAnimations().size(); i++) {
+			Animation &animation = ship.getAnimations().at(i); //A reference to current animation being processed
+			//Trigger the animations per-frame action
+			done = animation.actionPerFrame();
+			//Adjust the ships coordinates accordingly
+			ship.setX(animation.getX());
+			ship.setY(animation.getY());
+			ship.setAngle(animation.getAngle());
+			//If animation complete, delete from animations array
+			if (done) ship.getAnimations().erase(ship.getAnimations().begin() + i);
+		}
 	}
 }
 

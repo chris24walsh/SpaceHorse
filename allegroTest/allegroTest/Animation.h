@@ -3,16 +3,16 @@
 
 class Animation {
 private:
-	double x, y, angle;
-	int frameCounter;
-	bool done;
+	double m_x, m_y, m_angle;
+	int m_frameCounter;
+	bool m_done;
 public:
-	Animation();
+	Animation(double, double, double);
 	~Animation();
 	double getX();
 	double getY();
 	double getAngle();
-	bool actionPerFrame(double, double, double);
+	bool actionPerFrame();
 };
 
 #endif
