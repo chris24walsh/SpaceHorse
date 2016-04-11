@@ -1,6 +1,6 @@
 ###**Introduction**
 
-This project was started with the goal of creating an open map, multiplayer, 2D space explorer. The first release candidate will aim to ~~have at least a local server possible, which will allow dynamic multiplayer play. Eventually, it would be great to have an online server to facilitate this~~ allow exploration of a universe, which is importable/configurable from a text file. Each planet/space station etc should be dockable with resources to mine/buy in order to level up the ship. This project is currently using C++ and two C libraries, the Allegro games library and the Enet UDP networking library.
+This project was started with the goal of creating an open map, multiplayer, 2D space explorer. The first release candidate will aim to ~~have at least a local server possible, which will allow dynamic multiplayer play. Eventually, it would be great to have an online server to facilitate this~~ allow exploration of a universe, which is importable/configurable from a text file. Each planet/space station etc should be dockable with resources to mine/buy in order to level up the ship. This project is currently using C++ and two C libraries, the Allegro games library ~~and the Enet UDP networking library~~.
 
 
 ###**Setup**
