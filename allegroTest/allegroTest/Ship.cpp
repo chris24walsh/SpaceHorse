@@ -14,8 +14,7 @@ Ship::Ship()
 	m_speedY(0),
 	m_upgraded(0),
 	m_docked(0),
-	m_x(489000 + rand()%100),
-	m_y(503800 + rand()%100),
+	m_coordinates(),
 	m_shipSprite("c:/dev/allegro/images/shipSprite.png"), //display will load these when needed, ship just tells it where to load from
 	m_shipSprite1("c:/dev/allegro/images/shipSprite1.png"),
 	m_shipSprite2("c:/dev/allegro/images/shipSprite2.png"),
@@ -28,6 +27,8 @@ Ship::Ship()
 	m_fireCycle(100),
 	m_dockPlanet(0)
 {
+	m_coordinates.x = 489000 + rand()%100;
+	m_coordinates.y = 503800 + rand()%100;
 	m_fireSpeed = m_maxSpeed + 10;
 	for (int i=0;i<m_maxFireBalls;++i) 
 	{
@@ -56,8 +57,7 @@ But yes, rand() is pretty poor*/
 	m_speedY(0),
 	m_upgraded(0),
 	m_docked(0),
-	m_x(489000 + rand()%100),
-	m_y(503800 + rand()%100),
+	m_coordinates(),
 	m_shipSprite(shipSprite), //display will load these when needed, ship just tells it where to load from
 	m_shipSprite1(shipSprite1),
 	m_shipSprite2(shipSprite2),
@@ -70,6 +70,8 @@ But yes, rand() is pretty poor*/
 	m_fireCycle(100),
 	m_dockPlanet(0)
 {
+	m_coordinates.x = 489000 + rand()%100;
+	m_coordinates.y = 503800 + rand()%100;
 	m_fireSpeed = m_maxSpeed + 10;
 	for (int i=0;i<m_maxFireBalls;++i)
 	{

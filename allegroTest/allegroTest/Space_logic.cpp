@@ -64,8 +64,8 @@ void Space_logic::fire()
 bool Space_logic::nearPlanet(int index)
 {
 	int proxX, proxY;
-	proxX = abs(m_players->at(0).getShip().getX() - m_map->getPlanets().at(index).getX());
-	proxY = abs(m_players->at(0).getShip().getY() - m_map->getPlanets().at(index).getY());
+	proxX = abs(m_players->at(0).getShip().getCoordinates().x - m_map->getPlanets().at(index).getX());
+	proxY = abs(m_players->at(0).getShip().getCoordinates().y - m_map->getPlanets().at(index).getY());
 	if (proxX<m_map->getPlanets().at(index).getWidth() && proxY<m_map->getPlanets().at(index).getHeight())
 	{
 		return true;
@@ -104,8 +104,8 @@ void Space_logic::hyperDrive()
 	m_space->setEditText(m_editText);
 	m_space->setHyperDrive(true);
 	m_oldAngle = m_players->at(0).getShip().getAngle();
-	m_distanceTravelX = abs(abs(m_x2) - abs(m_players->at(0).getShip().getX()));
-	m_distanceTravelY = abs(abs(m_y2) - abs(m_players->at(0).getShip().getY()));
+	m_distanceTravelX = abs(abs(m_x2) - abs(m_players->at(0).getShip().getCoordinates().x));
+	m_distanceTravelY = abs(abs(m_y2) - abs(m_players->at(0).getShip().getCoordinates().y));
 }
 
 void Space_logic::rotate()
@@ -154,22 +154,22 @@ void Space_logic::moveShips()
 	for(int i=0; i<m_players->size(); ++i)
 	{
 		//Restrict map in X axis (can't travel below 0, above maxX)
-		if ((m_players->at(i).getShip().getX()<m_players->at(i).getShip().getWidth()/2
+		if ((m_players->at(i).getShip().getCoordinates().x<m_players->at(i).getShip().getWidth()/2
 			&& m_players->at(i).getShip().getSpeedX()<0)
-			|| (m_players->at(i).getShip().getX()>m_maxX-(m_players->at(i).getShip().getWidth()/2)
+			|| (m_players->at(i).getShip().getCoordinates().x>m_maxX-(m_players->at(i).getShip().getWidth()/2)
 			&& m_players->at(i).getShip().getSpeedX()>0))
 		{ ; } //Can't travel
 		else
-		{ m_players->at(0).getShip().setX(m_players->at(0).getShip().getX()+m_players->at(0).getShip().getSpeedX()); } //maybe get ship to add its own speed.
+		{ m_players->at(0).getShip().setX(m_players->at(0).getShip().getCoordinates().x+m_players->at(0).getShip().getSpeedX()); } //maybe get ship to add its own speed.
 	
 		//Restrict map in Y axis (can't travel below 0, above maxY)
-		if ((m_players->at(0).getShip().getY()<m_players->at(0).getShip().getHeight()/2
+		if ((m_players->at(0).getShip().getCoordinates().y<m_players->at(0).getShip().getHeight()/2
 			&& m_players->at(0).getShip().getSpeedY()<0)
-			|| (m_players->at(0).getShip().getY()>m_maxY-(m_players->at(0).getShip().getHeight()/2)
+			|| (m_players->at(0).getShip().getCoordinates().y>m_maxY-(m_players->at(0).getShip().getHeight()/2)
 			&& m_players->at(0).getShip().getSpeedY()>0))
 		{ ; } //Can't travel
 		else
-		{ m_players->at(0).getShip().setY(m_players->at(0).getShip().getY()+m_players->at(0).getShip().getSpeedY()); }
+		{ m_players->at(0).getShip().setY(m_players->at(0).getShip().getCoordinates().y+m_players->at(0).getShip().getSpeedY()); }
 	}
 }
 
@@ -204,8 +204,8 @@ void Space_logic::makeFireballs()
 		{
 			int x = m_players->at(0).getShip().getFireBallNumber(); //Cycled through available fireballs (having a high upper threshold of fireballs prevents onscreen fireballs being recycled)
 			m_players->at(0).getShip().setFireBallNumber((m_players->at(0).getShip().getFireBallNumber()+1));
-			m_players->at(0).getShip().setFireX(x, m_players->at(0).getShip().getX());
-			m_players->at(0).getShip().setFireY(x, m_players->at(0).getShip().getY());
+			m_players->at(0).getShip().setFireX(x, m_players->at(0).getShip().getCoordinates().x);
+			m_players->at(0).getShip().setFireY(x, m_players->at(0).getShip().getCoordinates().y);
 			m_players->at(0).getShip().setFireAngle(x, m_players->at(0).getShip().getAngle());
 			if (m_players->at(0).getShip().getFireBallNumber()>=m_players->at(0).getShip().getMaxFireBalls())
 			{ m_players->at(0).getShip().setFireBallNumber(0); }
@@ -256,9 +256,9 @@ void Space_logic::hyperAlignAngle()
 
 void Space_logic::hyperMove()
 {
-	m_players->at(0).getShip().setX(m_players->at(0).getShip().getX()
+	m_players->at(0).getShip().setX(m_players->at(0).getShip().getCoordinates().x
 		+ m_players->at(0).getShip().getMaxSpeed() * m_hyperSpeed * cos(m_players->at(0).getShip().getAngle()));
-	m_players->at(0).getShip().setY(m_players->at(0).getShip().getY()
+	m_players->at(0).getShip().setY(m_players->at(0).getShip().getCoordinates().y
 		+ m_players->at(0).getShip().getMaxSpeed() * m_hyperSpeed * sin(m_players->at(0).getShip().getAngle()));
 	m_distanceTravelX -= abs(m_players->at(0).getShip().getMaxSpeed() * m_hyperSpeed * cos(m_players->at(0).getShip().getAngle()));
 	m_distanceTravelY -= abs(m_players->at(0).getShip().getMaxSpeed() * m_hyperSpeed * sin(m_players->at(0).getShip().getAngle()));
@@ -307,13 +307,13 @@ void Space_logic::hyperTextEntered()
 		m_x2 = std::stoi(m_editText.substr(0, 6).c_str()); //better I think to convert relevant parts of string to integers
 		m_y2 = std::stoi(m_editText.substr(8, 6).c_str());
 		
-		m_newAngle = atan2( (m_y2 - m_players->at(0).getShip().getY()),  (m_x2 - m_players->at(0).getShip().getX()) );
+		m_newAngle = atan2( (m_y2 - m_players->at(0).getShip().getCoordinates().y),  (m_x2 - m_players->at(0).getShip().getCoordinates().x) );
 		if (m_newAngle<0) { m_newAngle += 3.14*2; }
 		
-		m_distanceTravelX = abs(abs(m_x2) - abs(m_players->at(0).getShip().getX()));
-		m_distanceTravelY = abs(abs(m_y2) - abs(m_players->at(0).getShip().getY()));
+		m_distanceTravelX = abs(abs(m_x2) - abs(m_players->at(0).getShip().getCoordinates().x));
+		m_distanceTravelY = abs(abs(m_y2) - abs(m_players->at(0).getShip().getCoordinates().y));
 
-		if (m_x2==m_players->at(0).getShip().getX() && m_y2==m_players->at(0).getShip().getY()) //if already there!
+		if (m_x2==m_players->at(0).getShip().getCoordinates().x && m_y2==m_players->at(0).getShip().getCoordinates().y) //if already there!
 		{ m_hyperDrive = m_paused = false; }
 	}
 	else if(m_textEntered==false) //abort if not full coordinates

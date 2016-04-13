@@ -158,21 +158,21 @@ coordinates (the camera), bgX and bgY - so subtract their x and y coordinates fr
 		case 0:
 			{
 				al_draw_rotated_bitmap(m_shipSprites.at(i), getShipSpriteWidth(i)/2, getShipSpriteHeight(i)/2,
-					(*m_players).at(i).getShip().getX()-m_bgX, (*m_players).at(i).getShip().getY()-m_bgY,
+					(*m_players).at(i).getShip().getCoordinates().x-m_bgX, (*m_players).at(i).getShip().getCoordinates().y-m_bgY,
 					(*m_players).at(i).getShip().getAngle(), 0);
 			}
 			break;
 		case 1:
 			{
 				al_draw_rotated_bitmap(m_shipSprite1s.at(i), getShipSpriteWidth(i)/2, getShipSpriteHeight(i)/2,
-					(*m_players).at(i).getShip().getX()-m_bgX, (*m_players).at(i).getShip().getY()-m_bgY,
+					(*m_players).at(i).getShip().getCoordinates().x-m_bgX, (*m_players).at(i).getShip().getCoordinates().y-m_bgY,
 					(*m_players).at(i).getShip().getAngle(), 0);
 			}
 			break;
 		case 2:
 			{
 				al_draw_rotated_bitmap(m_shipSprite2s.at(i), getShipSpriteWidth(i)/2, getShipSpriteHeight(i)/2,
-					(*m_players).at(i).getShip().getX()-m_bgX, (*m_players).at(i).getShip().getY()-m_bgY,
+					(*m_players).at(i).getShip().getCoordinates().x-m_bgX, (*m_players).at(i).getShip().getCoordinates().y-m_bgY,
 					(*m_players).at(i).getShip().getAngle(), 0);
 			}
 			break;
@@ -187,7 +187,7 @@ coordinates (the camera), bgX and bgY - so subtract their x and y coordinates fr
 	ss_health << "Health: " << (*m_players).at(0).getShip().getHealth();
 	std::string health = ss_health.str(); //good, don't try mixing stringstream with c-style strings - char* is just pointer to array!
 	std::stringstream ss_coordinates;
-	ss_coordinates << "Coordinates: " << (*m_players).at(0).getShip().getX() << " , " << (*m_players).at(0).getShip().getY();
+	ss_coordinates << "Coordinates: " << (*m_players).at(0).getShip().getCoordinates().x << " , " << (*m_players).at(0).getShip().getCoordinates().y;
 	std::string coordinates = ss_coordinates.str();
 	al_draw_text(font, al_map_rgb(255,255,255), m_windowWidth*0.05, m_windowHeight*0.1, 0, health.c_str());
 	al_draw_text(font, al_map_rgb(255,255,255), m_windowWidth*0.05, m_windowHeight*0.9, 0, coordinates.c_str());
@@ -199,8 +199,8 @@ coordinates (the camera), bgX and bgY - so subtract their x and y coordinates fr
 	//Planets on radar
 	for (int i=0; i<((*m_map).getPlanets().size()); ++i)
 	{
-		double rX = m_windowWidth*0.85 - ((*m_players).at(0).getShip().getX() - ((*m_map).getPlanets().at(i)).getX()) * m_radarScale;
-		double rY = m_windowHeight*0.15 - ((*m_players).at(0).getShip().getY() - ((*m_map).getPlanets().at(i)).getY()) * m_radarScale;
+		double rX = m_windowWidth*0.85 - ((*m_players).at(0).getShip().getCoordinates().x - ((*m_map).getPlanets().at(i)).getX()) * m_radarScale;
+		double rY = m_windowHeight*0.15 - ((*m_players).at(0).getShip().getCoordinates().y - ((*m_map).getPlanets().at(i)).getY()) * m_radarScale;
 		if ((rX > m_windowWidth*0.85 - m_windowWidth*0.1) && (rX < m_windowWidth*0.85 + m_windowWidth*0.1) &&
 			(rY > m_windowHeight*0.15 - m_windowHeight*0.1) && (rY < m_windowHeight*0.15 + m_windowHeight*0.1))
 		{ al_draw_rotated_bitmap(m_radarDotSprite, 2.5, 2.5, rX, rY, 0, 0); } //Draw planets only if their coordinates exist within current screen
@@ -211,8 +211,8 @@ coordinates (the camera), bgX and bgY - so subtract their x and y coordinates fr
 	{
 		for (int i=1; i<(*m_players).size(); ++i)
 		{
-			double rX = m_windowWidth*0.85 - ((*m_players).at(0).getShip().getX() - (*m_players).at(i).getShip().getX()) * m_radarScale;
-			double rY = m_windowHeight*0.15 - ((*m_players).at(0).getShip().getY() - (*m_players).at(i).getShip().getY()) * m_radarScale;
+			double rX = m_windowWidth*0.85 - ((*m_players).at(0).getShip().getCoordinates().x - (*m_players).at(i).getShip().getCoordinates().x) * m_radarScale;
+			double rY = m_windowHeight*0.15 - ((*m_players).at(0).getShip().getCoordinates().y - (*m_players).at(i).getShip().getCoordinates().y) * m_radarScale;
 			if ((rX > m_windowWidth*0.85 - m_windowWidth*0.1) && (rX < m_windowWidth*0.85 + m_windowWidth*0.1) &&
 				(rY > m_windowHeight*0.15 - m_windowHeight*0.1) && (rY < m_windowHeight*0.15 + m_windowHeight*0.1))
 				al_draw_tinted_rotated_bitmap(m_radarDotSprite, al_map_rgb(255,120,120), 2.5, 2.5, rX, rY, 0, 0);
@@ -242,10 +242,10 @@ int Space_display::getShipSpriteHeight(int index) { return al_get_bitmap_height(
 int Space_display::getFireSpriteWidth(int index) { return al_get_bitmap_width(m_fireSprites.at(index)); }
 int Space_display::getFireSpriteHeight(int index) { return al_get_bitmap_height(m_fireSprites.at(index)); }
 int Space_display::getNumberGrids() { return m_numberGrids; }
-void Space_display::setGridX() { m_gridX = int(float((*m_players).at(0).getShip().getX())/m_windowWidth)*m_windowWidth; }
-void Space_display::setGridY() { m_gridY = int(float((*m_players).at(0).getShip().getY())/m_windowHeight)*m_windowHeight; }
-void Space_display::setBgX() { m_bgX = (*m_players).at(0).getShip().getX() - m_windowWidth/2; }
-void Space_display::setBgY() { m_bgY = (*m_players).at(0).getShip().getY() - m_windowHeight/2; }
+void Space_display::setGridX() { m_gridX = int(float((*m_players).at(0).getShip().getCoordinates().x)/m_windowWidth)*m_windowWidth; }
+void Space_display::setGridY() { m_gridY = int(float((*m_players).at(0).getShip().getCoordinates().y)/m_windowHeight)*m_windowHeight; }
+void Space_display::setBgX() { m_bgX = (*m_players).at(0).getShip().getCoordinates().x - m_windowWidth/2; }
+void Space_display::setBgY() { m_bgY = (*m_players).at(0).getShip().getCoordinates().y - m_windowHeight/2; }
 void Space_display::setEditText(std::string editText) { m_editText = editText;}
 void Space_display::setGameOver() { m_gameOver = true; }
 void Space_display::setHyperDrive(bool hyperDrive) { m_hyperDrive = hyperDrive; }

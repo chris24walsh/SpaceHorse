@@ -24,9 +24,8 @@ private:
 	double m_angle,
 		m_speedX,
 		m_speedY,
-		m_x,
-		m_y,
 		m_fireAngle[static_cast<int>(Fire::MAXFIREBALLS)];
+	Coordinates m_coordinates;
 	std::string m_shipSprite,
 		m_shipSprite1,
 		m_shipSprite2,
@@ -38,8 +37,6 @@ public:
 	Ship(); //we can combine these constructors to load from a textfile.
 	Ship(std::string shipSprite, std::string shipSprite1, std::string shipSprite2, std::string fireSprite);
 	
-	void setUpgraded(std::string fireSprite) { m_fireSprite = fireSprite; m_upgraded = true; }
-	bool getUpgraded() { return m_upgraded; }
 	void setFireCycle(int fireCycle) { m_fireCycle = fireCycle; }
 	int getFireCycle() { return m_fireCycle; }
 	void setHealth(int health) { if(health>0) {m_health = health;} else m_health=0; }
@@ -59,6 +56,8 @@ public:
 	void setFlipflop(int flipflop) { m_flipflop = flipflop; }
 
 	//fireball functions
+	void setUpgraded(std::string fireSprite) { m_fireSprite = fireSprite; m_upgraded = true; }
+	bool getUpgraded() { return m_upgraded; }
 	std::string getFireSprite() { return m_fireSprite; }
 	void setFireSize(int fireWidth, int fireHeight) { m_fireWidth = fireWidth; m_fireHeight = fireHeight; }
 	int getMaxFireBalls() { return m_maxFireBalls; }
@@ -74,10 +73,9 @@ public:
 	void setFireAngle(int index, double fireAngle) { m_fireAngle[index] = fireAngle; }
 
 	//ship movement
-	double getX() { return m_x; }
-	double getY() { return m_y; }
-	void setX(double x) { m_x = x; }
-	void setY(double y) { m_y = y; }
+	const Coordinates& getCoordinates() { return m_coordinates; }
+	void setX(double x) { m_coordinates.x = x; }
+	void setY(double y) { m_coordinates.y = y; }
 	double getAngle() { return m_angle; }
 	void setAngle(double angle) { m_angle = angle; }
 	int getSpeed() { return m_speed; }
