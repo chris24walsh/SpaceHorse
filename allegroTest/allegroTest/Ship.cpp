@@ -79,58 +79,6 @@ But yes, rand() is pretty poor*/
 	}
 }
 
-
-void Ship::setDocked(bool docked, int dockPlanet)
-{
-	m_docked = docked;
-	if(m_docked)
-	{ m_dockPlanet = dockPlanet; m_speed = 0; }
-}
-
-void Ship::setFireCycle(int fireCycle) { m_fireCycle = fireCycle; }
-int Ship::getFireCycle() { return m_fireCycle; }
-void Ship::setShipSize(int shipWidth, int shipHeight) { m_width = shipWidth; m_height = shipHeight; }
-void Ship::setFireSize(int fireWidth, int fireHeight) { m_fireWidth = fireWidth; m_fireHeight = fireHeight; }
-void Ship::setUpgraded(std::string fireSprite) { m_fireSprite = fireSprite; m_upgraded = true; }
-bool Ship::getUpgraded() { return m_upgraded; }
-std::string Ship::getShipSprite() { return m_shipSprite; }
-std::string Ship::getShipSprite1() { return m_shipSprite1; }
-std::string Ship::getShipSprite2() { return m_shipSprite2; }
-std::string Ship::getFireSprite() { return m_fireSprite; }
-int Ship::getMaxFireBalls() { return m_maxFireBalls; }
-int Ship::getFireBallNumber() { return m_fireballNumber; }
-void Ship::setFireBallNumber(int fireBallNumber) { m_fireballNumber = fireBallNumber; }
-int Ship::getFireX(int index) { return m_fireX[index]; }
-int Ship::getFireY(int index) { return m_fireY[index]; }
-void Ship::setFireX(int index, int fireX) { m_fireX[index] = fireX; }
-void Ship::setFireY(int index, int fireY) { m_fireY[index] = fireY; }
-void Ship::updateFireX(int index) { m_fireX[index] += m_fireSpeed * cos(m_fireAngle[index]); }
-void Ship::updateFireY(int index) { m_fireY[index] += m_fireSpeed * sin(m_fireAngle[index]); }
-double Ship::getFireAngle(int index) { return m_fireAngle[index];}
-void Ship::setFireAngle(int index, double fireAngle) { m_fireAngle[index] = fireAngle; }
-double Ship::getX() { return m_x; }
-double Ship::getY() { return m_y; }
-void Ship::setX(double x) { m_x = x; }
-void Ship::setY(double y) { m_y = y; }
-double Ship::getAngle() { return m_angle; }
-void Ship::setAngle(double angle) { m_angle = angle; }
-void Ship::setHealth(int health) { if(health>0) {m_health = health;} else m_health=0; }
-int Ship::getHealth() { return m_health; }
-int Ship::getWidth() { return m_width; }
-int Ship::getHeight() { return m_height; }
-int Ship::getSpeed() { return m_speed; }
-int Ship::getMaxSpeed() { return m_maxSpeed; }
-double Ship::getSpeedX() { return m_speedX; }
-double Ship::getSpeedY() { return m_speedY; }
-void Ship::setSpeedX(double speedX) { m_speedX = speedX; }
-void Ship::setSpeedY(double speedY) { m_speedY = speedY; }
-int Ship::getFlipflop() { return m_flipflop; }
-void Ship::setFlipflop(int flipflop) { m_flipflop = flipflop; }
-bool Ship::goingMaxSpeed() { return (m_speed==m_maxSpeed); }
-void Ship::setSpeed(int speed) { m_speed = speed; }
-int Ship::getDockPlanet() { return m_dockPlanet; }
-bool Ship::getDocked() { return m_docked; }
-
 Ship::~Ship(void)
 {
 }
