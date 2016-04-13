@@ -22,20 +22,12 @@ private:
 		m_hyperDrive,
 		m_paused,
 		m_collided,
-		m_angleAligned,
-		m_distanceAligned,
 		m_textEntered;
 	int m_newKey,
 		m_distance,
-		m_distanceTravelX,
-		m_distanceTravelY,
-		m_x2,
-		m_y2,
 		m_maxX,
-		m_maxY,
-		m_hyperSpeed;
+		m_maxY;
 	std::string m_editText;
-	double m_newAngle;
 
 public:
 	Space_logic();
@@ -45,11 +37,9 @@ public:
 	int keyPress(ALLEGRO_EVENT &keyPressed);
 	void keyRelease(ALLEGRO_EVENT &keyReleased);
 
-	void rotate();
 	void animateShips();
-	void changeSpeed();
+	void changeVelocity();
 	void moveShips();
-	void setShipsInGrid();
 	
 	void fire();
 	void moveFireballs();
@@ -61,8 +51,6 @@ public:
 	void checkGameOver();
 
 	void hyperDrive();
-	void hyperAlignAngle();
-	void hyperMove();
 	void hyperEnterDigit();
 	void hyperBackDigit();
 	void hyperTextEntered();

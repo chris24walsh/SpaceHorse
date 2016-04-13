@@ -5,13 +5,11 @@
 
 class Ship {
 private:
-	int m_id,
-		m_height,
-		m_width,
-		m_speed,
+	int m_speed,
 		m_maxSpeed,
 		m_health,
 		m_flipflop,
+		m_currentSprite,
 		m_fireballNumber,
 		m_maxFireBalls,
 		m_fireX[static_cast<int>(Fire::MAXFIREBALLS)], //if using dynamically allocated arrays here, do it right (or use vectors instead)
@@ -20,16 +18,20 @@ private:
 		m_fireWidth,
 		m_fireSpeed,
 		m_fireCycle,
-		m_dockPlanet;
+		m_dockPlanet,
+		m_hyperDistanceX,
+		m_hyperDistanceY,
+		m_hyperX,
+		m_hyperY,
+		m_hyperSpeed;
 	double m_angle,
+		m_newAngle,
 		m_speedX,
 		m_speedY,
 		m_fireAngle[static_cast<int>(Fire::MAXFIREBALLS)];
 	Coordinates m_coordinates;
-	std::string m_shipSprite,
-		m_shipSprite1,
-		m_shipSprite2,
-		m_fireSprite; //don't need array for this, since display will take care of that.
+	std::vector<ALLEGRO_BITMAP*> m_shipSprite;
+	std::string m_fireSprite; //don't need array for this, since display will take care of that.
 	bool m_upgraded,
 		m_docked;
 
@@ -39,21 +41,15 @@ public:
 	
 	void setFireCycle(int fireCycle) { m_fireCycle = fireCycle; }
 	int getFireCycle() { return m_fireCycle; }
-	void setHealth(int health) { if(health>0) {m_health = health;} else m_health=0; }
+	void damage(int damage) { m_health -= damage; if(m_health<0) { m_health = 0; } }
 	int getHealth() { return m_health; }
-	void setDocked(bool docked, int dockPlanet) { m_docked = docked; if(m_docked) { m_dockPlanet = dockPlanet; m_speed = 0; } }
+	void setDocked(bool docked, int dockPlanet) { m_docked = docked; if(m_docked) { m_dockPlanet = dockPlanet; stop(); } }
 	int getDockPlanet() { return m_dockPlanet; }
 	bool getDocked() { return m_docked; }
 
-	//put these into one vector of Allegro bitmaps for ship images
-	std::string getShipSprite() { return m_shipSprite; }
-	std::string getShipSprite1() { return m_shipSprite1; }
-	std::string getShipSprite2() { return m_shipSprite2; }
-	void setShipSize(int shipWidth, int shipHeight) { m_width = shipWidth; m_height = shipHeight; }
-	int getWidth() { return m_width; }
-	int getHeight() { return m_height; }
-	int getFlipflop() { return m_flipflop; }
-	void setFlipflop(int flipflop) { m_flipflop = flipflop; }
+	ALLEGRO_BITMAP* getShipSprite() { return m_shipSprite.at(m_currentSprite); }
+	int getWidth() { return al_get_bitmap_width(m_shipSprite.at(0)); }
+	int getHeight() { return al_get_bitmap_height(m_shipSprite.at(0)); }
 
 	//fireball functions
 	void setUpgraded(std::string fireSprite) { m_fireSprite = fireSprite; m_upgraded = true; }
@@ -74,23 +70,27 @@ public:
 
 	//ship movement
 	const Coordinates& getCoordinates() { return m_coordinates; }
-	void move(bool x, bool y) { if(x) { m_coordinates.x += m_speedX; } if(y) { m_coordinates.y += m_speedY; } }
+	void move(bool x, bool y);
+	void animateRocket();
 	void setX(double x) { m_coordinates.x = x; }
 	void setY(double y) { m_coordinates.y = y; }
-
 	double getAngle() { return m_angle; }
-	void setAngle(double angle) { m_angle = angle; }
-
+	void turn(bool left);
 	int getSpeed() { return m_speed; }
 	double getSpeedX() { return m_speedX; }
 	double getSpeedY() { return m_speedY; }
 	int getMaxSpeed() { return m_maxSpeed; }
-	bool goingMaxSpeed() { return (m_speed==m_maxSpeed); }
-	void accelerate(bool accelerate);
-	void stop() { m_speed = m_speedX = m_speedY = 0; }
-	void setSpeedX(double speedX) { m_speedX = speedX; }
-	void setSpeedY(double speedY) { m_speedY = speedY; }
+	void accelerate(bool faster);
+	void updateSpeedXY() { m_speedX = m_speed * cos(m_angle); m_speedY = m_speed * sin(m_angle); }
+	void stop() { m_speed = m_speedX = m_speedY = m_flipflop = m_currentSprite = 0; }
 
+	//hyperdrive
+	void beginHyperDrive(int hyperX, int hyperY);
+	void hyperDrive();
+	void hyperAlignAngle();
+	void hyperMove();
+
+	void shutdown();
 	~Ship();
 };
 
