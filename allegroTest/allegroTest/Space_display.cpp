@@ -187,7 +187,8 @@ coordinates (the camera), bgX and bgY - so subtract their x and y coordinates fr
 	ss_health << "Health: " << (*m_players).at(0).getShip().getHealth();
 	std::string health = ss_health.str(); //good, don't try mixing stringstream with c-style strings - char* is just pointer to array!
 	std::stringstream ss_coordinates;
-	ss_coordinates << "Coordinates: " << (*m_players).at(0).getShip().getCoordinates().x << " , " << (*m_players).at(0).getShip().getCoordinates().y;
+	ss_coordinates << "Coordinates: " << static_cast<int>(m_players->at(0).getShip().getCoordinates().x)
+		<< " , " << static_cast<int>(m_players->at(0).getShip().getCoordinates().y);
 	std::string coordinates = ss_coordinates.str();
 	al_draw_text(font, al_map_rgb(255,255,255), m_windowWidth*0.05, m_windowHeight*0.1, 0, health.c_str());
 	al_draw_text(font, al_map_rgb(255,255,255), m_windowWidth*0.05, m_windowHeight*0.9, 0, coordinates.c_str());

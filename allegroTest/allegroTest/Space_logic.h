@@ -35,26 +35,31 @@ private:
 		m_maxY,
 		m_hyperSpeed;
 	std::string m_editText;
-	double m_oldAngle,
-		m_newAngle;
+	double m_newAngle;
 
 public:
 	Space_logic();
 	void load(Space_display &space, int windowWidth, int windowHeight, std::vector<Player> &players, Map &map);
 	void unload();
+	void update();
+	int keyPress(ALLEGRO_EVENT &keyPressed);
+	void keyRelease(ALLEGRO_EVENT &keyReleased);
+
 	void rotate();
 	void animateShips();
 	void changeSpeed();
 	void moveShips();
-	void setShipsPositions();
+	void setShipsInGrid();
+	
+	void fire();
 	void moveFireballs();
 	void makeFireballs();
-	void checkGameOver();
-	void update();
-	void fire();
+
 	int dock();
 	bool nearPlanet(int index);
 	void collide();
+	void checkGameOver();
+
 	void hyperDrive();
 	void hyperAlignAngle();
 	void hyperMove();
@@ -62,8 +67,7 @@ public:
 	void hyperBackDigit();
 	void hyperTextEntered();
 	void abortHyperDrive();
-	int keyPress(ALLEGRO_EVENT &keyPressed);
-	void keyRelease(ALLEGRO_EVENT &keyReleased);
+
 	~Space_logic(void);
 };
 

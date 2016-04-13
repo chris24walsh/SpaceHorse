@@ -81,6 +81,16 @@ But yes, rand() is pretty poor*/
 	}
 }
 
+void Ship::accelerate(bool accelerate)
+{
+	if(accelerate && m_speed<m_maxSpeed)
+	{ ++m_speed; }
+	else if(m_speed>0)
+	{ --m_speed; }
+	m_speedX = m_speed * cos(m_angle);
+	m_speedY = m_speed * sin(m_angle);
+}
+
 Ship::~Ship(void)
 {
 }

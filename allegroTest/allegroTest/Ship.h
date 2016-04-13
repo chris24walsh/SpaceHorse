@@ -74,18 +74,22 @@ public:
 
 	//ship movement
 	const Coordinates& getCoordinates() { return m_coordinates; }
+	void move(bool x, bool y) { if(x) { m_coordinates.x += m_speedX; } if(y) { m_coordinates.y += m_speedY; } }
 	void setX(double x) { m_coordinates.x = x; }
 	void setY(double y) { m_coordinates.y = y; }
+
 	double getAngle() { return m_angle; }
 	void setAngle(double angle) { m_angle = angle; }
+
 	int getSpeed() { return m_speed; }
-	int getMaxSpeed() { return m_maxSpeed; }
 	double getSpeedX() { return m_speedX; }
 	double getSpeedY() { return m_speedY; }
+	int getMaxSpeed() { return m_maxSpeed; }
+	bool goingMaxSpeed() { return (m_speed==m_maxSpeed); }
+	void accelerate(bool accelerate);
+	void stop() { m_speed = m_speedX = m_speedY = 0; }
 	void setSpeedX(double speedX) { m_speedX = speedX; }
 	void setSpeedY(double speedY) { m_speedY = speedY; }
-	bool goingMaxSpeed() { return (m_speed==m_maxSpeed); }
-	void setSpeed(int speed) { m_speed = speed; }
 
 	~Ship();
 };

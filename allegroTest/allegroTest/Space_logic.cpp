@@ -24,7 +24,6 @@ Space_logic::Space_logic()
 	m_maxX(0),
 	m_maxY(0),
 	m_editText(""),
-	m_oldAngle(0),
 	m_newAngle(0),
 	m_x2(3000),
 	m_y2(3000),
@@ -103,9 +102,6 @@ void Space_logic::hyperDrive()
 	m_editText = ("");
 	m_space->setEditText(m_editText);
 	m_space->setHyperDrive(true);
-	m_oldAngle = m_players->at(0).getShip().getAngle();
-	m_distanceTravelX = abs(abs(m_x2) - abs(m_players->at(0).getShip().getCoordinates().x));
-	m_distanceTravelY = abs(abs(m_y2) - abs(m_players->at(0).getShip().getCoordinates().y));
 }
 
 void Space_logic::rotate()
@@ -137,43 +133,36 @@ void Space_logic::animateShips()
 }
 
 void Space_logic::changeSpeed()
-{
-	if (m_upPressed && (!m_players->at(0).getShip().goingMaxSpeed()))
-	{ (*m_players).at(0).getShip().setSpeed((*m_players).at(0).getShip().getSpeed()+1); }
+{	
+	if (m_upPressed)
+	{ m_players->at(0).getShip().accelerate(true); }
 
-	if (m_downPressed && (m_players->at(0).getShip().getSpeed()>0))
-	{ (*m_players).at(0).getShip().setSpeed((*m_players).at(0).getShip().getSpeed()-1); }
-
-	//Resolve translations for x and y axis
-	(*m_players).at(0).getShip().setSpeedX((*m_players).at(0).getShip().getSpeed() * cos((*m_players).at(0).getShip().getAngle()));
-	(*m_players).at(0).getShip().setSpeedY((*m_players).at(0).getShip().getSpeed() * sin((*m_players).at(0).getShip().getAngle()));
+	if (m_downPressed)
+	{ m_players->at(0).getShip().accelerate(false); }
 }
 
 void Space_logic::moveShips()
 {
 	for(int i=0; i<m_players->size(); ++i)
 	{
+		//needs to be made more precise
 		//Restrict map in X axis (can't travel below 0, above maxX)
-		if ((m_players->at(i).getShip().getCoordinates().x<m_players->at(i).getShip().getWidth()/2
+		bool x = !((m_players->at(i).getShip().getCoordinates().x<m_players->at(i).getShip().getWidth()/2
 			&& m_players->at(i).getShip().getSpeedX()<0)
 			|| (m_players->at(i).getShip().getCoordinates().x>m_maxX-(m_players->at(i).getShip().getWidth()/2)
-			&& m_players->at(i).getShip().getSpeedX()>0))
-		{ ; } //Can't travel
-		else
-		{ m_players->at(0).getShip().setX(m_players->at(0).getShip().getCoordinates().x+m_players->at(0).getShip().getSpeedX()); } //maybe get ship to add its own speed.
-	
+			&& m_players->at(i).getShip().getSpeedX()>0));
+		
 		//Restrict map in Y axis (can't travel below 0, above maxY)
-		if ((m_players->at(0).getShip().getCoordinates().y<m_players->at(0).getShip().getHeight()/2
+		bool y = !((m_players->at(0).getShip().getCoordinates().y<m_players->at(0).getShip().getHeight()/2
 			&& m_players->at(0).getShip().getSpeedY()<0)
 			|| (m_players->at(0).getShip().getCoordinates().y>m_maxY-(m_players->at(0).getShip().getHeight()/2)
-			&& m_players->at(0).getShip().getSpeedY()>0))
-		{ ; } //Can't travel
-		else
-		{ m_players->at(0).getShip().setY(m_players->at(0).getShip().getCoordinates().y+m_players->at(0).getShip().getSpeedY()); }
+			&& m_players->at(0).getShip().getSpeedY()>0));
+
+		m_players->at(0).getShip().move(x, y);
 	}
 }
 
-void Space_logic::setShipsPositions()
+void Space_logic::setShipsInGrid()
 {
 	//Set which grid the ship is currently in
 	m_space->setGridX();
@@ -221,7 +210,7 @@ void Space_logic::checkGameOver()
 	{
 		m_gameOver = true;
 		m_space->setGameOver(); //tell display that game is over
-		m_players->at(0).getShip().setSpeed(0); //stop ship
+		m_players->at(0).getShip().stop(); //stop ship
 		//paused = true;
 	}
 }
@@ -271,7 +260,6 @@ void Space_logic::hyperMove()
 		m_players->at(0).getShip().setDocked(false, 0);
 		m_paused = m_hyperDrive = m_angleAligned = m_textEntered = false; //Reset flags
 	}
-	setShipsPositions();
 }
 
 void Space_logic::hyperEnterDigit()
@@ -344,7 +332,7 @@ void Space_logic::update()
 		moveShips();
 
 		//tell display to update grid and coordinates
-		setShipsPositions();
+		setShipsInGrid();
 	
 		//Set fireball position
 		moveFireballs();
@@ -362,7 +350,7 @@ void Space_logic::update()
 	if (m_hyperDrive && m_textEntered)
 	{
 		if (!m_angleAligned) { hyperAlignAngle(); } //Get angle right first
-		if (m_angleAligned) { hyperMove(); } //Then check distance
+		if (m_angleAligned) { hyperMove(); setShipsInGrid(); } //Then check distance
 	}
 }
 
