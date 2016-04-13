@@ -37,19 +37,17 @@ public:
 	int keyPress(ALLEGRO_EVENT &keyPressed);
 	void keyRelease(ALLEGRO_EVENT &keyReleased);
 
-	void animateShips();
 	void changeVelocity();
-	void moveShips();
-	
+	void moveShips();	
 	void fire();
 	void moveFireballs();
 	void makeFireballs();
-
 	int dock();
 	bool nearPlanet(int index);
 	void collide();
 	void checkGameOver();
 
+	//hyperdrive
 	void hyperDrive();
 	void hyperEnterDigit();
 	void hyperBackDigit();
