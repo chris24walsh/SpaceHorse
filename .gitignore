@@ -8,3 +8,5 @@ allegroTest/allegroTest.v*
 allegroTest/allegroTest/allegro.log
 
 allegroTest/allegroTest/Debug/*
+
+allegroTest/.vs/*
