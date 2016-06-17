@@ -1,12 +1,13 @@
-allegroTest/Debug/allegro.log
-allegroTest/Debug/allegroTest.*
+allegroTest/Debug/*
+allegroTest/Release/*
 
-allegroTest/allegroTest.sdf
+#allegroTest/allegroTest.sdf
 allegroTest/allegroTest.opensdf
 allegroTest/allegroTest.v*
 
 allegroTest/allegroTest/allegro.log
 
 allegroTest/allegroTest/Debug/*
+allegroTest/allegroTest/Release/*
 
 allegroTest/.vs/*
