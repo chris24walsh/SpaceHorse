@@ -357,6 +357,9 @@ void Space_logic::update()
 
 		//Check for gameover
 		checkGameOver();
+
+		//Check for animations
+		checkAnimations();
 	}
 
 	if (m_hyperDrive && m_textEntered)
@@ -401,6 +404,12 @@ int Space_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 //		case ALLEGRO_KEY_F1:
 //			saveGame();
 //			break;
+		case ALLEGRO_KEY_A:
+			triggerAnimation1();
+			break;
+		case ALLEGRO_KEY_Q:
+			triggerAnimation2();
+			break;
 		}
 	}
 	else if (m_hyperDrive)
@@ -477,6 +486,46 @@ void Space_logic::keyRelease(ALLEGRO_EVENT &keyReleased)
 				m_firePressed = false;
 				(*m_players).at(0).getShip().setFireCycle(10);
 			}
+}
+
+void Space_logic::triggerAnimation1()
+{
+	Ship& ship = m_players->at(0).getShip(); //Get a reference to player 1 ship object
+	Animation a1(ship.getX(), ship.getY(), ship.getAngle());
+	a1.setAction(10, 10, 0);
+	ship.setAnimation(a1);
+	std::cout << "# Animations: " << ship.getAnimations().size() << std::endl;
+}
+
+void Space_logic::triggerAnimation2()
+{
+	Ship& ship = m_players->at(0).getShip(); //Get a reference to player 1 ship object
+	Animation a1(ship.getX(), ship.getY(), ship.getAngle());
+	ship.setAnimation(a1);
+	std::cout << "# Animations: " << ship.getAnimations().size() << std::endl;
+}
+
+void Space_logic::checkAnimations()
+{
+	
+	bool done = false; //A check of whether the animation is done
+	Ship& ship = m_players->at(0).getShip(); //A reference to player 1 ship object
+
+	//If ship has animations then..
+	if (m_players->at(0).getShip().getAnimations().size() > 0) {
+		//Cycle through all ships animations
+		for (int i=0; i<ship.getAnimations().size(); i++) {
+			Animation &animation = ship.getAnimations().at(i); //A reference to current animation being processed
+			//Trigger the animations per-frame action
+			done = animation.actionPerFrame();
+			//Adjust the ships coordinates accordingly
+			ship.setX(animation.getX());
+			ship.setY(animation.getY());
+			ship.setAngle(animation.getAngle());
+			//If animation complete, delete from animations array
+			if (done) ship.getAnimations().erase(ship.getAnimations().begin() + i);
+		}
+	}
 }
 
 Space_logic::~Space_logic(void)
