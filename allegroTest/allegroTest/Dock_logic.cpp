@@ -26,7 +26,7 @@ void Dock_logic::upgrade_weapon()
 {
 	if((*m_planet).getCanUpgrade()) //check if possible at this planet
 	{
-		(*m_player).getShip().setUpgraded("c:/dev/allegro/images/fireball2.png"); //set new file location for image
+		(*m_player).getShip().setUpgraded("../../images/fireball2.png"); //set new file location for image
 		(*m_dock).setDispUpgradeText(); //load new fireball image
 		(*m_player).getShip().setFireSize((*m_dock).getFireSpriteWidth(), (*m_dock).getFireSpriteHeight()); //set new firing parameters
 	}

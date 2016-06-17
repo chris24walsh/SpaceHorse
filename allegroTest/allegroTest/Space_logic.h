@@ -54,6 +54,11 @@ public:
 	void hyperTextEntered();
 	void abortHyperDrive();
 
+  //animations (to be worked on)
+	void triggerAnimation1();
+	void triggerAnimation2();
+	void checkAnimations();
+
 	~Space_logic(void);
 };
 

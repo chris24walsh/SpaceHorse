@@ -21,14 +21,14 @@ void Dock_display::load(Player &player, Planet &planet)
 		m_player = &player;
 		m_planet = &planet;
 
-		m_font = al_load_ttf_font("C:/Dev/allegro/Font/pirulen.ttf",25,0);
+		m_font = al_load_ttf_font("../../Font/pirulen.ttf",25,0);
 		if(!m_font) { dockFail("Could not load 'pirulen.ttf'.\n"); }
 
-		m_dockingText = al_load_bitmap("c:/dev/allegro/images/dockingText.png");
+		m_dockingText = al_load_bitmap("../../images/dockingText.png");
 		if(!m_dockingText) { dockFail("Failed to load the dockingText image"); }
 		if(player.getShip().getUpgraded())
 		{
-			m_upgradedText = al_load_bitmap("c:/dev/allegro/images/upgradedText.png");
+			m_upgradedText = al_load_bitmap("../../images/upgradedText.png");
 			if(!m_upgradedText) { dockFail("Failed to load the upgradedText image"); }
 		}
 
@@ -80,7 +80,7 @@ void Dock_display::update()
 
 void Dock_display::setDispUpgradeText()
 {
-	m_upgradedText = al_load_bitmap("c:/dev/allegro/images/upgradedText.png");
+	m_upgradedText = al_load_bitmap("../../images/upgradedText.png");
 	if(!m_upgradedText) { dockFail("Failed to load the upgradedText image"); }
 
 	if (m_fireSprite) al_destroy_bitmap(m_fireSprite);

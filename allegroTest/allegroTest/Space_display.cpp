@@ -37,11 +37,11 @@ void Space_display::load(std::vector<Player> &players, Map &map)
 		m_map = &map;
 		
 		//load background
-		m_backgroundSprite = al_load_bitmap("c:/dev/allegro/images/backgroundSprite3.png");
+		m_backgroundSprite = al_load_bitmap("../../images/backgroundSprite3.png");
 		if(!m_backgroundSprite) { spaceFail("Failed to load the background image"); }
 		
 		//load font
-		font = al_load_ttf_font("C:/Dev/allegro/Font/pirulen.ttf",25,0);
+		font = al_load_ttf_font("../../Font/pirulen.ttf",25,0);
 		if(!font) { spaceFail("Could not load 'pirulen.ttf'.\n"); }
 		
 		//load ships
@@ -68,9 +68,9 @@ void Space_display::load(std::vector<Player> &players, Map &map)
 
 		//load radar
 		m_radarBuffer = al_create_bitmap(m_windowWidth*3, m_windowHeight*3);
-		m_radarSprite = al_load_bitmap("c:/dev/allegro/images/radar1.png");
+		m_radarSprite = al_load_bitmap("../../images/radar1.png");
 		if(!m_radarSprite) { spaceFail("Failed to load the radar image"); }
-		m_radarDotSprite = al_load_bitmap("c:/dev/allegro/images/radarDot.png");
+		m_radarDotSprite = al_load_bitmap("../../images/radarDot.png");
 		if(!m_radarDotSprite) { spaceFail("Failed to load the radar dot image"); }
 		m_spaceLoad = true;
 	}

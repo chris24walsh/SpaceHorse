@@ -2,6 +2,8 @@
 #define SHIP_H
 
 #include "Header.h"
+#include <vector>
+#include "Animation.h"
 
 class Ship {
 private:
@@ -34,8 +36,9 @@ private:
 	std::string m_fireSprite; //don't need array for this, since display will take care of that.
 	bool m_upgraded,
 		m_docked;
-
+	std::vector<Animation> m_animations;
 public:
+<<<<<<< HEAD
 	Ship(); //we can combine these constructors to load from a textfile.
 	
 	void damage(int damage) { m_health -= damage; if(m_health<0) { m_health = 0; } }
@@ -87,6 +90,8 @@ public:
 	void hyperMove();
 
 	void shutdown();
+	std::vector<Animation>& getAnimations();
+	void setAnimation(Animation);
 	~Ship();
 };
 
