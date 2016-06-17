@@ -51,6 +51,4 @@ void Game::gameLoop(ALLEGRO_TIMER &timer, ALLEGRO_EVENT_QUEUE &event_queue)
 
 Game::~Game(void)
 {
-	for(int i=0; i<players.size(); ++i)
-	{ players.at(i).getShip().shutdown(); }
 }

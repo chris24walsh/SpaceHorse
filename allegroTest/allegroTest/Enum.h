@@ -6,10 +6,4 @@ enum class Fire //we don't want a dynamically allocated array(or vector) unless 
 	MAXFIREBALLS = 15
 };
 
-struct Coordinates
-{
-	double x,
-		y;
-};
-
 #endif
