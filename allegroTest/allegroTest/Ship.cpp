@@ -16,10 +16,10 @@ Ship::Ship()
 	m_docked(0),
 	m_x(489000 + rand()%100),
 	m_y(503800 + rand()%100),
-	m_shipSprite("c:/dev/allegro/images/shipSprite.png"), //display will load these when needed, ship just tells it where to load from
-	m_shipSprite1("c:/dev/allegro/images/shipSprite1.png"),
-	m_shipSprite2("c:/dev/allegro/images/shipSprite2.png"),
-	m_fireSprite("c:/dev/allegro/images/fireball.png"),
+	m_shipSprite("../../images/shipSprite.png"), //display will load these when needed, ship just tells it where to load from
+	m_shipSprite1("../../images/shipSprite1.png"),
+	m_shipSprite2("../../images/shipSprite2.png"),
+	m_fireSprite("../../images/fireball.png"),
 	//logic will set m_height and m_width later when it tells display to load these bitmaps
 	m_maxSpeed(10),
 	m_health(6),

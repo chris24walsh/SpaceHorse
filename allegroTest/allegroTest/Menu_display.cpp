@@ -14,7 +14,7 @@ void Menu_display::load() //load all the resources for this display screen
 {
 	if(!m_menuLoad)
 	{
-		font = al_load_ttf_font("C:/Dev/allegro/Font/pirulen.ttf",25,0);
+		font = al_load_ttf_font("../../Font/pirulen.ttf",25,0);
 		if(!font) { menuFail("Could not load 'pirulen.ttf'.\n"); }
 		m_menuLoad = true;
 	}
