@@ -12,6 +12,7 @@ Space_display::Space_display(int windowWidth, int windowHeight)
 	m_screenHeight(0),
 	m_windowWidth(windowWidth),
 	m_windowHeight(windowHeight),
+	m_shipSpriteCurrents(1, 0),
 	m_editText(""),
 	m_backgroundSprite(nullptr),
 	m_radarSprite(nullptr),
@@ -24,6 +25,9 @@ Space_display::Space_display(int windowWidth, int windowHeight)
 	m_radarScreenWidth(1920),
 	m_radarScreenHeight(1080),
 	m_radarScale(0.005),
+	m_shipSprites(0),
+	m_shipSprite1s(0),
+	m_shipSprite2s(0),
 	m_fireSprites(0),
 	m_planetSprites(0)
 {
@@ -45,10 +49,20 @@ void Space_display::load(std::vector<Player> &players, Map &map)
 		if(!font) { spaceFail("Could not load 'pirulen.ttf'.\n"); }
 		
 		//load ships
+		m_shipSpriteCurrents.reserve(players.size());
+		m_shipSprites.reserve(players.size());
+		m_shipSprite1s.reserve(players.size());
+		m_shipSprite2s.reserve(players.size());
 		m_fireSprites.reserve(players.size());
 	
 		for(int i=0;i<players.size();++i)
 		{
+		m_shipSprites.push_back(al_load_bitmap(players.at(i).getShip().getShipSprite().c_str()));
+		if(!m_shipSprites.at(i)) { spaceFail("Failed to load the shipSprite image"); }
+		m_shipSprite1s.push_back(al_load_bitmap(players.at(i).getShip().getShipSprite1().c_str()));
+		if(!m_shipSprite1s.at(i)) { spaceFail("Failed to load the shipSprite1 image"); }
+		m_shipSprite2s.push_back(al_load_bitmap(players.at(i).getShip().getShipSprite2().c_str()));
+		if(!m_shipSprite2s.at(i)) { spaceFail("Failed to load the shipSprite2 image"); }
 		m_fireSprites.push_back(al_load_bitmap(players.at(i).getShip().getFireSprite().c_str()));
 		if(!m_fireSprites.at(i)) { spaceFail("Failed to load the fireball image"); }
 		}
@@ -83,6 +97,9 @@ void Space_display::unload()
 		if(m_backgroundSprite) { al_destroy_bitmap(m_backgroundSprite); } 
 		for(int i=(*m_players).size()-1;i>-1;--i) 
 		{
+			if(m_shipSprites.at(i)) { al_destroy_bitmap(m_shipSprites.at(i)); m_shipSprites.pop_back(); }
+			if(m_shipSprite1s.at(i)) { al_destroy_bitmap(m_shipSprite1s.at(i)); m_shipSprite1s.pop_back(); }
+			if(m_shipSprite2s.at(i)) { al_destroy_bitmap(m_shipSprite2s.at(i)); m_shipSprite2s.pop_back(); }
 			if(m_fireSprites.at(i)) { al_destroy_bitmap(m_fireSprites.at(i)); m_fireSprites.pop_back(); }
 		}
 		for(int i=(*m_map).getPlanets().size()-1;i>-1;--i)
@@ -104,7 +121,6 @@ void Space_display::update()
 	
 /*Remember that all sprites drawn to the display must be drawn relative to the current background 
 coordinates (the camera), bgX and bgY - so subtract their x and y coordinates from bgX and bgY*/
-	setGrid();
 	
 	//Draw all 9 of the background sprites, tiled around, and including, the current grid
 	int backX = m_gridX-m_windowWidth; //X coordinate of top left corner tile of the 9 tiles
@@ -126,20 +142,41 @@ coordinates (the camera), bgX and bgY - so subtract their x and y coordinates fr
 	} //Draw planets only if their coordinates exist within current screen
 	
 	//Draw sprites for each Ship object
-	for (int i=0; i<m_players->size(); ++i)
+	for (int i=0; i<(*m_players).size(); ++i)
 	{
 		//Draw fireballs
-		for (int f=0; f<m_players->at(i).getShip().getMaxFireBalls(); ++f)
+		for (int f=0; f<(*m_players).at(i).getShip().getMaxFireBalls(); ++f)
 		{
 			al_draw_tinted_rotated_bitmap(m_fireSprites.at(i), al_map_rgb(255,255,255),
 				getFireSpriteWidth(i)/2, getFireSpriteHeight(i)/2,
-				m_players->at(i).getShip().getFireX(f)-m_bgX, m_players->at(i).getShip().getFireY(f)-m_bgY,
-				m_players->at(i).getShip().getFireAngle(f), 0);
+				(*m_players).at(i).getShip().getFireX(f)-m_bgX, (*m_players).at(i).getShip().getFireY(f)-m_bgY,
+				(*m_players).at(i).getShip().getFireAngle(f), 0);
 		}
 		//Draw ships
-		al_draw_rotated_bitmap(m_players->at(i).getShip().getShipSprite(), m_players->at(i).getShip().getWidth()/2, m_players->at(i).getShip().getHeight()/2,
-			m_players->at(i).getShip().getCoordinates().x-m_bgX, m_players->at(i).getShip().getCoordinates().y-m_bgY,
-			m_players->at(i).getShip().getAngle(), 0);
+		switch(m_shipSpriteCurrents.at(i))
+		{
+		case 0:
+			{
+				al_draw_rotated_bitmap(m_shipSprites.at(i), getShipSpriteWidth(i)/2, getShipSpriteHeight(i)/2,
+					(*m_players).at(i).getShip().getX()-m_bgX, (*m_players).at(i).getShip().getY()-m_bgY,
+					(*m_players).at(i).getShip().getAngle(), 0);
+			}
+			break;
+		case 1:
+			{
+				al_draw_rotated_bitmap(m_shipSprite1s.at(i), getShipSpriteWidth(i)/2, getShipSpriteHeight(i)/2,
+					(*m_players).at(i).getShip().getX()-m_bgX, (*m_players).at(i).getShip().getY()-m_bgY,
+					(*m_players).at(i).getShip().getAngle(), 0);
+			}
+			break;
+		case 2:
+			{
+				al_draw_rotated_bitmap(m_shipSprite2s.at(i), getShipSpriteWidth(i)/2, getShipSpriteHeight(i)/2,
+					(*m_players).at(i).getShip().getX()-m_bgX, (*m_players).at(i).getShip().getY()-m_bgY,
+					(*m_players).at(i).getShip().getAngle(), 0);
+			}
+			break;
+		}
 	}
 	
 	//Draw bordering rectangle //Not necessary with current gigantic map, but useful to debug a small bounded area
@@ -150,8 +187,7 @@ coordinates (the camera), bgX and bgY - so subtract their x and y coordinates fr
 	ss_health << "Health: " << (*m_players).at(0).getShip().getHealth();
 	std::string health = ss_health.str(); //good, don't try mixing stringstream with c-style strings - char* is just pointer to array!
 	std::stringstream ss_coordinates;
-	ss_coordinates << "Coordinates: " << static_cast<int>(m_players->at(0).getShip().getCoordinates().x)
-		<< " , " << static_cast<int>(m_players->at(0).getShip().getCoordinates().y);
+	ss_coordinates << "Coordinates: " << (*m_players).at(0).getShip().getX() << " , " << (*m_players).at(0).getShip().getY();
 	std::string coordinates = ss_coordinates.str();
 	al_draw_text(font, al_map_rgb(255,255,255), m_windowWidth*0.05, m_windowHeight*0.1, 0, health.c_str());
 	al_draw_text(font, al_map_rgb(255,255,255), m_windowWidth*0.05, m_windowHeight*0.9, 0, coordinates.c_str());
@@ -163,8 +199,8 @@ coordinates (the camera), bgX and bgY - so subtract their x and y coordinates fr
 	//Planets on radar
 	for (int i=0; i<((*m_map).getPlanets().size()); ++i)
 	{
-		double rX = m_windowWidth*0.85 - ((*m_players).at(0).getShip().getCoordinates().x - ((*m_map).getPlanets().at(i)).getX()) * m_radarScale;
-		double rY = m_windowHeight*0.15 - ((*m_players).at(0).getShip().getCoordinates().y - ((*m_map).getPlanets().at(i)).getY()) * m_radarScale;
+		double rX = m_windowWidth*0.85 - ((*m_players).at(0).getShip().getX() - ((*m_map).getPlanets().at(i)).getX()) * m_radarScale;
+		double rY = m_windowHeight*0.15 - ((*m_players).at(0).getShip().getY() - ((*m_map).getPlanets().at(i)).getY()) * m_radarScale;
 		if ((rX > m_windowWidth*0.85 - m_windowWidth*0.1) && (rX < m_windowWidth*0.85 + m_windowWidth*0.1) &&
 			(rY > m_windowHeight*0.15 - m_windowHeight*0.1) && (rY < m_windowHeight*0.15 + m_windowHeight*0.1))
 		{ al_draw_rotated_bitmap(m_radarDotSprite, 2.5, 2.5, rX, rY, 0, 0); } //Draw planets only if their coordinates exist within current screen
@@ -175,8 +211,8 @@ coordinates (the camera), bgX and bgY - so subtract their x and y coordinates fr
 	{
 		for (int i=1; i<(*m_players).size(); ++i)
 		{
-			double rX = m_windowWidth*0.85 - ((*m_players).at(0).getShip().getCoordinates().x - (*m_players).at(i).getShip().getCoordinates().x) * m_radarScale;
-			double rY = m_windowHeight*0.15 - ((*m_players).at(0).getShip().getCoordinates().y - (*m_players).at(i).getShip().getCoordinates().y) * m_radarScale;
+			double rX = m_windowWidth*0.85 - ((*m_players).at(0).getShip().getX() - (*m_players).at(i).getShip().getX()) * m_radarScale;
+			double rY = m_windowHeight*0.15 - ((*m_players).at(0).getShip().getY() - (*m_players).at(i).getShip().getY()) * m_radarScale;
 			if ((rX > m_windowWidth*0.85 - m_windowWidth*0.1) && (rX < m_windowWidth*0.85 + m_windowWidth*0.1) &&
 				(rY > m_windowHeight*0.15 - m_windowHeight*0.1) && (rY < m_windowHeight*0.15 + m_windowHeight*0.1))
 				al_draw_tinted_rotated_bitmap(m_radarDotSprite, al_map_rgb(255,120,120), 2.5, 2.5, rX, rY, 0, 0);
@@ -199,24 +235,25 @@ coordinates (the camera), bgX and bgY - so subtract their x and y coordinates fr
 	}
 }
 
-void Space_display::setGrid()
-{
-	//Set which grid the ship is currently in
-	m_gridX = int(float(m_players->at(0).getShip().getCoordinates().x)/m_windowWidth)*m_windowWidth;
-	m_gridY = int(float(m_players->at(0).getShip().getCoordinates().y)/m_windowHeight)*m_windowHeight;
-	//Set background coordinates
-	m_bgX = m_players->at(0).getShip().getCoordinates().x - m_windowWidth/2;
-	m_bgY = m_players->at(0).getShip().getCoordinates().y - m_windowHeight/2;
-}
-
 int Space_display::getPlanetSpriteWidth(int index) { return al_get_bitmap_width(m_planetSprites.at(index)); }
 int Space_display::getPlanetSpriteHeight(int index) { return al_get_bitmap_height(m_planetSprites.at(index)); }
+int Space_display::getShipSpriteWidth(int index) { return al_get_bitmap_width(m_shipSprites.at(index)); }
+int Space_display::getShipSpriteHeight(int index) { return al_get_bitmap_height(m_shipSprites.at(index)); }
 int Space_display::getFireSpriteWidth(int index) { return al_get_bitmap_width(m_fireSprites.at(index)); }
 int Space_display::getFireSpriteHeight(int index) { return al_get_bitmap_height(m_fireSprites.at(index)); }
 int Space_display::getNumberGrids() { return m_numberGrids; }
+void Space_display::setGridX() { m_gridX = int(float((*m_players).at(0).getShip().getX())/m_windowWidth)*m_windowWidth; }
+void Space_display::setGridY() { m_gridY = int(float((*m_players).at(0).getShip().getY())/m_windowHeight)*m_windowHeight; }
+void Space_display::setBgX() { m_bgX = (*m_players).at(0).getShip().getX() - m_windowWidth/2; }
+void Space_display::setBgY() { m_bgY = (*m_players).at(0).getShip().getY() - m_windowHeight/2; }
 void Space_display::setEditText(std::string editText) { m_editText = editText;}
 void Space_display::setGameOver() { m_gameOver = true; }
 void Space_display::setHyperDrive(bool hyperDrive) { m_hyperDrive = hyperDrive; }
+void Space_display::setShipSpriteCurrents(int index, int shipSpriteCurrent)
+{
+	if(shipSpriteCurrent<0 || shipSpriteCurrent>2) { spaceFail("Invalid shipSpriteCurrent number"); }
+	else { m_shipSpriteCurrents.at(index) = shipSpriteCurrent; }
+}
 
 void Space_display::spaceFail(std::string failMessage)
 {
@@ -232,6 +269,9 @@ Space_display::~Space_display(void)
 		if(m_backgroundSprite) { al_destroy_bitmap(m_backgroundSprite); } 
 		for(int i=(*m_players).size()-1;i>-1;--i) 
 		{
+			if(m_shipSprites.at(i)) { al_destroy_bitmap(m_shipSprites.at(i)); m_shipSprites.pop_back(); }
+			if(m_shipSprite1s.at(i)) { al_destroy_bitmap(m_shipSprite1s.at(i)); m_shipSprite1s.pop_back(); }
+			if(m_shipSprite2s.at(i)) { al_destroy_bitmap(m_shipSprite2s.at(i)); m_shipSprite2s.pop_back(); }
 			if(m_fireSprites.at(i)) { al_destroy_bitmap(m_fireSprites.at(i)); m_fireSprites.pop_back(); }
 		}
 		for(int i=(*m_map).getPlanets().size()-1;i>-1;--i)

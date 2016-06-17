@@ -5,6 +5,7 @@ Dock_display::Dock_display(int windowWidth, int windowHeight)
 	:m_failedUpgrade(0),
 	m_windowWidth(windowWidth),
 	m_windowHeight(windowHeight),
+	m_shipSprite(nullptr),
 	m_fireSprite(nullptr),
 	m_dockingText(nullptr),
 	m_upgradedText(nullptr),
@@ -32,6 +33,8 @@ void Dock_display::load(Player &player, Planet &planet)
 			if(!m_upgradedText) { dockFail("Failed to load the upgradedText image"); }
 		}
 
+		m_shipSprite = al_load_bitmap(player.getShip().getShipSprite().c_str()); //converting to c-style string because allegro is archaic or something...
+		if(!m_shipSprite) { dockFail("Failed to load the shipSprite image"); }
 		m_fireSprite = al_load_bitmap(player.getShip().getFireSprite().c_str());
 		if(!m_fireSprite) { dockFail("Failed to load the fireball image"); }
 
@@ -45,6 +48,7 @@ void Dock_display::unload()
 	{
 		if (m_dockingText) { al_destroy_bitmap(m_dockingText); m_dockingText=nullptr; }
 		if (m_upgradedText) { al_destroy_bitmap(m_upgradedText); m_upgradedText=nullptr; }
+		if (m_shipSprite) { al_destroy_bitmap(m_shipSprite); m_shipSprite=nullptr; }
 		if (m_fireSprite) { al_destroy_bitmap(m_fireSprite); m_fireSprite=nullptr; }
 		if(m_font) { al_destroy_font(m_font); m_font=nullptr; }
 		m_failedUpgrade = false;
@@ -56,9 +60,7 @@ void Dock_display::update()
 {
 	if(!m_dockLoad) { load(*m_player, *m_planet); }
 	al_clear_to_color(al_map_rgb(25,0,25));
-	al_draw_rotated_bitmap(m_player->getShip().getShipSprite(),
-		m_player->getShip().getWidth()/2, m_player->getShip().getHeight()/2,
-		m_windowWidth*0.48, m_windowHeight*0.4, 0, 0);
+	al_draw_rotated_bitmap(m_shipSprite, al_get_bitmap_width(m_shipSprite)/2, al_get_bitmap_height(m_shipSprite)/2, m_windowWidth*0.48, m_windowHeight*0.4, 0, 0);
 	al_draw_rotated_bitmap(m_fireSprite, al_get_bitmap_width(m_fireSprite)/2, al_get_bitmap_height(m_fireSprite)/2, m_windowWidth*0.52, m_windowHeight*0.4, 0, 0);
 
 //	al_draw_bitmap(m_dockingText, 0, 0, 0);
@@ -105,6 +107,7 @@ Dock_display::~Dock_display(void)
 	{
 		if (m_dockingText) { al_destroy_bitmap(m_dockingText); }
 		if (m_upgradedText) { al_destroy_bitmap(m_upgradedText); }
+		if (m_shipSprite) { al_destroy_bitmap(m_shipSprite); }
 		if (m_fireSprite) { al_destroy_bitmap(m_fireSprite); }
 		m_dockLoad = false;
 	}

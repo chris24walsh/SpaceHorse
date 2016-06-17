@@ -22,43 +22,51 @@ private:
 		m_hyperDrive,
 		m_paused,
 		m_collided,
+		m_angleAligned,
+		m_distanceAligned,
 		m_textEntered;
 	int m_newKey,
 		m_distance,
+		m_distanceTravelX,
+		m_distanceTravelY,
+		m_x2,
+		m_y2,
 		m_maxX,
-		m_maxY;
+		m_maxY,
+		m_hyperSpeed;
 	std::string m_editText;
+	double m_oldAngle,
+		m_newAngle;
 
 public:
 	Space_logic();
 	void load(Space_display &space, int windowWidth, int windowHeight, std::vector<Player> &players, Map &map);
 	void unload();
-	void update();
-	int keyPress(ALLEGRO_EVENT &keyPressed);
-	void keyRelease(ALLEGRO_EVENT &keyReleased);
-
-	void changeVelocity();
-	void moveShips();	
-	void fire();
+	void rotate();
+	void animateShips();
+	void changeSpeed();
+	void moveShips();
+	void setShipsPositions();
 	void moveFireballs();
 	void makeFireballs();
+	void checkGameOver();
+	void update();
+	void fire();
 	int dock();
 	bool nearPlanet(int index);
 	void collide();
-	void checkGameOver();
-
-	//hyperdrive
 	void hyperDrive();
+	void hyperAlignAngle();
+	void hyperMove();
 	void hyperEnterDigit();
 	void hyperBackDigit();
 	void hyperTextEntered();
 	void abortHyperDrive();
-
-  //animations (to be worked on)
+	int keyPress(ALLEGRO_EVENT &keyPressed);
+	void keyRelease(ALLEGRO_EVENT &keyReleased);
 	void triggerAnimation1();
 	void triggerAnimation2();
 	void checkAnimations();
-
 	~Space_logic(void);
 };
 
