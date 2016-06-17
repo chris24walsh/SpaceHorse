@@ -4,6 +4,7 @@ allegroTest/Release/*
 allegroTest/allegroTest.sdf
 allegroTest/allegroTest.opensdf
 allegroTest/allegroTest.v*
+allegroTest/.vs/*
 
 allegroTest/allegroTest/allegro.log
 
