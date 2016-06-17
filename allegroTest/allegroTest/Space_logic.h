@@ -64,7 +64,8 @@ public:
 	void abortHyperDrive();
 	int keyPress(ALLEGRO_EVENT &keyPressed);
 	void keyRelease(ALLEGRO_EVENT &keyReleased);
-	void triggerAnimation();
+	void triggerAnimation1();
+	void triggerAnimation2();
 	void checkAnimations();
 	~Space_logic(void);
 };

@@ -1,5 +1,6 @@
 #include "Animation.h"
 
+//Takes objects instantaneous x, y, and angle values
 Animation::Animation(double shipX, double shipY, double shipAngle) {
 	m_frameCounter = 0;
 	m_done = false;
@@ -23,6 +24,7 @@ double Animation::getAngle() {
 	return m_angle;
 }
 
+//This does the actual animation of the object
 bool Animation::actionPerFrame() {
 	if (m_frameCounter<50) m_x += 1;
 	else if (m_frameCounter>=50 && m_frameCounter<100) m_y += 1;
@@ -31,4 +33,9 @@ bool Animation::actionPerFrame() {
 	else if (m_frameCounter>=200) m_done = true;
 	m_frameCounter++;
 	return m_done;
+}
+
+void Animation::setAction(double, double, double)
+{
+	;//nothing for now
 }

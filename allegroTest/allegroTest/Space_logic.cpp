@@ -405,7 +405,10 @@ int Space_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 //			saveGame();
 //			break;
 		case ALLEGRO_KEY_A:
-			triggerAnimation();
+			triggerAnimation1();
+			break;
+		case ALLEGRO_KEY_Q:
+			triggerAnimation2();
 			break;
 		}
 	}
@@ -485,7 +488,16 @@ void Space_logic::keyRelease(ALLEGRO_EVENT &keyReleased)
 			}
 }
 
-void Space_logic::triggerAnimation()
+void Space_logic::triggerAnimation1()
+{
+	Ship& ship = m_players->at(0).getShip(); //Get a reference to player 1 ship object
+	Animation a1(ship.getX(), ship.getY(), ship.getAngle());
+	a1.setAction(10, 10, 0);
+	ship.setAnimation(a1);
+	std::cout << "# Animations: " << ship.getAnimations().size() << std::endl;
+}
+
+void Space_logic::triggerAnimation2()
 {
 	Ship& ship = m_players->at(0).getShip(); //Get a reference to player 1 ship object
 	Animation a1(ship.getX(), ship.getY(), ship.getAngle());
@@ -499,7 +511,9 @@ void Space_logic::checkAnimations()
 	bool done = false; //A check of whether the animation is done
 	Ship& ship = m_players->at(0).getShip(); //A reference to player 1 ship object
 
+	//If ship has animations then..
 	if (m_players->at(0).getShip().getAnimations().size() > 0) {
+		//Cycle through all ships animations
 		for (int i=0; i<ship.getAnimations().size(); i++) {
 			Animation &animation = ship.getAnimations().at(i); //A reference to current animation being processed
 			//Trigger the animations per-frame action
