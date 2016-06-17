@@ -13,7 +13,8 @@ private:
 		m_dockLoad;
 	int m_windowWidth,
 		m_windowHeight;
-	ALLEGRO_BITMAP *m_fireSprite,
+	ALLEGRO_BITMAP *m_shipSprite,
+		*m_fireSprite,
 		*m_dockingText,
 		*m_upgradedText;
 	Player *m_player;
