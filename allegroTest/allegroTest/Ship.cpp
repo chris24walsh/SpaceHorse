@@ -1,10 +1,7 @@
 #include "Ship.h"
 
 Ship::Ship()
-	:m_id(0),
-	m_height(0),
-	m_width(0),
-	m_speed(0),
+	:m_speed(0),
 	m_flipflop(0),
 	m_fireballNumber(0),
 	m_fireHeight(0),
@@ -14,62 +11,32 @@ Ship::Ship()
 	m_speedY(0),
 	m_upgraded(0),
 	m_docked(0),
-	m_x(489000 + rand()%100),
-	m_y(503800 + rand()%100),
-	m_shipSprite("../../images/shipSprite.png"), //display will load these when needed, ship just tells it where to load from
-	m_shipSprite1("../../images/shipSprite1.png"),
-	m_shipSprite2("../../images/shipSprite2.png"),
-	m_fireSprite("../../images/fireball.png"),
-	//logic will set m_height and m_width later when it tells display to load these bitmaps
+	m_coordinates(),
+	m_currentSprite(0),
+	m_shipSprite(0),
 	m_maxSpeed(10),
 	m_health(6),
 	//logic will also set height and width of fireball to bitmap when loading display
+	m_fireSprite("c:/dev/allegro/images/fireball.png"),
 	m_maxFireBalls(static_cast<int>(Fire::MAXFIREBALLS)),
 	m_fireCycle(100),
-	m_dockPlanet(0)
+	m_dockPlanet(0),
+	m_hyperDistanceX(0),
+	m_hyperDistanceY(0),
+	m_hyperX(0),
+	m_hyperY(0),
+	m_hyperSpeed(50),
+	m_newAngle(0)
 {
-	m_fireSpeed = m_maxSpeed + 10;
-	for (int i=0;i<m_maxFireBalls;++i) 
-	{
-		m_fireX[i] = 2000;
-		m_fireY[i] = 2000;
-		m_fireAngle[i] = 0;
-	}
-}
+	m_shipSprite.reserve(3);
+	m_shipSprite.push_back(al_load_bitmap("c:/dev/allegro/images/shipSprite.png"));
+	m_shipSprite.push_back(al_load_bitmap("c:/dev/allegro/images/shipSprite1.png"));
+	m_shipSprite.push_back(al_load_bitmap("c:/dev/allegro/images/shipSprite2.png"));
+	for(int i=0; i<m_shipSprite.size(); ++i)
+	{ if(!m_shipSprite.at(i)) { printf("%s \n", "Failed to load the shipSprite image"); _getch(); exit(1); } }
 
-Ship::Ship(std::string shipSprite, std::string shipSprite1, std::string shipSprite2, std::string fireSprite)
-	:m_id(rand()%1000), 
-/*Why this? It won't prevent a ship having the same id.
-Also this % modulus method will not return a uniform distribution of pseudo-random numbers.
-I.e. out of 32767, 1 extra for each number 1-767.
-It will be weighted to lower numbers - a loaded dice (not just poor randomness, which in itself is not necessarily a problem).
-But yes, rand() is pretty poor*/
-	m_height(0),
-	m_width(0),
-	m_speed(0),
-	m_flipflop(0),
-	m_fireballNumber(0),
-	m_fireHeight(0),
-	m_fireWidth(0),
-	m_angle(0),
-	m_speedX(0),
-	m_speedY(0),
-	m_upgraded(0),
-	m_docked(0),
-	m_x(489000 + rand()%100),
-	m_y(503800 + rand()%100),
-	m_shipSprite(shipSprite), //display will load these when needed, ship just tells it where to load from
-	m_shipSprite1(shipSprite1),
-	m_shipSprite2(shipSprite2),
-	m_fireSprite(fireSprite),
-	//logic will set m_height and m_width later when it tells display to load these bitmaps
-	m_maxSpeed(10),
-	m_health(6),
-	//logic will also set height and width of fireball to bitmap when loading display
-	m_maxFireBalls(static_cast<int>(Fire::MAXFIREBALLS)),
-	m_fireCycle(100),
-	m_dockPlanet(0)
-{
+	m_coordinates.x = 489000 + rand()%100;
+	m_coordinates.y = 503800 + rand()%100;
 	m_fireSpeed = m_maxSpeed + 10;
 	for (int i=0;i<m_maxFireBalls;++i)
 	{
@@ -79,59 +46,109 @@ But yes, rand() is pretty poor*/
 	}
 }
 
-
-void Ship::setDocked(bool docked, int dockPlanet)
+void Ship::animateRocket()
 {
-	m_docked = docked;
-	if(m_docked)
-	{ m_dockPlanet = dockPlanet; m_speed = 0; }
+	if(m_flipflop<5)
+	{ m_currentSprite = 1; }
+	else
+	{ m_currentSprite = 2; }
+	++m_flipflop; //increase by one
+	if (m_flipflop==10)
+	{ m_flipflop = 0; } //reset when it reaches 10
 }
 
-void Ship::setFireCycle(int fireCycle) { m_fireCycle = fireCycle; }
-int Ship::getFireCycle() { return m_fireCycle; }
-void Ship::setShipSize(int shipWidth, int shipHeight) { m_width = shipWidth; m_height = shipHeight; }
-void Ship::setFireSize(int fireWidth, int fireHeight) { m_fireWidth = fireWidth; m_fireHeight = fireHeight; }
-void Ship::setUpgraded(std::string fireSprite) { m_fireSprite = fireSprite; m_upgraded = true; }
-bool Ship::getUpgraded() { return m_upgraded; }
-std::string Ship::getShipSprite() { return m_shipSprite; }
-std::string Ship::getShipSprite1() { return m_shipSprite1; }
-std::string Ship::getShipSprite2() { return m_shipSprite2; }
-std::string Ship::getFireSprite() { return m_fireSprite; }
-int Ship::getMaxFireBalls() { return m_maxFireBalls; }
-int Ship::getFireBallNumber() { return m_fireballNumber; }
-void Ship::setFireBallNumber(int fireBallNumber) { m_fireballNumber = fireBallNumber; }
-int Ship::getFireX(int index) { return m_fireX[index]; }
-int Ship::getFireY(int index) { return m_fireY[index]; }
-void Ship::setFireX(int index, int fireX) { m_fireX[index] = fireX; }
-void Ship::setFireY(int index, int fireY) { m_fireY[index] = fireY; }
-void Ship::updateFireX(int index) { m_fireX[index] += m_fireSpeed * cos(m_fireAngle[index]); }
-void Ship::updateFireY(int index) { m_fireY[index] += m_fireSpeed * sin(m_fireAngle[index]); }
-double Ship::getFireAngle(int index) { return m_fireAngle[index];}
-void Ship::setFireAngle(int index, double fireAngle) { m_fireAngle[index] = fireAngle; }
-double Ship::getX() { return m_x; }
-double Ship::getY() { return m_y; }
-void Ship::setX(double x) { m_x = x; }
-void Ship::setY(double y) { m_y = y; }
-double Ship::getAngle() { return m_angle; }
-void Ship::setAngle(double angle) { m_angle = angle; }
-void Ship::setHealth(int health) { if(health>0) {m_health = health;} else m_health=0; }
-int Ship::getHealth() { return m_health; }
-int Ship::getWidth() { return m_width; }
-int Ship::getHeight() { return m_height; }
-int Ship::getSpeed() { return m_speed; }
-int Ship::getMaxSpeed() { return m_maxSpeed; }
-double Ship::getSpeedX() { return m_speedX; }
-double Ship::getSpeedY() { return m_speedY; }
-void Ship::setSpeedX(double speedX) { m_speedX = speedX; }
-void Ship::setSpeedY(double speedY) { m_speedY = speedY; }
-int Ship::getFlipflop() { return m_flipflop; }
-void Ship::setFlipflop(int flipflop) { m_flipflop = flipflop; }
-bool Ship::goingMaxSpeed() { return (m_speed==m_maxSpeed); }
-void Ship::setSpeed(int speed) { m_speed = speed; }
-int Ship::getDockPlanet() { return m_dockPlanet; }
-bool Ship::getDocked() { return m_docked; }
-std::vector<Animation>& Ship::getAnimations() { return m_animations; }
-void Ship::setAnimation(Animation a1) { m_animations.push_back(a1); }
+void Ship::move(bool x, bool y)
+{
+	if(x) { m_coordinates.x += m_speedX; }
+	if(y) { m_coordinates.y += m_speedY; }
+	//animate if moving
+	if (m_speed>0) { animateRocket(); }
+	else { m_currentSprite = 0; }
+}
+
+void Ship::turn(bool left)
+{
+	if(left)
+	{ m_angle -= 0.05; }
+	else
+	{ m_angle += 0.05; }
+	//keep angle above 0 and below 6.28
+	if (m_angle>6.25) { m_angle = 0; }
+	if (m_angle<0) { m_angle = 6.25; }
+	updateSpeedXY();
+}
+
+void Ship::accelerate(bool faster)
+{
+	if(faster && m_speed<m_maxSpeed)
+	{ ++m_speed; }
+	else if(m_speed>0)
+	{ --m_speed; }
+	updateSpeedXY();
+}
+
+void Ship::beginHyperDrive(int hyperX, int hyperY)
+{
+	m_hyperX = hyperX;
+	m_hyperY = hyperY;
+
+	m_newAngle = atan2( (m_hyperY - m_coordinates.y),  (m_hyperX - m_coordinates.x) );
+	if (m_newAngle<0) { m_newAngle += 3.14*2; }
+
+	m_hyperDistanceX = abs(abs(m_hyperX) - abs(m_coordinates.x));
+	m_hyperDistanceY = abs(abs(m_hyperY) - abs(m_coordinates.y));
+}
+
+void Ship::hyperDrive()
+{
+	if(m_angle!=m_newAngle) { hyperAlignAngle(); }
+	else { hyperMove(); }
+}
+
+void Ship::hyperAlignAngle()
+{
+	//Decide if better to rotate clockwise or anticlockwise
+	if (m_newAngle > m_angle)
+	{
+		if (m_newAngle - m_angle < 3.14)
+		{ turn(false); }
+		else
+		{ turn(true); }
+	}
+	else
+	{
+		if (m_angle - m_newAngle > 3.14)
+		{ turn(false); }
+		else
+		{ turn(true); }
+	}
+	//Check for nearness then align angle exactly
+	if (abs(abs(m_angle) - abs(m_newAngle)) < 0.05)
+	{ m_angle = m_newAngle; }
+}
+
+void Ship::hyperMove()
+{
+	m_coordinates.x += m_maxSpeed * m_hyperSpeed * cos(m_angle);
+	m_coordinates.y += m_maxSpeed * m_hyperSpeed * sin(m_angle);
+	m_hyperDistanceX -= abs(m_maxSpeed * m_hyperSpeed * cos(m_angle));
+	m_hyperDistanceY -= abs(m_maxSpeed * m_hyperSpeed * sin(m_angle));
+
+	//if ( abs(abs(players.at(0).x) - abs(x2)) < 1000 && abs(abs(players.at(0).y) - abs(y2)) < 1000) { //Check for nearness, then align distance exactly
+	if (m_hyperDistanceX <= 1000 && m_hyperDistanceY <= 1000)
+	{
+		m_coordinates.x = m_hyperX;
+		m_coordinates.y = m_hyperY;
+		setDocked(false, 0);
+	}
+}
+
+void Ship::shutdown()
+{
+	for(int i=0; i<m_shipSprite.size(); ++i)
+	{ if(m_shipSprite.at(i)) { al_destroy_bitmap(m_shipSprite.at(i)); } }
+}
+
 Ship::~Ship(void)
 {
 }
