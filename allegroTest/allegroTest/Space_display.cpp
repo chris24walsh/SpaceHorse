@@ -87,12 +87,13 @@ void Space_display::load(std::vector<Player> &players, Map &map)
 		if(!m_radarSprite) { spaceFail("Failed to load the radar image"); }
 		m_radarDotSprite = al_load_bitmap("../../images/radarDot.png");
 		if(!m_radarDotSprite) { spaceFail("Failed to load the radar dot image"); }
-		m_spaceLoad = true;
 
 		//load music
-		music = al_load_sample("../../sounds/background-music2.wav");
-		if(!music) { spaceFail("Failed to load the music track"); }
+		music = al_load_sample("../../sounds/background-music.wav");
+		if(!music) { spaceFail("Could not load 'background-music.wav'.\n"); }
 		al_play_sample(music, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
+
+		m_spaceLoad = true;
 	}
 }
 
@@ -114,7 +115,9 @@ void Space_display::unload()
 		}
 		if(m_radarSprite) { al_destroy_bitmap(m_radarSprite); }
 		if(m_radarDotSprite) { al_destroy_bitmap(m_radarDotSprite); }
-		if(font) { al_destroy_font(font); }
+		if(font) { al_destroy_font(font); font = nullptr; }
+		if (music) { al_destroy_sample(music); music = nullptr; }
+		
 		m_spaceLoad = false;
 	}
 }
