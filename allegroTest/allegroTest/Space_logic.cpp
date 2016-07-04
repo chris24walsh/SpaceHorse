@@ -201,13 +201,14 @@ void Space_logic::makeFireballs()
 {
 	if (m_firePressed)
 	{
-		//load fireball sound
-		fireball = al_load_sample("../../sounds/fireball.wav");
-		if (!fireball) { printf("Could not load 'fireball.wav'.\n"); }
-		al_play_sample(fireball, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+		
 
 		if (m_players->at(0).getShip().getFireCycle() >= 10)
 		{
+			//load fireball sound
+			fireball = al_load_sample("../../sounds/fireball.wav");
+			if (!fireball) { printf("Could not load 'fireball.wav'.\n"); }
+			al_play_sample(fireball, 0.5, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 			int x = m_players->at(0).getShip().getFireBallNumber(); //Cycled through available fireballs (having a high upper threshold of fireballs prevents onscreen fireballs being recycled)
 			m_players->at(0).getShip().setFireBallNumber((m_players->at(0).getShip().getFireBallNumber()+1));
 			m_players->at(0).getShip().setFireX(x, m_players->at(0).getShip().getX());
