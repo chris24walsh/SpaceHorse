@@ -6,7 +6,8 @@ Menu_display::Menu_display(int windowWidth, int windowHeight)
 	m_windowWidth(windowWidth),
 	m_windowHeight(windowHeight),
 	m_homeScreenOption(1), //'new game' option lit up by default
-	font(nullptr)
+	font(nullptr),
+	music(nullptr)
 {
 }
 
@@ -14,8 +15,15 @@ void Menu_display::load() //load all the resources for this display screen
 {
 	if(!m_menuLoad)
 	{
+		//Load font
 		font = al_load_ttf_font("../../Font/pirulen.ttf",35,0);
 		if(!font) { menuFail("Could not load 'pirulen.ttf'.\n"); }
+
+		//Load audio
+		music = al_load_sample("../../sounds/space-ambient.wav");
+		if (!music) { menuFail("Could not load 'space-ambient.wav'.\n"); }
+		al_play_sample(music, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
+
 		m_menuLoad = true;
 	}
 }
@@ -25,6 +33,8 @@ void Menu_display::unload() //free up all the resources for this display screen
 	if(m_menuLoad)
 	{
 		if(font) { al_destroy_font(font); font = nullptr; }
+		if (music) { al_destroy_sample(music); music = nullptr;  }
+		
 		m_menuLoad = false;
 	}
 }
