@@ -30,7 +30,8 @@ Space_display::Space_display(int windowWidth, int windowHeight)
 	m_shipSprite2s(0),
 	m_fireSprites(0),
 	m_planetSprites(0),
-	music(nullptr)
+	music(nullptr),
+	fireball(nullptr)
 {
 }
 
@@ -88,10 +89,10 @@ void Space_display::load(std::vector<Player> &players, Map &map)
 		m_radarDotSprite = al_load_bitmap("../../images/radarDot.png");
 		if(!m_radarDotSprite) { spaceFail("Failed to load the radar dot image"); }
 
-		//load music
-		music = al_load_sample("../../sounds/space-ambient.wav");
-		if(!music) { spaceFail("Could not load 'space-ambient.wav'.\n"); }
-		al_play_sample(music, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
+		////load music
+		//music = al_load_sample("../../sounds/space-ambient.wav");
+		//if(!music) { spaceFail("Could not load 'space-ambient.wav'.\n"); }
+		//al_play_sample(music, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
 
 		m_spaceLoad = true;
 	}

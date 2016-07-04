@@ -38,7 +38,7 @@ private:
 	std::vector<Player> *m_players;
 	Map *m_map;
 	ALLEGRO_FONT *font;
-	ALLEGRO_SAMPLE *music;
+	ALLEGRO_SAMPLE *music, *fireball;
 
 public:
 	Space_display(int windowWidth, int windowHeight);

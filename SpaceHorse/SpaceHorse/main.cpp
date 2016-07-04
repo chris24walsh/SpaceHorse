@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
 	if(!al_init_acodec_addon())
 	{ abort("Failed to initialize audio codecs!\n"); }
  
-	if(!al_reserve_samples(1))
+	if(!al_reserve_samples(20))
 	{ abort("Failed to reserve samples!\n"); }
 
 	//seed random
