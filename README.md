@@ -2,6 +2,8 @@
 
 https://www.dropbox.com/s/w4r70j10c8w71sx/SpaceHorse.zip?dl=0
 
+Download and unzip the project to a suitable location. Navigate into 'SpaceHorse/game/Release/' and run SpaceHorse.exe.
+
 ###**Introduction**
 
 This project was started with the goal of creating an open map, multiplayer, 2D space explorer. The first release candidate will aim to allow exploration of a universe, which is importable/configurable from a text file. Each planet/space station etc should be dockable with resources to mine/buy in order to level up the ship. This project is currently using C++ and two C libraries, the Allegro games library.
