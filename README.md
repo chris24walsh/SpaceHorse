@@ -1,4 +1,4 @@
-######**RELEASE VERSION NOW AVAILABLE**
+##**RELEASE VERSION NOW AVAILABLE**
 
 https://www.dropbox.com/s/w4r70j10c8w71sx/SpaceHorse.zip?dl=0
 
