@@ -1,14 +1,14 @@
-allegroTest/Debug/*
-allegroTest/Release/*
+SpaceHorse/Debug/*
+SpaceHorse/Release/*
 
-allegroTest/allegroTest.sdf
-allegroTest/allegroTest.opensdf
-allegroTest/allegroTest.v*
-allegroTest/.vs/*
+SpaceHorse/SpaceHorse.sdf
+SpaceHorse/SpaceHorse.opensdf
+SpaceHorse/SpaceHorse.v*
+SpaceHorse/.vs/*
 
-allegroTest/allegroTest/allegro.log
+SpaceHorse/SpaceHorse/allegro.log
 
-allegroTest/allegroTest/Debug/*
-allegroTest/allegroTest/Release/*
+SpaceHorse/SpaceHorse/Debug/*
+SpaceHorse/SpaceHorse/Release/*
 
-allegroTest/.vs/*
+SpaceHorse/.vs/*
