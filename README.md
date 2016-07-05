@@ -52,3 +52,7 @@ If you are getting errors when you rebuild the project, you may need to delete t
 ### Other resources
 
 (https://wiki.allegro.cc/index.php?title=Windows,_Visual_Studio_2010_and_Allegro_5) is a link to a tutorial to set up VS with the [Allegro 5 windows binary] (https://www.allegro.cc/files/), and [Enet] (http://enet.bespin.org/Downloads.html) can linked in the same way.
+
+### NEWS
+
+This project has been renamed, to 'Space Horse'. This is the alpha name for the game :) 
