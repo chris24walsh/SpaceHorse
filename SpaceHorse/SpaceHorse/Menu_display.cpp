@@ -20,7 +20,7 @@ void Menu_display::load() //load all the resources for this display screen
 		if(!font) { menuFail("Could not load 'pirulen.ttf'.\n"); }
 
 		//Load audio
-		music = al_load_sample("../../sounds/space-ambient.wav");
+		music = al_load_sample("../../sounds/intro-music.wav");
 		if (!music) { menuFail("Could not load 'space-ambient.wav'.\n"); }
 		al_play_sample(music, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
 
