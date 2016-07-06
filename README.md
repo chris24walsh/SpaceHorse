@@ -1,6 +1,12 @@
+##**RELEASE VERSION NOW AVAILABLE**
+
+https://www.dropbox.com/s/w4r70j10c8w71sx/SpaceHorse.zip?dl=0
+
+Download and unzip the project to a suitable location. Navigate into 'SpaceHorse/game/Release/' and run SpaceHorse.exe.
+
 ###**Introduction**
 
-This project was started with the goal of creating an open map, multiplayer, 2D space explorer. The first release candidate will aim to allow exploration of a universe, which is importable/configurable from a text file. Each planet/space station etc should be dockable with resources to mine/buy in order to level up the ship. This project is currently using C++ and two C libraries, the Allegro games library.
+This project was started with the goal of creating an open map, multiplayer, 2D space explorer. The first release candidate will aim to allow exploration of a universe, which is importable/configurable from a text file. Each planet/space station etc should be dockable with resources to mine/buy in order to level up the ship. This project is currently using C++ and the Allegro games library.
 
 
 ###**Setup**
@@ -51,8 +57,4 @@ If you are getting errors when you rebuild the project, you may need to delete t
 
 ### Other resources
 
-(https://wiki.allegro.cc/index.php?title=Windows,_Visual_Studio_2010_and_Allegro_5) is a link to a tutorial to set up VS with the [Allegro 5 windows binary] (https://www.allegro.cc/files/), and [Enet] (http://enet.bespin.org/Downloads.html) can linked in the same way.
-
-### NEWS
-
-This project has been renamed, to 'Space Horse'. This is the alpha name for the game :) 
+[Here] (https://wiki.allegro.cc/index.php?title=Windows,_Visual_Studio_2010_and_Allegro_5) is a link to a tutorial to set up VS with the [Allegro 5 windows binary] (https://www.allegro.cc/files/).
