@@ -17,7 +17,6 @@ private:
 
 public:
 	Game(int width, int height, ALLEGRO_TIMER &timer, ALLEGRO_EVENT_QUEUE &event_queue);
-	void gameLoop(ALLEGRO_TIMER &timer, ALLEGRO_EVENT_QUEUE &event_queue);
 	~Game();
 };
 
