@@ -57,4 +57,4 @@ If you are getting errors when you rebuild the project, you may need to delete t
 
 ### Other resources
 
-(https://wiki.allegro.cc/index.php?title=Windows,_Visual_Studio_2010_and_Allegro_5) is a link to a tutorial to set up VS with the [Allegro 5 windows binary] (https://www.allegro.cc/files/).
+[Here] (https://wiki.allegro.cc/index.php?title=Windows,_Visual_Studio_2010_and_Allegro_5) is a link to a tutorial to set up VS with the [Allegro 5 windows binary] (https://www.allegro.cc/files/).
