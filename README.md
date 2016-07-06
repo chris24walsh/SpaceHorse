@@ -17,7 +17,7 @@ If you want to develop for this project, you will need to install the allegro li
 
 ##### 1. Download allegro
 
-You can download Allegro 5.1 from the [Gna!] (http://download.gna.org/allegro/allegro-unstable-bin/5.1.12/) repository. Recommend that you download the 32 bit version - allegro-msvc2015-x86-5.1.12.zip. Select the x64 version only if you know what you are doing.
+You can download Allegro 5.0 from [here](https://www.allegro.cc/files/). Recommend that you download the 32 bit version - allegro-msvc2015-x86-5.1.12.zip. Select the x64 version only if you know what you are doing.
 
 ##### 2. Extract to disk
 
