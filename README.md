@@ -29,9 +29,9 @@ Open the Visual Studio solution file, right click on the project in Solution exp
 
 At the top, where it says something like Configuration: Active(Debug), select All Configurations.
 
-On the left menu select C/C++ -> General. On this configuration page, select Additional Include Directories and edit it to contain C:\allegro5\include\ in its text field.
+On the left menu select C/C++ -> General. On this configuration page, select Additional Include Directories and edit it to contain C:\allegro\include\ in its text field.
 
-On the left menu select Linker -> General. On this configuration page, select Additional Library Directories and edit it to contain C:\allegro5\lib\ in its text field.
+On the left menu select Linker -> General. On this configuration page, select Additional Library Directories and edit it to contain C:\allegro\lib\ in its text field.
 
 Click on Apply at the bottom, but don´t close the window yet.
 Back at the top, select the Debug configuration.
@@ -57,4 +57,4 @@ If you are getting errors when you rebuild the project, you may need to delete t
 
 ### Other resources
 
-[Here] (https://wiki.allegro.cc/index.php?title=Windows,_Visual_Studio_2010_and_Allegro_5) is a link to a tutorial to set up VS with the [Allegro 5 windows binary] (https://www.allegro.cc/files/).
+[Here] (https://wiki.allegro.cc/index.php?title=Windows,_Visual_Studio_2010_and_Allegro_5) is a link to a tutorial to set up VS with the Allegro 5 windows binary.
