@@ -21,7 +21,7 @@ You can download Allegro 5.0 from [this repo](https://www.allegro.cc/files/). Do
 
 ##### 2. Extract to disk
 
-When it finishes downloading, extract the contents somewhere, e.g. C:\allegro.
+When it finishes downloading, extract the contents somewhere, e.g. C:\allegro, so that the contents of this folder is C:\allegro\bin, C:\allegro\include, and C:\allegro\lib.
 
 ##### 3. Ensure solution properties are configured:
 
