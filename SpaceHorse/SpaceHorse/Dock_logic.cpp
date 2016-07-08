@@ -33,7 +33,7 @@ void Dock_logic::upgrade_weapon()
 	else { (*m_dock).setFailedUpgrade(); }
 }
 
-int Dock_logic::keyPress(ALLEGRO_EVENT &keyPressed)
+GameMode Dock_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 {
 	switch(keyPressed.keyboard.keycode)
 	{
@@ -42,11 +42,11 @@ int Dock_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 		break;
 	case ALLEGRO_KEY_D:
 		(*m_player).getShip().setDocked(false, 0);
-		return 1; //switch back to space screen
+		return GameMode::space;
 	case ALLEGRO_KEY_ESCAPE:
-		return -1;
+		return GameMode::quit;
 	}
-	return 2; //i.e. screenmode will not change
+	return GameMode::dock;
 }
 
 Dock_logic::~Dock_logic(void)

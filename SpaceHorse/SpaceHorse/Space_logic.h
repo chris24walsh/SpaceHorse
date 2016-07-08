@@ -6,6 +6,7 @@
 #include "Space_display.h"
 #include "Player.h"
 #include "Map.h"
+#include "Game_mode.h"
 
 class Space_logic
 {
@@ -52,7 +53,7 @@ public:
 	void checkGameOver();
 	void update();
 	void fire();
-	int dock();
+	GameMode dock();
 	bool nearPlanet(int index);
 	void collide();
 	void hyperDrive();
@@ -62,7 +63,7 @@ public:
 	void hyperBackDigit();
 	void hyperTextEntered();
 	void abortHyperDrive();
-	int keyPress(ALLEGRO_EVENT &keyPressed);
+	GameMode keyPress(ALLEGRO_EVENT &keyPressed);
 	void keyRelease(ALLEGRO_EVENT &keyReleased);
 	void triggerAnimation1();
 	void triggerAnimation2();

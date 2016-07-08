@@ -6,31 +6,24 @@ Display::Display(int width, int height)
 	dock(width, height),
 	m_windowWidth(width),
 	m_windowHeight(height),
-	m_screenMode(0)
+	m_gameMode(GameMode::menu)
 {
 }
 
 void Display::update()
 	{
-	switch (m_screenMode)
+	switch (m_gameMode)
 	{
-	//Home screen mode
-	case 0:
+	case GameMode::menu:
 		menu.update();
 		break;
-	//Space mode
-	case 1:
+	case GameMode::space:
 		space.update();
 		break;
-
-	//Docking mode
-	case 2:
+	case GameMode::dock:
 		dock.update();
 		break;
 
-	//Join server mode
-//	case 3:
-//		break;
 	}
 }
 
@@ -39,7 +32,7 @@ Space_display& Display::getSpace() { return space; }
 Dock_display& Display::getDock() { return dock; }
 int Display::getWindowWidth() { return m_windowWidth; }
 int Display::getWindowHeight() { return m_windowHeight; }
-void Display::setScreenMode(int screenMode) { m_screenMode = screenMode; }
+void Display::setScreenMode(GameMode screenMode) { m_gameMode = screenMode; }
 
 Display::~Display(void)
 {

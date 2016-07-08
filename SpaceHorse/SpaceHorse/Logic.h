@@ -8,18 +8,17 @@
 #include "Menu_logic.h"
 #include "Space_logic.h"
 #include "Dock_logic.h"
-//#include "Server_logic.h"
+#include "Game_mode.h"
 
 class Logic
 {
 private:
 	std::vector<Player> *m_players;
 	Map *m_map;
-	Menu_logic menu;
-	Space_logic space;
-	Dock_logic dock;
-//	Server_logic server;
-	int m_screenMode;
+	Menu_logic m_menu_logic;
+	Space_logic m_space_logic;
+	Dock_logic m_dock_logic;
+	GameMode m_gameMode;
 	bool m_done;
 
 public:
@@ -28,7 +27,7 @@ public:
 	void update();
 	void pressKey(ALLEGRO_EVENT &keyPressed, Display &display);
 	void releaseKey(ALLEGRO_EVENT &keyReleased);
-	void changeScreen(int oldScreenMode, Display &display);
+	void changeScreen(GameMode oldScreenMode, Display &display);
 	bool getDone();
 	~Logic(void);
 };

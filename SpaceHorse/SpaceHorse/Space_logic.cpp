@@ -73,17 +73,17 @@ bool Space_logic::nearPlanet(int index)
 	else return false;
 }
 
-int Space_logic::dock()
+GameMode Space_logic::dock()
 {
 	for (int i=0; i<(*m_map).getPlanets().size(); ++i)
 	{
 		if (m_map->getPlanets().at(i).getCanDock() && nearPlanet(i))
 		{
 			m_players->at(0).getShip().setDocked(true, i);
-			return 2; //switch to dock screen }
+			return GameMode::dock;
 		}
 	}
-	return 1; //stay in space screen
+	return GameMode::space;
 }
 
 void Space_logic::collide()
@@ -369,14 +369,14 @@ void Space_logic::update()
 	}
 }
 
-int Space_logic::keyPress(ALLEGRO_EVENT &keyPressed)
+GameMode Space_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 {
 	if (!m_hyperDrive && !m_gameOver)
 	{
 		switch(keyPressed.keyboard.keycode)
 		{
 		case ALLEGRO_KEY_ESCAPE: 
-			return -1;
+			return GameMode::quit;
 		case ALLEGRO_KEY_LEFT:
 			m_leftPressed = true;
 			break;
@@ -401,9 +401,6 @@ int Space_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 		case ALLEGRO_KEY_H:
 			hyperDrive();
 			break;
-//		case ALLEGRO_KEY_F1:
-//			saveGame();
-//			break;
 		case ALLEGRO_KEY_A:
 			triggerAnimation1();
 			break;
@@ -453,7 +450,7 @@ int Space_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 			{ abortHyperDrive(); }
 			break;
 		case ALLEGRO_KEY_ESCAPE:
-			return -1;
+			return GameMode::quit;
 		}
 	}
 	else if (m_gameOver)
@@ -462,10 +459,10 @@ int Space_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 		{
 		case ALLEGRO_KEY_ENTER:
 		case ALLEGRO_KEY_ESCAPE:
-			return -1;
+			return GameMode::quit;
 		}
 	}
-	return 1;
+	return GameMode::space;
 }
 
 void Space_logic::keyRelease(ALLEGRO_EVENT &keyReleased)

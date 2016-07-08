@@ -6,6 +6,7 @@
 #include "Menu_display.h"
 #include "Space_display.h"
 #include "Dock_display.h"
+#include "Game_mode.h"
 
 class Display
 {
@@ -13,9 +14,9 @@ private:
 	Menu_display menu;
 	Space_display space;
 	Dock_display dock;
-	int m_windowWidth,
-		m_windowHeight,
-		m_screenMode;
+	int m_windowWidth;
+	int m_windowHeight;
+	GameMode m_gameMode;
 
 public:
 	Display(int width, int height);
@@ -25,7 +26,7 @@ public:
 	Dock_display& getDock();
 	int getWindowWidth();
 	int getWindowHeight();
-	void setScreenMode(int screenMode);
+	void setScreenMode(GameMode screenMode);
 	~Display(void);
 };
 
