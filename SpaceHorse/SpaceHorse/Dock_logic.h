@@ -6,6 +6,7 @@
 #include "Dock_display.h"
 #include "Player.h"
 #include "Planet.h"
+#include "Game_mode.h"
 
 class Dock_logic
 {
@@ -20,7 +21,7 @@ public:
 	void unload();
 	void update();
 	void upgrade_weapon();
-	int keyPress(ALLEGRO_EVENT &keyPressed);
+	GameMode keyPress(ALLEGRO_EVENT &keyPressed);
 	~Dock_logic(void);
 };
 

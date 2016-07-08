@@ -20,7 +20,7 @@ void Menu_logic::unload()
 
 void Menu_logic::update() {}
 
-int Menu_logic::keyPress(ALLEGRO_EVENT &keyPressed)
+GameMode Menu_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 {
 	switch(keyPressed.keyboard.keycode)
 	{
@@ -41,18 +41,16 @@ int Menu_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 			switch(m_homeScreenOption)
 			{
 			case 1:
-				return 1; //Start new game (go to space screen)
+				return GameMode::space; //Start new game (go to space screen)
 			case 2:
-				return 1; //Load existing game (go to space screen)
+				return GameMode::space; //Load existing game (go to space screen)
 			case 3:
-				return -1; //Quit
+				return GameMode::quit; //Quit
 			}
 		}
-	/*case ALLEGRO_KEY_ESCAPE:
-		return -1;*/
 	}
 	(*m_menu).setHomeScreenOption(m_homeScreenOption); //tell display which option to light up
-	return 0; //otherwise stay in menu
+	return GameMode::menu; //otherwise stay in menu
 }
 
 Menu_logic::~Menu_logic(void)

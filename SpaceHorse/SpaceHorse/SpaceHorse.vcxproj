@@ -105,6 +105,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="Screen.h" />
     <ClInclude Include="Planet.h" />
+    <ClInclude Include="Game_mode.h" />
     <ClInclude Include="Ship.h" />
     <ClInclude Include="Space_display.h" />
     <ClInclude Include="Space_logic.h" />

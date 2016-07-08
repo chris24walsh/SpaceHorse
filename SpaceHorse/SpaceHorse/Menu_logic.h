@@ -4,6 +4,7 @@
 #include "Header.h"
 
 #include "Menu_display.h"
+#include "Game_mode.h"
 
 class Menu_logic
 {
@@ -16,7 +17,7 @@ public:
 	void load(Menu_display &menu);
 	void unload();
 	void update();
-	int keyPress(ALLEGRO_EVENT &keyPressed);
+	GameMode keyPress(ALLEGRO_EVENT &keyPressed);
 	~Menu_logic(void);
 };
 

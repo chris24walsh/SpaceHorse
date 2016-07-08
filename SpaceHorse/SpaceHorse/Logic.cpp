@@ -4,10 +4,10 @@
 Logic::Logic()
 	:m_players(),
 	m_map(),
-	menu(),
-	space(),
-	dock(),
-	m_screenMode(0),
+	m_menu_logic(),
+	m_space_logic(),
+	m_dock_logic(),
+	m_gameMode(GameMode::menu),
 	m_done(0)
 {
 }
@@ -16,107 +16,93 @@ void Logic::load(Display &display, std::vector<Player> &players, Map &map)
 {
 	m_players = &players;
 	m_map = &map;
-	menu.load(display.getMenu());
+	m_menu_logic.load(display.getMenu());
 }
 
 void Logic::update() 
 {
-	switch(m_screenMode) 
+	switch(m_gameMode) 
 	{
-	case 0: // Menu
-		menu.update();
+	case GameMode::menu:
+		m_menu_logic.update();
 		break;
-	case 1: // Space
-		space.update();
+	case GameMode::space:
+		m_space_logic.update();
 		break;
-	case 2: // Dock
-		dock.update();
+	case GameMode::dock:
+		m_dock_logic.update();
 		break;
-//	case 3: // Server
-//		server.update();
-//		break;
 	}
 }
 
 void Logic::pressKey(ALLEGRO_EVENT &keyPressed, Display &display)
 {
-	int screenMode;
-	switch(m_screenMode) 
+	GameMode gameMode;
+	switch(m_gameMode) 
 	{
-	case 0: // Menu
-		screenMode = menu.keyPress(keyPressed);
+	case GameMode::menu:
+		gameMode = m_menu_logic.keyPress(keyPressed);
 		break;
-	case 1: // Space
-		screenMode = space.keyPress(keyPressed);
+	case GameMode::space:
+		gameMode = m_space_logic.keyPress(keyPressed);
 		break;
-	case 2: // Dock
-		screenMode = dock.keyPress(keyPressed);
+	case GameMode::dock:
+		gameMode = m_dock_logic.keyPress(keyPressed);
 		break;
-//	case 3: // Server
-//		server.keyPress(keyPressed);
-//		break;
 	}
-	if(screenMode==-1) { m_done = true; } //Quit
+	if(gameMode == GameMode::quit) { m_done = true; } //Quit
 
-	else if(screenMode != m_screenMode) //if screenmode is changed, load new screen
+	else if(gameMode != m_gameMode) //if screenmode is changed, load new screen
 	{ 
-		int oldScreenMode = m_screenMode;
-		m_screenMode = screenMode;
+		GameMode oldScreenMode = m_gameMode;
+		m_gameMode = gameMode;
 		changeScreen(oldScreenMode, display);
 	}
 }
 
 void Logic::releaseKey(ALLEGRO_EVENT &keyReleased)
 {
-	switch(m_screenMode)
+	switch(m_gameMode)
 	{
-	case 0: //Menu
+	case GameMode::menu:
 //		m_screenMode = menu.keyRelease(keyReleased);
 		break;
-	case 1: //Space mode
-		space.keyRelease(keyReleased);
+	case GameMode::space:
+		m_space_logic.keyRelease(keyReleased);
 		break;
-	case 2: //Dock
+	case GameMode::dock:
 //		m_screenMode = dock.keyRelease(keyReleased);
 		break;
-//	case 3: //Server
-//		m_screenMode = server.keyRelease(keyReleased);
-//		break;	
 	}
 }
 
-void Logic::changeScreen(int oldScreenMode, Display &display)
+void Logic::changeScreen(GameMode oldScreenMode, Display &display)
 {
-	display.setScreenMode(m_screenMode);
+	display.setScreenMode(m_gameMode);
 	switch(oldScreenMode)
 	{
-	case 0:
-		menu.unload(); //tells logic to tell old display to unload resources (e.g. bitmaps, etc)
+	case GameMode::menu:
+		m_menu_logic.unload(); //tells logic to tell old display to unload resources (e.g. bitmaps, etc)
 		break;
-	case 1:
-		space.unload();
+	case GameMode::space:
+		m_space_logic.unload();
 		break;
-	case 2:
-		dock.unload();
+	case GameMode::dock:
+		m_dock_logic.unload();
 		break;
-//	case 3:
-//		server;
-//		break;
 	}
-	switch(m_screenMode)
+
+	switch(m_gameMode)
 	{
-	case 0: //passes the display to logic (for future manipulation/control) and tells logic to tell display to load resources (e.g. bitmaps, fonts, etc)
-		menu.load(display.getMenu());
+	case GameMode::menu: //passes the display to logic (for future manipulation/control) and tells logic to tell display to load resources (e.g. bitmaps, fonts, etc)
+		m_menu_logic.load(display.getMenu());
 		break;
-	case 1:
-		space.load(display.getSpace(), display.getWindowWidth(), display.getWindowHeight(), *m_players, *m_map);
+	case GameMode::space:
+		m_space_logic.load(display.getSpace(), display.getWindowWidth(), display.getWindowHeight(), *m_players, *m_map);
 		break;
-	case 2:
-		dock.load(display.getDock(), (*m_players).at(0), (*m_map).getPlanets().at((*m_players).at(0).getShip().getDockPlanet()));
+	case GameMode::dock:
+		m_dock_logic.load(display.getDock(), (*m_players).at(0), (*m_map).getPlanets().at((*m_players).at(0).getShip().getDockPlanet()));
 		break;
-//	case 3:
-//		server;
-//		break;
 	}
 }
 
