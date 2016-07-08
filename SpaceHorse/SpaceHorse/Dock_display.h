@@ -20,6 +20,7 @@ private:
 	Player *m_player;
 	Planet *m_planet;
 	ALLEGRO_FONT *m_font;
+	ALLEGRO_SAMPLE *m_music;
 
 public:
 	Dock_display(int windowWidth, int windowHeight);

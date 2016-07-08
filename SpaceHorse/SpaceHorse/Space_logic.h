@@ -37,6 +37,7 @@ private:
 	std::string m_editText;
 	double m_oldAngle,
 		m_newAngle;
+	ALLEGRO_SAMPLE *fireball;
 
 public:
 	Space_logic();
