@@ -3,7 +3,7 @@
 
 void abort(std::string message)
 {
-    printf("%s \n", message);
+	std::cout << message << std::endl;
 	_getch();
     exit(1);
 }

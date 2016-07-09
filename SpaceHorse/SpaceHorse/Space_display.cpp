@@ -257,7 +257,7 @@ void Space_display::setShipSpriteCurrents(int index, int shipSpriteCurrent)
 
 void Space_display::spaceFail(std::string failMessage)
 {
-    printf("%s \n", failMessage);
+	std::cout << failMessage << std::endl;
 	_getch();
     exit(1);
 }

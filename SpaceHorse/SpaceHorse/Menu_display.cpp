@@ -59,7 +59,7 @@ void Menu_display::update()
 
 void Menu_display::menuFail(std::string failMessage)
 {
-    printf("%s \n", failMessage);
+	std::cout << failMessage << std::endl;
 	_getch();
     exit(1);
 }

@@ -96,7 +96,7 @@ int Dock_display::getFireSpriteHeight() { return al_get_bitmap_height(m_fireSpri
 
 void Dock_display::dockFail(std::string failMessage)
 {
-    printf("%s \n", failMessage);
+	std::cout << failMessage << std::endl;
 	_getch();
     exit(1);
 }
