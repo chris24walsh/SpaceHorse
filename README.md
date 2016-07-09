@@ -11,9 +11,7 @@ This project was started with the goal of creating an open map, multiplayer, 2D 
 
 ###**Setup**
 
-If you want to develop for this project, you will need to install the allegro library - See instructions below. 
-
-###**NEW INSTRUCTIONS FOR BUILDING IN VS COMMUNITY 2015**
+If you want to develop for this project, you will need to install the allegro library - See instructions below.
 
 ##### 1. Download allegro
 
