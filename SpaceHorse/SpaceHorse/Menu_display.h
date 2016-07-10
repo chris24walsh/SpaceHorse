@@ -10,7 +10,8 @@ private:
 	int m_windowWidth,
 		m_windowHeight,
 		m_homeScreenOption;
-	ALLEGRO_FONT *font;
+	ALLEGRO_FONT *m_font;
+	ALLEGRO_SAMPLE *m_music;
 
 public:
 	Menu_display(int windowWidth, int windowHeight);

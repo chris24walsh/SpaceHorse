@@ -11,7 +11,8 @@ Dock_display::Dock_display(int windowWidth, int windowHeight)
 	m_upgradedText(nullptr),
 	m_font(nullptr),
 	m_player(),
-	m_dockLoad(0)
+	m_dockLoad(0),
+	m_music(nullptr)
 {
 }
 
@@ -38,6 +39,11 @@ void Dock_display::load(Player &player, Planet &planet)
 		m_fireSprite = al_load_bitmap(player.getShip().getFireSprite().c_str());
 		if(!m_fireSprite) { dockFail("Failed to load the fireball image"); }
 
+		//Load audio
+		m_music = al_load_sample("../../sounds/dock-music.wav");
+		if (!m_music) { dockFail("Could not load 'dock-music.wav'.\n"); }
+		al_play_sample(m_music, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
+
 		m_dockLoad = true;
 	}
 }
@@ -51,6 +57,7 @@ void Dock_display::unload()
 		if (m_shipSprite) { al_destroy_bitmap(m_shipSprite); m_shipSprite=nullptr; }
 		if (m_fireSprite) { al_destroy_bitmap(m_fireSprite); m_fireSprite=nullptr; }
 		if(m_font) { al_destroy_font(m_font); m_font=nullptr; }
+		if (m_music) { al_destroy_sample(m_music); m_music = nullptr; }
 		m_failedUpgrade = false;
 		m_dockLoad = false;
 	}
