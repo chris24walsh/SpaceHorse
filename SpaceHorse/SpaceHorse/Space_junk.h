@@ -1,14 +1,16 @@
 #ifndef SPACE_JUNK_H
 #define SPACE_JUNK_H
 
+#include "Header.h"
+
 class SpaceJunk
 {
 private:
-	int x;
-	int y;
+	int m_x;
+	int m_y;
 
 public:
-	SpaceJunk(int x, int y);
+	SpaceJunk();
 	~SpaceJunk();
 };
 

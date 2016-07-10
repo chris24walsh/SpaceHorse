@@ -2,7 +2,7 @@
 
 
 Map::Map(void)
-	:planets(0)
+	:m_planets(0)
 {
 }
 
@@ -28,19 +28,30 @@ void Map::makeSolarSystem()
 	Planet saturn("../../images/saturn.png", "Saturn", 24, 1, 0, canUpgrade[5]);
 	Planet neptune("../../images/neptune.png", "Neptune", 49, 1, 0, canUpgrade[6]);
 	Planet uranus("../../images/uranus.png", "Uranus", 76, 1, 0, canUpgrade[7]);
-	planets.reserve(9); //this is the number of celestial bodies, but if it's wrong, push_back will still resize if necessary
-	planets.push_back(sun);
-	planets.push_back(mercury);
-	planets.push_back(venus);
-	planets.push_back(earth);
-	planets.push_back(mars);
-	planets.push_back(jupiter);
-	planets.push_back(saturn);
-	planets.push_back(neptune);
-	planets.push_back(uranus);
+	m_planets.reserve(9); //this is the number of celestial bodies, but if it's wrong, push_back will still resize if necessary
+	m_planets.push_back(sun);
+	m_planets.push_back(mercury);
+	m_planets.push_back(venus);
+	m_planets.push_back(earth);
+	m_planets.push_back(mars);
+	m_planets.push_back(jupiter);
+	m_planets.push_back(saturn);
+	m_planets.push_back(neptune);
+	m_planets.push_back(uranus);
 }
 
-std::vector<Planet>& Map::getPlanets() { return planets; }
+std::vector<Planet>& Map::getPlanets() { return m_planets; }
+
+void Map::generateSpaceJunk()
+{
+	while (m_spaceJunks.size <= 100) {
+		SpaceJunk aNewPiece = SpaceJunk();
+		m_spaceJunks.push_back(aNewPiece);
+	}
+}
+
+std::vector<SpaceJunk>& Map::getSpaceJunk() { return m_spaceJunks; }
+
 
 Map::~Map(void)
 {
