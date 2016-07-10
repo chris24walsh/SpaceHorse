@@ -1,16 +1,11 @@
 #include "Game.h"
 
 Game::Game(int width, int height, ALLEGRO_TIMER &timer, ALLEGRO_EVENT_QUEUE &event_queue)
-	:players(1, Player()),
-	map(),
-	display(width, height),
+	:display(width, height),
 	logic()
 {   
-	//load map
-	map.makeSolarSystem();
-
 	//load logic
-	logic.load(display, players, map);
+	logic.load(display);
 
 	//finally, start the game loop
 	gameLoop(timer, event_queue);
