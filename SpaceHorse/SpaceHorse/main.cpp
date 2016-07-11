@@ -39,10 +39,8 @@ int main(int argc, char* argv[])
 	//setup display
 	ALLEGRO_DISPLAY_MODE disp_data;
 	al_get_display_mode(al_get_num_display_modes() - 1, &disp_data); //Set resolution to max
-	//windowWidth = backgroundWidth;
-	//windowHeight = backgroundHeight;
-	//windowWidth = 700;
-	//windowHeight = 700;
+	//int windowWidth = 1600;
+	//int windowHeight = 900;
 	int windowWidth = disp_data.width;
 	int windowHeight = disp_data.height;
     //al_set_new_display_flags(ALLEGRO_FULLSCREEN);
