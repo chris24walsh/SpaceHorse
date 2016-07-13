@@ -8,6 +8,7 @@ Game::Game(int width, int height, ALLEGRO_TIMER &timer, ALLEGRO_EVENT_QUEUE &eve
 {   
 	//load map
 	map.makeSolarSystem();
+	map.generateSpaceJunk();
 
 	//load logic
 	logic.load(display, players, map);

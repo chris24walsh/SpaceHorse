@@ -119,107 +119,18 @@ void Space_display::update()
 	//Clear display first
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 	
-/*Remember that all sprites drawn to the display must be drawn relative to the current background 
-coordinates (the camera), bgX and bgY - so subtract their x and y coordinates from bgX and bgY*/
+	/*
+	Remember that all sprites drawn to the display must be drawn relative to the current background 
+	coordinates (the camera), bgX and bgY - so subtract their x and y coordinates from bgX and bgY
+	*/
 	
-	//Draw all 9 of the background sprites, tiled around, and including, the current grid
-	int backX = m_gridX-m_windowWidth; //X coordinate of top left corner tile of the 9 tiles
-	int backY = m_gridY-m_windowHeight; //Y coordinate of top left corner tile of the 9 tiles
-	for (int x=0; x<3; x++)
-	{
-		for (int y=0; y<3; y++)
-		{ al_draw_bitmap(m_backgroundSprite, backX + m_windowWidth*x - m_bgX, backY + m_windowHeight*y - m_bgY,0); }
-	}
-
-	//Draw planets
-	for (int i=0; i<(*m_map).getPlanets().size(); i++)
-	{
-		al_draw_tinted_scaled_rotated_bitmap(m_planetSprites.at(i),
-			al_map_rgb((*m_map).getPlanets().at(i).getColor1(), (*m_map).getPlanets().at(i).getColor2(), (*m_map).getPlanets().at(i).getColor3()), 
-			getPlanetSpriteWidth(i)/2, getPlanetSpriteHeight(i)/2,
-			(*m_map).getPlanets().at(i).getX()-m_bgX, (*m_map).getPlanets().at(i).getY()-m_bgY, 
-			(*m_map).getPlanets().at(i).getPlanetScale(), (*m_map).getPlanets().at(i).getPlanetScale(), 0, 0);
-	} //Draw planets only if their coordinates exist within current screen
-	
-	//Draw sprites for each Ship object
-	for (int i=0; i<(*m_players).size(); ++i)
-	{
-		//Draw fireballs
-		for (int f=0; f<(*m_players).at(i).getShip().getMaxFireBalls(); ++f)
-		{
-			al_draw_tinted_rotated_bitmap(m_fireSprites.at(i), al_map_rgb(255,255,255),
-				getFireSpriteWidth(i)/2, getFireSpriteHeight(i)/2,
-				(*m_players).at(i).getShip().getFireX(f)-m_bgX, (*m_players).at(i).getShip().getFireY(f)-m_bgY,
-				(*m_players).at(i).getShip().getFireAngle(f), 0);
-		}
-		//Draw ships
-		switch(m_shipSpriteCurrents.at(i))
-		{
-		case 0:
-			{
-				al_draw_rotated_bitmap(m_shipSprites.at(i), getShipSpriteWidth(i)/2, getShipSpriteHeight(i)/2,
-					(*m_players).at(i).getShip().getX()-m_bgX, (*m_players).at(i).getShip().getY()-m_bgY,
-					(*m_players).at(i).getShip().getAngle(), 0);
-			}
-			break;
-		case 1:
-			{
-				al_draw_rotated_bitmap(m_shipSprite1s.at(i), getShipSpriteWidth(i)/2, getShipSpriteHeight(i)/2,
-					(*m_players).at(i).getShip().getX()-m_bgX, (*m_players).at(i).getShip().getY()-m_bgY,
-					(*m_players).at(i).getShip().getAngle(), 0);
-			}
-			break;
-		case 2:
-			{
-				al_draw_rotated_bitmap(m_shipSprite2s.at(i), getShipSpriteWidth(i)/2, getShipSpriteHeight(i)/2,
-					(*m_players).at(i).getShip().getX()-m_bgX, (*m_players).at(i).getShip().getY()-m_bgY,
-					(*m_players).at(i).getShip().getAngle(), 0);
-			}
-			break;
-		}
-	}
-	
-	//Draw bordering rectangle //Not necessary with current gigantic map, but useful to debug a small bounded area
-	//al_draw_rectangle(0-bgX, 0-bgY, maxX-bgX, maxY-bgY, al_map_rgb(255, 255, 255), 10);
-
-	//Draw stats to screen
-	std::stringstream ss_health;
-	ss_health << "Health: " << (*m_players).at(0).getShip().getHealth();
-	std::string health = ss_health.str(); //good, don't try mixing stringstream with c-style strings - char* is just pointer to array!
-	std::stringstream ss_coordinates;
-	ss_coordinates << "Coordinates: " << (*m_players).at(0).getShip().getX() << " , " << (*m_players).at(0).getShip().getY();
-	std::string coordinates = ss_coordinates.str();
-	al_draw_text(font, al_map_rgb(255,255,255), m_windowWidth*0.05, m_windowHeight*0.1, 0, health.c_str());
-	al_draw_text(font, al_map_rgb(255,255,255), m_windowWidth*0.05, m_windowHeight*0.9, 0, coordinates.c_str());
-
-	//Draw radar
-	al_draw_scaled_rotated_bitmap(m_radarSprite, m_radarScreenWidth/2, m_radarScreenHeight/2,
-		m_windowWidth*0.85, m_windowHeight*0.15, 0.2, 0.2, 0, 0);
-
-	//Planets on radar
-	for (int i=0; i<((*m_map).getPlanets().size()); ++i)
-	{
-		double rX = m_windowWidth*0.85 - ((*m_players).at(0).getShip().getX() - ((*m_map).getPlanets().at(i)).getX()) * m_radarScale;
-		double rY = m_windowHeight*0.15 - ((*m_players).at(0).getShip().getY() - ((*m_map).getPlanets().at(i)).getY()) * m_radarScale;
-		if ((rX > m_windowWidth*0.85 - m_windowWidth*0.1) && (rX < m_windowWidth*0.85 + m_windowWidth*0.1) &&
-			(rY > m_windowHeight*0.15 - m_windowHeight*0.1) && (rY < m_windowHeight*0.15 + m_windowHeight*0.1))
-		{ al_draw_rotated_bitmap(m_radarDotSprite, 2.5, 2.5, rX, rY, 0, 0); } //Draw planets only if their coordinates exist within current screen
-	}
-
-	//Ships on radar
-	if((*m_players).size()>1)
-	{
-		for (int i=1; i<(*m_players).size(); ++i)
-		{
-			double rX = m_windowWidth*0.85 - ((*m_players).at(0).getShip().getX() - (*m_players).at(i).getShip().getX()) * m_radarScale;
-			double rY = m_windowHeight*0.15 - ((*m_players).at(0).getShip().getY() - (*m_players).at(i).getShip().getY()) * m_radarScale;
-			if ((rX > m_windowWidth*0.85 - m_windowWidth*0.1) && (rX < m_windowWidth*0.85 + m_windowWidth*0.1) &&
-				(rY > m_windowHeight*0.15 - m_windowHeight*0.1) && (rY < m_windowHeight*0.15 + m_windowHeight*0.1))
-				al_draw_tinted_rotated_bitmap(m_radarDotSprite, al_map_rgb(255,120,120), 2.5, 2.5, rX, rY, 0, 0);
-		}
-	}
-	//draw player1's ship tinted green rather than red
-	al_draw_tinted_rotated_bitmap(m_radarDotSprite, al_map_rgb(100,255,100), 2.5, 2.5, m_windowWidth*0.85, m_windowHeight*0.15, 0, 0);
+	drawBackground();
+	drawPlanets();
+	drawSpaceJunk();
+	drawShips();
+	drawBorder();
+	drawStats();
+	drawRadar();
 
 	//Game over
 	if (m_gameOver)
@@ -233,6 +144,138 @@ coordinates (the camera), bgX and bgY - so subtract their x and y coordinates fr
 		al_draw_text(font, al_map_rgb(255, 255, 255), m_windowWidth*0.5, m_windowHeight*0.35, ALLEGRO_ALIGN_CENTRE, "Enter coordinates: ");
 		al_draw_text(font, al_map_rgb(255, 255, 255), m_windowWidth*0.5, m_windowHeight*0.4, ALLEGRO_ALIGN_CENTRE, m_editText.c_str());
 	}
+}
+
+void Space_display::drawBackground(void)
+{
+	//Draw all 9 of the background sprites, tiled around, and including, the current grid
+	int backX = m_gridX - m_windowWidth; //X coordinate of top left corner tile of the 9 tiles
+	int backY = m_gridY - m_windowHeight; //Y coordinate of top left corner tile of the 9 tiles
+	for (int x = 0; x<3; x++)
+	{
+		for (int y = 0; y<3; y++)
+		{
+			al_draw_bitmap(m_backgroundSprite, backX + m_windowWidth*x - m_bgX, backY + m_windowHeight*y - m_bgY, 0);
+		}
+	}
+}
+void Space_display::drawPlanets(void)
+{
+	for (int i = 0; i<(*m_map).getPlanets().size(); i++)
+	{
+		al_draw_tinted_scaled_rotated_bitmap(m_planetSprites.at(i),
+			al_map_rgb((*m_map).getPlanets().at(i).getColor1(), (*m_map).getPlanets().at(i).getColor2(), (*m_map).getPlanets().at(i).getColor3()),
+			getPlanetSpriteWidth(i) / 2, getPlanetSpriteHeight(i) / 2,
+			(*m_map).getPlanets().at(i).getX() - m_bgX, (*m_map).getPlanets().at(i).getY() - m_bgY,
+			(*m_map).getPlanets().at(i).getPlanetScale(), (*m_map).getPlanets().at(i).getPlanetScale(), 0, 0);
+	} //Draw planets only if their coordinates exist within current screen
+}
+void Space_display::drawSpaceJunk(void)
+{
+	// TODO: Only draw space junk if on screen
+	for (int i = 0; i < m_map->getSpaceJunk().size(); i++)
+	{
+		ALLEGRO_BITMAP *sprite = m_map->getSpaceJunk().at(i).getSprite();
+		al_draw_tinted_scaled_rotated_bitmap(sprite,
+			al_map_rgb(255, 255, 255),
+			al_get_bitmap_width(sprite), al_get_bitmap_height(sprite),
+			(*m_map).getSpaceJunk().at(i).getX() - m_bgX, (*m_map).getSpaceJunk().at(i).getY() - m_bgY,
+			1, 1, 0, 0);
+	}
+}
+void Space_display::drawShips(void)
+{
+	for (int i = 0; i<(*m_players).size(); ++i)
+	{
+		//Draw fireballs
+		for (int f = 0; f<(*m_players).at(i).getShip().getMaxFireBalls(); ++f)
+		{
+			al_draw_tinted_rotated_bitmap(m_fireSprites.at(i), al_map_rgb(255, 255, 255),
+				getFireSpriteWidth(i) / 2, getFireSpriteHeight(i) / 2,
+				(*m_players).at(i).getShip().getFireX(f) - m_bgX, (*m_players).at(i).getShip().getFireY(f) - m_bgY,
+				(*m_players).at(i).getShip().getFireAngle(f), 0);
+		}
+		//Draw ships
+		switch (m_shipSpriteCurrents.at(i))
+		{
+		case 0:
+		{
+			al_draw_rotated_bitmap(m_shipSprites.at(i), getShipSpriteWidth(i) / 2, getShipSpriteHeight(i) / 2,
+				(*m_players).at(i).getShip().getX() - m_bgX, (*m_players).at(i).getShip().getY() - m_bgY,
+				(*m_players).at(i).getShip().getAngle(), 0);
+		}
+		break;
+		case 1:
+		{
+			al_draw_rotated_bitmap(m_shipSprite1s.at(i), getShipSpriteWidth(i) / 2, getShipSpriteHeight(i) / 2,
+				(*m_players).at(i).getShip().getX() - m_bgX, (*m_players).at(i).getShip().getY() - m_bgY,
+				(*m_players).at(i).getShip().getAngle(), 0);
+		}
+		break;
+		case 2:
+		{
+			al_draw_rotated_bitmap(m_shipSprite2s.at(i), getShipSpriteWidth(i) / 2, getShipSpriteHeight(i) / 2,
+				(*m_players).at(i).getShip().getX() - m_bgX, (*m_players).at(i).getShip().getY() - m_bgY,
+				(*m_players).at(i).getShip().getAngle(), 0);
+		}
+		break;
+		}
+	}
+}
+void Space_display::drawBorder(void)
+{
+	//Draw bordering rectangle //Not necessary with current gigantic map, but useful to debug a small bounded area
+	//al_draw_rectangle(0-bgX, 0-bgY, maxX-bgX, maxY-bgY, al_map_rgb(255, 255, 255), 10);
+}
+void Space_display::drawStats(void)
+{
+	std::stringstream ss_health;
+	ss_health << "Health: " << (*m_players).at(0).getShip().getHealth();
+	std::string health = ss_health.str(); //good, don't try mixing stringstream with c-style strings - char* is just pointer to array!
+	std::stringstream ss_spaceJunkCounter;
+	ss_spaceJunkCounter << "Space Junk Counter: " << (*m_players).at(0).getShip().getSpaceJunkCounter();
+	std::string spaceJunkCounter = ss_spaceJunkCounter.str();
+	std::stringstream ss_coordinates;
+	ss_coordinates << "Coordinates: " << (*m_players).at(0).getShip().getX() << " , " << (*m_players).at(0).getShip().getY();
+	std::string coordinates = ss_coordinates.str();
+
+	al_draw_text(font, al_map_rgb(255, 255, 255), m_windowWidth*0.05, m_windowHeight*0.1, 0, health.c_str());
+	al_draw_text(font, al_map_rgb(255, 255, 255), m_windowWidth*0.2, m_windowHeight*0.1, 0, spaceJunkCounter.c_str());
+	al_draw_text(font, al_map_rgb(255, 255, 255), m_windowWidth*0.05, m_windowHeight*0.9, 0, coordinates.c_str());
+}
+void Space_display::drawRadar(void)
+{
+	//Draw radar
+	al_draw_scaled_rotated_bitmap(m_radarSprite, m_radarScreenWidth / 2, m_radarScreenHeight / 2,
+		m_windowWidth*0.85, m_windowHeight*0.15, 0.2, 0.2, 0, 0);
+
+	//Planets on radar
+	for (int i = 0; i<((*m_map).getPlanets().size()); ++i)
+	{
+		double rX = m_windowWidth*0.85 - ((*m_players).at(0).getShip().getX() - ((*m_map).getPlanets().at(i)).getX()) * m_radarScale;
+		double rY = m_windowHeight*0.15 - ((*m_players).at(0).getShip().getY() - ((*m_map).getPlanets().at(i)).getY()) * m_radarScale;
+		if ((rX > m_windowWidth*0.85 - m_windowWidth*0.1) && (rX < m_windowWidth*0.85 + m_windowWidth*0.1) &&
+			(rY > m_windowHeight*0.15 - m_windowHeight*0.1) && (rY < m_windowHeight*0.15 + m_windowHeight*0.1))
+		{
+			al_draw_rotated_bitmap(m_radarDotSprite, 2.5, 2.5, rX, rY, 0, 0);
+		} //Draw planets only if their coordinates exist within current screen
+	}
+
+	//Ships on radar
+	if ((*m_players).size()>1)
+	{
+		for (int i = 1; i<(*m_players).size(); ++i)
+		{
+			double rX = m_windowWidth*0.85 - ((*m_players).at(0).getShip().getX() - (*m_players).at(i).getShip().getX()) * m_radarScale;
+			double rY = m_windowHeight*0.15 - ((*m_players).at(0).getShip().getY() - (*m_players).at(i).getShip().getY()) * m_radarScale;
+			if ((rX > m_windowWidth*0.85 - m_windowWidth*0.1) && (rX < m_windowWidth*0.85 + m_windowWidth*0.1) &&
+				(rY > m_windowHeight*0.15 - m_windowHeight*0.1) && (rY < m_windowHeight*0.15 + m_windowHeight*0.1))
+				al_draw_tinted_rotated_bitmap(m_radarDotSprite, al_map_rgb(255, 120, 120), 2.5, 2.5, rX, rY, 0, 0);
+		}
+	}
+	//draw player1's ship tinted green rather than red
+	al_draw_tinted_rotated_bitmap(m_radarDotSprite, al_map_rgb(100, 255, 100), 2.5, 2.5, m_windowWidth*0.85, m_windowHeight*0.15, 0, 0);
+
 }
 
 int Space_display::getPlanetSpriteWidth(int index) { return al_get_bitmap_width(m_planetSprites.at(index)); }
@@ -257,7 +300,7 @@ void Space_display::setShipSpriteCurrents(int index, int shipSpriteCurrent)
 
 void Space_display::spaceFail(std::string failMessage)
 {
-    printf("%s \n", failMessage);
+    printf("%s \n", failMessage.c_str());
 	_getch();
     exit(1);
 }

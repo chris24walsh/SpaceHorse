@@ -2,7 +2,8 @@
 
 
 Map::Map(void)
-	:m_planets(0)
+	:m_planets(0),
+	 m_spaceJunks(1000, new SpaceJunk())
 {
 }
 
@@ -44,13 +45,19 @@ std::vector<Planet>& Map::getPlanets() { return m_planets; }
 
 void Map::generateSpaceJunk()
 {
-	while (m_spaceJunks.size <= 100) {
-		SpaceJunk aNewPiece = SpaceJunk();
-		m_spaceJunks.push_back(aNewPiece);
-	}
+	//m_spaceJunks.reserve(1000);
+	//while (m_spaceJunks.size() <= 1000) {
+	//	SpaceJunk *spaceJunk = new SpaceJunk();
+	//	m_spaceJunks.push_back(*spaceJunk);
+	//}
 }
 
-std::vector<SpaceJunk>& Map::getSpaceJunk() { return m_spaceJunks; }
+std::vector<SpaceJunk *>& Map::getSpaceJunk() { return m_spaceJunks; }
+
+void Map::collectSpaceJunk(int index)
+{
+	m_spaceJunks.erase(m_spaceJunks.begin() + index);
+}
 
 
 Map::~Map(void)
