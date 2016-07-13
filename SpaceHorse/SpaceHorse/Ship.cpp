@@ -26,7 +26,8 @@ Ship::Ship()
 	//logic will also set height and width of fireball to bitmap when loading display
 	m_maxFireBalls(static_cast<int>(Fire::MAXFIREBALLS)),
 	m_fireCycle(100),
-	m_dockPlanet(0)
+	m_dockPlanet(0),
+	m_spaceJunkCounter(0)
 {
 	m_fireSpeed = m_maxSpeed + 10;
 	for (int i=0;i<m_maxFireBalls;++i) 
@@ -116,6 +117,11 @@ double Ship::getAngle() { return m_angle; }
 void Ship::setAngle(double angle) { m_angle = angle; }
 void Ship::setHealth(int health) { if(health>0) {m_health = health;} else m_health=0; }
 int Ship::getHealth() { return m_health; }
+int Ship::getSpaceJunkCounter() { return m_spaceJunkCounter; }
+void Ship::incrementSpaceJunkCounter()
+{
+	m_spaceJunkCounter++;
+}
 int Ship::getWidth() { return m_width; }
 int Ship::getHeight() { return m_height; }
 int Ship::getSpeed() { return m_speed; }
