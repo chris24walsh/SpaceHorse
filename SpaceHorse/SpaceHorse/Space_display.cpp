@@ -175,11 +175,12 @@ void Space_display::drawSpaceJunk(void)
 	// TODO: Only draw space junk if on screen
 	for (int i = 0; i < m_map->getSpaceJunk().size(); i++)
 	{
-		ALLEGRO_BITMAP *sprite = m_map->getSpaceJunk().at(i).getSprite();
-		al_draw_tinted_scaled_rotated_bitmap(sprite,
+		SpaceJunk *junk = m_map->getSpaceJunk().at(i);
+		ALLEGRO_BITMAP *junk_sprite = m_map->getSpaceJunk().at(i)->getSprite();
+		al_draw_tinted_scaled_rotated_bitmap(junk_sprite,
 			al_map_rgb(255, 255, 255),
-			al_get_bitmap_width(sprite), al_get_bitmap_height(sprite),
-			(*m_map).getSpaceJunk().at(i).getX() - m_bgX, (*m_map).getSpaceJunk().at(i).getY() - m_bgY,
+			al_get_bitmap_width(junk_sprite), al_get_bitmap_height(junk_sprite),
+			junk->getX() - m_bgX, junk->getY() - m_bgY,
 			1, 1, 0, 0);
 	}
 }

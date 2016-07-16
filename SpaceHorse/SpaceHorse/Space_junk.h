@@ -16,6 +16,7 @@ public:
 	int getY();
 	int getWidth();
 	int getHeight();
+	void generateCoordinates();
 	ALLEGRO_BITMAP *getSprite();
 	~SpaceJunk();
 };

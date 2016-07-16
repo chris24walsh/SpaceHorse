@@ -2,9 +2,15 @@
 
 
 Map::Map(void)
-	:m_planets(0),
-	 m_spaceJunks(1000, new SpaceJunk())
+	:m_planets(0)
 {
+	// Create space junk
+	const int num_of_space_junks = 200;
+	m_spaceJunks.reserve(num_of_space_junks);
+	for (int i = 0; i < num_of_space_junks; i++)
+	{
+		m_spaceJunks.push_back(new SpaceJunk());
+	}
 }
 
 void Map::makeSolarSystem()
@@ -42,15 +48,6 @@ void Map::makeSolarSystem()
 }
 
 std::vector<Planet>& Map::getPlanets() { return m_planets; }
-
-void Map::generateSpaceJunk()
-{
-	//m_spaceJunks.reserve(1000);
-	//while (m_spaceJunks.size() <= 1000) {
-	//	SpaceJunk *spaceJunk = new SpaceJunk();
-	//	m_spaceJunks.push_back(*spaceJunk);
-	//}
-}
 
 std::vector<SpaceJunk *>& Map::getSpaceJunk() { return m_spaceJunks; }
 

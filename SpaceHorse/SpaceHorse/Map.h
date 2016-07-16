@@ -16,7 +16,6 @@ public:
 	Map(void);
 	void makeSolarSystem();
 	std::vector<Planet>& getPlanets();
-	void generateSpaceJunk();
 	std::vector<SpaceJunk *>& getSpaceJunk();
 	void collectSpaceJunk(int index);
 	~Map(void);

@@ -90,13 +90,14 @@ void Space_logic::collectSpaceJunk()
 bool Space_logic::nearSpaceJunk(int index)
 {
 	int proxX, proxY;
-	proxX = abs(m_players->at(0).getShip().getX() - m_map->getSpaceJunk().at(index).getX());
-	proxY = abs(m_players->at(0).getShip().getY() - m_map->getSpaceJunk().at(index).getY());
-	if (proxX<m_map->getSpaceJunk().at(index).getWidth() && proxY<m_map->getSpaceJunk().at(index).getHeight())
-	{
+	proxX = abs(m_players->at(0).getShip().getX() - m_map->getSpaceJunk().at(index)->getX());
+	proxY = abs(m_players->at(0).getShip().getY() - m_map->getSpaceJunk().at(index)->getY());
+	int sj_width = m_map->getSpaceJunk().at(index)->getWidth();
+	int sj_height = m_map->getSpaceJunk().at(index)->getHeight();
+	if (proxX < (sj_width / 2.0) && proxY < (sj_height / 2.0))
 		return true;
-	}
-	else return false;
+	else 
+		return false;
 }
 
 GameMode Space_logic::dock()

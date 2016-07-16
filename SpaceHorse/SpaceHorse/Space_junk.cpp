@@ -1,11 +1,11 @@
 #include "Space_junk.h"
 
-SpaceJunk::SpaceJunk(void)
+SpaceJunk::SpaceJunk(void):
+	m_x((rand() % 20000) + 490000),
+	m_y((rand() % 20000) + 490000),
+	m_sprite(al_load_bitmap("../../images/Space_junk.png"))
 {
-	m_x = (rand() % 40000) + 480000;
-	m_y = (rand() % 40000) + 480000;
-	m_sprite = al_load_bitmap("../../images/Space_junk.png");
-	int width = al_get_bitmap_width(m_sprite);
+	printf("Space Junk Generated at %d, %d\n", m_x, m_y);
 	if (!m_sprite) 
 	{ 
 		printf("Could not load space junk sprite.\n");
@@ -26,12 +26,12 @@ int SpaceJunk::getY(void)
 
 int SpaceJunk::getWidth(void)
 {
-	return 120;
+	return al_get_bitmap_width(m_sprite);
 }
 
 int SpaceJunk::getHeight(void)
 {
-	return 120;
+	return al_get_bitmap_height(m_sprite);
 }
 
 ALLEGRO_BITMAP * SpaceJunk::getSprite()
