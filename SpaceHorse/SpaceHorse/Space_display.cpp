@@ -189,7 +189,7 @@ void Space_display::drawSpaceJunk(void)
 		ALLEGRO_BITMAP *junk_sprite = m_map->getSpaceJunk().at(i)->getSprite();
 		al_draw_tinted_scaled_rotated_bitmap(junk_sprite,
 			al_map_rgb(255, 255, 255),
-			al_get_bitmap_width(junk_sprite), al_get_bitmap_height(junk_sprite),
+			al_get_bitmap_width(junk_sprite) / 2, al_get_bitmap_height(junk_sprite) / 2,
 			junk->getX() - m_bgX, junk->getY() - m_bgY,
 			1, 1, 0, 0);
 	}
