@@ -2,7 +2,7 @@
 
 
 Space_logic::Space_logic()
-	:m_space(),
+	:m_space_display(),
 	m_players(),
 	m_map(),
 	m_leftPressed(0),
@@ -36,25 +36,28 @@ Space_logic::Space_logic()
 void Space_logic::load(Space_display &space, int windowWidth, int windowHeight, std::vector<Player> &players, Map &map)
 {
 	space.load(players, map);
-	m_space = &space;
+	m_space_display = &space;
 	m_players = &players;
 	m_map = &map;
 	m_maxX = windowWidth*space.getNumberGrids();
 	m_maxY = windowHeight*space.getNumberGrids();
 
 	//set size of planets, ships and fire according to loaded bitmaps
-	for(int i=0;i<map.getPlanets().size();++i) 
-	{ map.getPlanets().at(i).setPlanetSize(m_space->getPlanetSpriteWidth(i), m_space->getPlanetSpriteHeight(i)); }
+	for(int i=0; i<map.getPlanets().size(); ++i) 
+	{ 
+		map.getPlanets().at(i).setPlanetSize(m_space_display->getPlanetSpriteWidth(i), m_space_display->getPlanetSpriteHeight(i)); 
+	}
+
 	for(int i=0;i<players.size();++i)
 	{
-		players.at(i).getShip().setShipSize(m_space->getShipSpriteWidth(i), m_space->getShipSpriteHeight(i));
-		players.at(i).getShip().setFireSize(m_space->getFireSpriteWidth(i), m_space->getFireSpriteHeight(i));
+		players.at(i).getShip().setShipSize(m_space_display->getShipSpriteWidth(i), m_space_display->getShipSpriteHeight(i));
+		players.at(i).getShip().setFireSize(m_space_display->getFireSpriteWidth(i), m_space_display->getFireSpriteHeight(i));
 	}
 }
 
 void Space_logic::unload()
 {
-	m_space->unload();
+	m_space_display->unload();
 }
 
 void Space_logic::fire()
@@ -72,6 +75,30 @@ bool Space_logic::nearPlanet(int index)
 		return true;
 	}
 	else return false;
+}
+
+void Space_logic::collectSpaceJunk()
+{
+	for (int i = 0; i < m_map->getSpaceJunk().size(); i++)
+	{
+		if (nearSpaceJunk(i)) {
+			m_map->collectSpaceJunk(i);
+			m_players->at(0).getShip().incrementSpaceJunkCounter();
+		}
+	}
+}
+
+bool Space_logic::nearSpaceJunk(int index)
+{
+	int proxX, proxY;
+	proxX = abs(m_players->at(0).getShip().getX() - m_map->getSpaceJunk().at(index)->getX());
+	proxY = abs(m_players->at(0).getShip().getY() - m_map->getSpaceJunk().at(index)->getY());
+	int sj_width = m_map->getSpaceJunk().at(index)->getWidth();
+	int sj_height = m_map->getSpaceJunk().at(index)->getHeight();
+	if (proxX < (sj_width / 2.0) && proxY < (sj_height / 2.0))
+		return true;
+	else 
+		return false;
 }
 
 GameMode Space_logic::dock()
@@ -92,7 +119,9 @@ void Space_logic::collide()
 	for (int i=0; i<m_map->getPlanets().size(); ++i)
 	{
 		if (m_map->getPlanets().at(i).getCanCollide() && nearPlanet(i) && !m_players->at(0).getShip().getDocked())
-		{ m_players->at(0).getShip().setHealth((m_players->at(0).getShip().getHealth()-1)); }
+		{ 
+			m_players->at(0).getShip().setHealth((m_players->at(0).getShip().getHealth()-1)); 
+		}
 	}
 }
 
@@ -102,8 +131,8 @@ void Space_logic::hyperDrive()
 	//m_paused = true;
 	m_hyperDrive = true;
 	m_editText = ("");
-	m_space->setEditText(m_editText);
-	m_space->setHyperDrive(true);
+	m_space_display->setEditText(m_editText);
+	m_space_display->setHyperDrive(true);
 	m_oldAngle = m_players->at(0).getShip().getAngle();
 	m_distanceTravelX = abs(abs(m_x2) - abs(m_players->at(0).getShip().getX()));
 	m_distanceTravelY = abs(abs(m_y2) - abs(m_players->at(0).getShip().getY()));
@@ -127,13 +156,13 @@ void Space_logic::animateShips()
 		if (m_players->at(i).getShip().getSpeed()>0)
 		{
 			if(m_players->at(i).getShip().getFlipflop()<5)
-			{ m_space->setShipSpriteCurrents(i, 1); }
-			else { m_space->setShipSpriteCurrents(i, 2); }
+			{ m_space_display->setShipSpriteCurrents(i, 1); }
+			else { m_space_display->setShipSpriteCurrents(i, 2); }
 
 			m_players->at(i).getShip().setFlipflop(m_players->at(i).getShip().getFlipflop()+1); //increase by one
 			if (m_players->at(i).getShip().getFlipflop()==10) { m_players->at(i).getShip().setFlipflop(0); } //reset when it reaches 10
 		}
-		else { m_space->setShipSpriteCurrents(i, 0); }
+		else { m_space_display->setShipSpriteCurrents(i, 0); }
 	}
 }
 
@@ -177,12 +206,12 @@ void Space_logic::moveShips()
 void Space_logic::setShipsPositions()
 {
 	//Set which grid the ship is currently in
-	m_space->setGridX();
-	m_space->setGridY();
+	m_space_display->setGridX();
+	m_space_display->setGridY();
 
 	//Set background coordinates
-	m_space->setBgX();
-	m_space->setBgY();
+	m_space_display->setBgX();
+	m_space_display->setBgY();
 }
 
 void Space_logic::moveFireballs()
@@ -227,7 +256,7 @@ void Space_logic::checkGameOver()
 	if (m_players->at(0).getShip().getHealth() <= 0)
 	{
 		m_gameOver = true;
-		m_space->setGameOver(); //tell display that game is over
+		m_space_display->setGameOver(); //tell display that game is over
 		m_players->at(0).getShip().setSpeed(0); //stop ship
 		//paused = true;
 	}
@@ -288,7 +317,7 @@ void Space_logic::hyperEnterDigit()
 		m_editText += std::to_string(m_newKey);
 		if(m_editText.length()==6) //now add the separator characters to show the user it expects the y coordinate now
 		{ m_editText += ", "; }
-		m_space->setEditText(m_editText); //tell display what the new string is
+		m_space_display->setEditText(m_editText); //tell display what the new string is
 	}
 }
 
@@ -300,7 +329,7 @@ void Space_logic::hyperBackDigit()
 		{ m_editText.pop_back(); m_editText.pop_back(); } 
 
 		m_editText.pop_back(); //back one digit
-		m_space->setEditText(m_editText); //tell display what the new string is
+		m_space_display->setEditText(m_editText); //tell display what the new string is
 	}
 }
 
@@ -308,7 +337,7 @@ void Space_logic::hyperTextEntered()
 {
 	if (m_editText.length()==14 && m_textEntered==false)
 	{
-		m_space->setHyperDrive(false); //switch off get coordinates overlay
+		m_space_display->setHyperDrive(false); //switch off get coordinates overlay
 		m_textEntered = true;
 		
 		m_x2 = std::stoi(m_editText.substr(0, 6).c_str()); //better I think to convert relevant parts of string to integers
@@ -329,7 +358,7 @@ void Space_logic::hyperTextEntered()
 
 void Space_logic::abortHyperDrive()
 {
-	m_space->setHyperDrive(false);
+	m_space_display->setHyperDrive(false);
 	m_players->at(0).getShip().setDocked(false, 0);
 	m_hyperDrive = m_paused = false;
 }
@@ -352,7 +381,10 @@ void Space_logic::update()
 
 		//tell display to update grid and coordinates
 		setShipsPositions();
-	
+
+		//Check if we have collected Space Junk
+		collectSpaceJunk();
+
 		//Set fireball position
 		moveFireballs();
 

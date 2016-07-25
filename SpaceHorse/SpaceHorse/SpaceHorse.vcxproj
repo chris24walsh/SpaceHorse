@@ -87,6 +87,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Ship.cpp" />
     <ClCompile Include="Space_display.cpp" />
+    <ClCompile Include="Space_junk.cpp" />
     <ClCompile Include="Space_logic.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -98,6 +99,7 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="Enum.h" />
     <ClInclude Include="Header.h" />
+    <ClInclude Include="Space_junk.h" />
     <ClInclude Include="Logic.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Menu_display.h" />

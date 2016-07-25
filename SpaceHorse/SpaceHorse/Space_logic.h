@@ -11,7 +11,7 @@
 class Space_logic
 {
 private:
-	Space_display *m_space;
+	Space_display *m_space_display;
 	std::vector<Player> *m_players;
 	Map *m_map;
 	bool m_leftPressed,
@@ -49,6 +49,8 @@ public:
 	void changeSpeed();
 	void moveShips();
 	void setShipsPositions();
+	void collectSpaceJunk();
+	bool nearSpaceJunk(int index);
 	void moveFireballs();
 	void makeFireballs();
 	void checkGameOver();
@@ -56,6 +58,7 @@ public:
 	void fire();
 	GameMode dock();
 	bool nearPlanet(int index);
+	bool nearSpaceJunk(void);
 	void collide();
 	void hyperDrive();
 	void hyperAlignAngle();

@@ -40,6 +40,15 @@ private:
 	ALLEGRO_FONT *font;
 	ALLEGRO_SAMPLE *music, *fireball;
 
+	// Helper functions
+	void drawBackground(void);
+	void drawPlanets(void);
+	void drawSpaceJunk(void);
+	void drawShips(void);
+	void drawBorder(void);
+	void drawStats(void);
+	void drawRadar(void);
+
 public:
 	Space_display(int windowWidth, int windowHeight);
 	void load(std::vector<Player> &players, Map &map);

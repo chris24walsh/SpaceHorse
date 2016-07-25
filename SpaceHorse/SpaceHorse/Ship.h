@@ -22,7 +22,8 @@ private:
 		m_fireWidth,
 		m_fireSpeed,
 		m_fireCycle,
-		m_dockPlanet;
+		m_dockPlanet,
+		m_spaceJunkCounter;
 	double m_angle,
 		m_speedX,
 		m_speedY,
@@ -68,6 +69,8 @@ public:
 	void setAngle(double angle);
 	void setHealth(int health);
 	int getHealth();
+	int getSpaceJunkCounter();
+	void incrementSpaceJunkCounter();
 	int getWidth();
 	int getHeight();
 	int getSpeed();
