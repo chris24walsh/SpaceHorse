@@ -3,7 +3,7 @@
 
 void abort(std::string message)
 {
-    printf("%s \n", message);
+	std::cout << message << std::endl;
 	_getch();
     exit(1);
 }
@@ -54,6 +54,16 @@ int main(int argc, char* argv[])
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
 	al_register_event_source(event_queue, al_get_display_event_source(display));
+
+	//Initialise the sound addons
+	if(!al_install_audio())
+	{ abort("Failed to initialize audio!\n"); }
+ 
+	if(!al_init_acodec_addon())
+	{ abort("Failed to initialize audio codecs!\n"); }
+ 
+	if(!al_reserve_samples(20))
+	{ abort("Failed to reserve samples!\n"); }
 
 	//seed random
 	srand(static_cast<unsigned int>(time(0))); //this is in effect globally, so start it here

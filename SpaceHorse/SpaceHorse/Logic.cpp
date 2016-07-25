@@ -2,7 +2,7 @@
 
 
 Logic::Logic()
-	:m_players(),
+	:m_players(1, Player()),
 	m_map(),
 	m_menu_logic(),
 	m_space_logic(),
@@ -10,12 +10,12 @@ Logic::Logic()
 	m_gameMode(GameMode::menu),
 	m_done(0)
 {
+	//load map
+	m_map.makeSolarSystem();
 }
 
-void Logic::load(Display &display, std::vector<Player> &players, Map &map)
+void Logic::load(Display &display)
 {
-	m_players = &players;
-	m_map = &map;
 	m_menu_logic.load(display.getMenu());
 }
 
@@ -98,10 +98,10 @@ void Logic::changeScreen(GameMode oldScreenMode, Display &display)
 		m_menu_logic.load(display.getMenu());
 		break;
 	case GameMode::space:
-		m_space_logic.load(display.getSpace(), display.getWindowWidth(), display.getWindowHeight(), *m_players, *m_map);
+		m_space_logic.load(display.getSpace(), display.getWindowWidth(), display.getWindowHeight(), m_players, m_map);
 		break;
 	case GameMode::dock:
-		m_dock_logic.load(display.getDock(), (*m_players).at(0), (*m_map).getPlanets().at((*m_players).at(0).getShip().getDockPlanet()));
+		m_dock_logic.load(display.getDock(), (m_players).at(0), (m_map).getPlanets().at((m_players).at(0).getShip().getDockPlanet()));
 		break;
 	}
 }

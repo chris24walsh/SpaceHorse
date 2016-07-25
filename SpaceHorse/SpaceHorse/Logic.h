@@ -5,6 +5,7 @@
 
 #include "Display.h"
 #include "Player.h"
+#include "Map.h"
 #include "Menu_logic.h"
 #include "Space_logic.h"
 #include "Dock_logic.h"
@@ -13,8 +14,8 @@
 class Logic
 {
 private:
-	std::vector<Player> *m_players;
-	Map *m_map;
+	std::vector<Player> m_players;
+	Map m_map;
 	Menu_logic m_menu_logic;
 	Space_logic m_space_logic;
 	Dock_logic m_dock_logic;
@@ -23,7 +24,7 @@ private:
 
 public:
 	Logic();
-	void load(Display &display, std::vector<Player> &players, Map &map);
+	void load(Display &display);
 	void update();
 	void pressKey(ALLEGRO_EVENT &keyPressed, Display &display);
 	void releaseKey(ALLEGRO_EVENT &keyReleased);
