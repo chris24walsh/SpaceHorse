@@ -2,6 +2,7 @@
 
 Display::Display(int width, int height)
 	:menu(width, height),
+	newGame(width, height),
 	space(width, height),
 	dock(width, height),
 	m_windowWidth(width),
@@ -17,6 +18,9 @@ void Display::update()
 	case GameMode::menu:
 		menu.update();
 		break;
+	case GameMode::newGame:
+		newGame.update();
+		break;
 	case GameMode::space:
 		space.update();
 		break;
@@ -28,6 +32,7 @@ void Display::update()
 }
 
 Menu_display& Display::getMenu() { return menu; }
+New_game_display& Display::getNewGame() { return newGame; }
 Space_display& Display::getSpace() { return space; }
 Dock_display& Display::getDock() { return dock; }
 int Display::getWindowWidth() { return m_windowWidth; }

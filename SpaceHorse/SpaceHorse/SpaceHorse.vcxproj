@@ -83,6 +83,8 @@
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Menu_display.cpp" />
     <ClCompile Include="Menu_logic.cpp" />
+    <ClCompile Include="New_game_display.cpp" />
+    <ClCompile Include="New_game_logic.cpp" />
     <ClCompile Include="Planet.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Ship.cpp" />
@@ -100,6 +102,8 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="Enum.h" />
     <ClInclude Include="Header.h" />
+    <ClInclude Include="New_game_display.h" />
+    <ClInclude Include="New_game_logic.h" />
     <ClInclude Include="Space_junk.h" />
     <ClInclude Include="Logic.h" />
     <ClInclude Include="Map.h" />

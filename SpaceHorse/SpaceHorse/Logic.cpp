@@ -27,7 +27,7 @@ void Logic::update()
 	case GameMode::menu:
 		m_menu_logic.update();
 		break;
-	case GameMode::new_game:
+	case GameMode::newGame:
 		m_new_game_logic.update();
 		break;
 	case GameMode::space:
@@ -47,7 +47,7 @@ void Logic::pressKey(ALLEGRO_EVENT &keyPressed, Display &display)
 	case GameMode::menu:
 		gameMode = m_menu_logic.keyPress(keyPressed);
 		break;
-	case GameMode::new_game:
+	case GameMode::newGame:
 		gameMode = m_new_game_logic.keyPress(keyPressed);
 		break;
 	case GameMode::space:
@@ -91,7 +91,7 @@ void Logic::changeScreen(GameMode oldScreenMode, Display &display)
 	case GameMode::menu:
 		m_menu_logic.unload(); //tells logic to tell old display to unload resources (e.g. bitmaps, etc)
 		break;
-	case GameMode::new_game:
+	case GameMode::newGame:
 		m_new_game_logic.unload(); //tells logic to tell old display to unload resources (e.g. bitmaps, etc)
 		break;
 	case GameMode::space:
@@ -107,8 +107,8 @@ void Logic::changeScreen(GameMode oldScreenMode, Display &display)
 	case GameMode::menu: //passes the display to logic (for future manipulation/control) and tells logic to tell display to load resources (e.g. bitmaps, fonts, etc)
 		m_menu_logic.load(display.getMenu());
 		break;
-	case GameMode::new_game:
-		m_new_game_logic.load(); //tells logic to tell old display to unload resources (e.g. bitmaps, etc)
+	case GameMode::newGame:
+		m_new_game_logic.load(display.getNewGame()); //tells logic to tell old display to unload resources (e.g. bitmaps, etc)
 		break;
 	case GameMode::space:
 		m_space_logic.load(display.getSpace(), display.getWindowWidth(), display.getWindowHeight(), m_players, m_map);

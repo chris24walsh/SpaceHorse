@@ -1,7 +1,7 @@
 #pragma once
 enum class GameMode { 
 	menu, 
-	new_game,
+	newGame,
 	space, 
 	dock, 
 	quit 

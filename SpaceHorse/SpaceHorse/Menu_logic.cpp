@@ -41,7 +41,7 @@ GameMode Menu_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 			switch(m_homeScreenOption)
 			{
 			case 1:
-				return GameMode::space; //Start new game (go to space screen)
+				return GameMode::newGame; //Start new game (go to space screen)
 			case 2:
 				return GameMode::space; //Load existing game (go to space screen)
 			case 3:
