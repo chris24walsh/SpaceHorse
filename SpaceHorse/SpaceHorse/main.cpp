@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
         abort_game("An error occurred while initializing ENet.\n");
     }*/
 
-	/*//Test sqlite*/
+	/*//Test sqlite
 	int rc;
 	char *error;
 
