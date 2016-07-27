@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
         abort_game("An error occurred while initializing ENet.\n");
     }*/
 
-	//Test sqlite
+	/*//Test sqlite*/
 	int rc;
 	char *error;
 
@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
 
 	// Wait For User To Close Program
 	cout << "Please press any key to exit the program ..." << endl;
-	_getch();
+	//_getch();*/
 
 	//End test sqlite
 
