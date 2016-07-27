@@ -20,7 +20,6 @@ public:
 	void unload();
 	void update();
 	GameMode keyPress(ALLEGRO_EVENT &keyPressed);
-	void enterText(int newKey);
 	void enterText(char newKey);
 	void deleteText();
 	~New_game_logic(void);

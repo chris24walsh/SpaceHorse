@@ -4,7 +4,7 @@
 New_game_logic::New_game_logic()
 	:m_new_game(),
 	m_textEntered(), //the text string that has been entered so far
-	m_newKey()
+	m_newChar()
 {
 }
 
@@ -25,32 +25,6 @@ GameMode New_game_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 {
 	switch (keyPressed.keyboard.keycode)
 	{
-	case ALLEGRO_KEY_0: //numbers 0 to 9
-	case ALLEGRO_KEY_1:
-	case ALLEGRO_KEY_2:
-	case ALLEGRO_KEY_3:
-	case ALLEGRO_KEY_4:
-	case ALLEGRO_KEY_5:
-	case ALLEGRO_KEY_6:
-	case ALLEGRO_KEY_7:
-	case ALLEGRO_KEY_8:
-	case ALLEGRO_KEY_9:
-		m_newKey = keyPressed.keyboard.keycode - 27; //convert keycode to intended number
-		enterText(m_newKey);
-		break;
-	case ALLEGRO_KEY_PAD_0: //pad numbers 0 to 9 for different people
-	case ALLEGRO_KEY_PAD_1:
-	case ALLEGRO_KEY_PAD_2:
-	case ALLEGRO_KEY_PAD_3:
-	case ALLEGRO_KEY_PAD_4:
-	case ALLEGRO_KEY_PAD_5:
-	case ALLEGRO_KEY_PAD_6:
-	case ALLEGRO_KEY_PAD_7:
-	case ALLEGRO_KEY_PAD_8:
-	case ALLEGRO_KEY_PAD_9:
-		m_newKey = keyPressed.keyboard.keycode - 37; //convert keycode to intended number
-		enterText(m_newKey);
-		break;
 	case ALLEGRO_KEY_A: //digits a to z
 	case ALLEGRO_KEY_B:
 	case ALLEGRO_KEY_C:
@@ -77,7 +51,33 @@ GameMode New_game_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 	case ALLEGRO_KEY_X:
 	case ALLEGRO_KEY_Y:
 	case ALLEGRO_KEY_Z:
-		m_newChar = keyPressed.keyboard.keycode + 64; //convert keycode to intended ascii value
+		m_newChar = keyPressed.keyboard.keycode + 64; //convert keycode to intended ascii value (e.g. A = ascii 65)
+		enterText(m_newChar);
+		break;
+	case ALLEGRO_KEY_0: //numbers 0 to 9
+	case ALLEGRO_KEY_1:
+	case ALLEGRO_KEY_2:
+	case ALLEGRO_KEY_3:
+	case ALLEGRO_KEY_4:
+	case ALLEGRO_KEY_5:
+	case ALLEGRO_KEY_6:
+	case ALLEGRO_KEY_7:
+	case ALLEGRO_KEY_8:
+	case ALLEGRO_KEY_9:
+		m_newChar = keyPressed.keyboard.keycode + 21; //convert keycode to intended ascii value (e.g. 0 = ascii 48)
+		enterText(m_newChar);
+		break;
+	case ALLEGRO_KEY_PAD_0: //pad numbers 0 to 9 for different people
+	case ALLEGRO_KEY_PAD_1:
+	case ALLEGRO_KEY_PAD_2:
+	case ALLEGRO_KEY_PAD_3:
+	case ALLEGRO_KEY_PAD_4:
+	case ALLEGRO_KEY_PAD_5:
+	case ALLEGRO_KEY_PAD_6:
+	case ALLEGRO_KEY_PAD_7:
+	case ALLEGRO_KEY_PAD_8:
+	case ALLEGRO_KEY_PAD_9:
+		m_newChar = keyPressed.keyboard.keycode + 11; //convert keycode to intended ascii value (e.g. 0 = ascii 48)
 		enterText(m_newChar);
 		break;
 	case ALLEGRO_KEY_BACKSPACE: //backspace
@@ -99,16 +99,8 @@ GameMode New_game_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 	return GameMode::newGame; //stay in New_game
 }
 
-void New_game_logic::enterText(int newKey) { //Passing in an int keycode
-	if (m_textEntered.length()<10) // limit to 5 characters
-	{
-		m_textEntered += std::to_string(newKey);
-		m_new_game->setTextEntered(m_textEntered); //tell display what the new string is
-	}
-}
-
 void New_game_logic::enterText(char newChar) {
-	if (m_textEntered.length()<10) // limit to 5 characters
+	if (m_textEntered.length()<10) // limit to 10 characters
 	{
 		m_textEntered += newChar;
 		m_new_game->setTextEntered(m_textEntered); //tell display what the new string is
