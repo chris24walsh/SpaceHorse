@@ -22,6 +22,7 @@ public:
 	GameMode keyPress(ALLEGRO_EVENT &keyPressed);
 	void enterText(char newKey);
 	void deleteText();
+	void fail(std::string message);
 	~New_game_logic(void);
 };
 
