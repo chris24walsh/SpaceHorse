@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
 	// Open Database
 	cout << "Opening MyDb.db ..." << endl;
 	sqlite3 *db;
-	rc = sqlite3_open("MyDb.db", &db);
+	rc = sqlite3_open("../../Saves/MyDb.db", &db);
 	if (rc)
 	{
 		cerr << "Error opening SQLite3 database: " << sqlite3_errmsg(db) << endl << endl;
