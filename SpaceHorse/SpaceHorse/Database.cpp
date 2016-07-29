@@ -4,7 +4,7 @@ Database::Database(std::string fileName)
 {
 	// Open Database
 	std::cout << "Opening MyDb.db ..." << std::endl;
-	std::string saveName = "../../Saves/" + fileName + ".db";
+	std::string saveName = "../../Saves/" + fileName;
 	rc = sqlite3_open(saveName.c_str(), &db);
 	if (rc)
 	{

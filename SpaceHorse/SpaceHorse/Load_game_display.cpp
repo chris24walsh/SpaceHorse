@@ -9,8 +9,6 @@ Load_game_display::Load_game_display(int windowWidth, int windowHeight)
 	m_font(nullptr),
 	m_music(nullptr)
 {
-	savedGameName.push_back("test_file_name");
-	savedGameSelected.push_back(0);
 }
 
 void Load_game_display::load() //load all the resources for this display screen
@@ -37,11 +35,13 @@ void Load_game_display::load() //load all the resources for this display screen
 				// , delete '!' read other 2 default folder . and ..
 				if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
 					savedGameName.push_back(fd.cFileName);
-					savedGameSelected.push_back(0);
 				}
 			} while (::FindNextFile(hFind, &fd));
 			::FindClose(hFind);
 		}
+
+		savedGameName.erase(savedGameName.begin());
+		savedGameName.push_back("BACK TO MENU");
 
 		m_loadGameLoad = true;
 	}
@@ -53,6 +53,9 @@ void Load_game_display::unload() //free up all the resources for this display sc
 	{
 		if(m_font) { al_destroy_font(m_font); m_font = nullptr; }
 		if (m_music) { al_destroy_sample(m_music); m_music = nullptr;  }
+
+		//Delete vector elements
+		savedGameName.clear();
 		
 		m_loadGameLoad = false;
 	}

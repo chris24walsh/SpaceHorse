@@ -11,7 +11,7 @@ void Load_game_logic::load(Load_game_display &loadGame)
 {
 	loadGame.load();
 	m_loadGame = &loadGame;
-	//m_numScreenOptions = (int)((*m_loadGame).getNumberSaveGames);
+	m_numScreenOptions = (int)((*m_loadGame).getNumberSaveGames());
 }
 
 void Load_game_logic::unload()
@@ -39,11 +39,11 @@ GameMode Load_game_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 		break;
 	case ALLEGRO_KEY_ENTER:
 		{
-			if (m_homeScreenOption != m_numScreenOptions) //Go back
+			if (m_homeScreenOption != m_numScreenOptions) //Load selected game
 			{
 				return GameMode::space;
 			}
-			if (m_homeScreenOption == m_numScreenOptions) //Go back
+			if (m_homeScreenOption == m_numScreenOptions) //Go back to menu
 			{
 				return GameMode::menu;
 			}
