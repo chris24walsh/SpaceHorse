@@ -73,11 +73,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Database.cpp" />
     <ClCompile Include="Display.cpp" />
     <ClCompile Include="Dock_display.cpp" />
     <ClCompile Include="Dock_logic.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Load_game_display.cpp" />
+    <ClCompile Include="Load_game_logic.cpp" />
     <ClCompile Include="Logic.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
@@ -95,6 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Allegro_init.h" />
+    <ClInclude Include="Database.h" />
     <ClInclude Include="Display.h" />
     <ClInclude Include="Dock_display.h" />
     <ClInclude Include="Dock_logic.h" />
@@ -102,6 +106,8 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="Enum.h" />
     <ClInclude Include="Header.h" />
+    <ClInclude Include="Load_game_display.h" />
+    <ClInclude Include="Load_game_logic.h" />
     <ClInclude Include="New_game_display.h" />
     <ClInclude Include="New_game_logic.h" />
     <ClInclude Include="Space_junk.h" />

@@ -16,7 +16,7 @@ private:
 
 public:
 	New_game_logic();
-	void load(New_game_display &new_game);
+	void load(New_game_display &newGame);
 	void unload();
 	void update();
 	GameMode keyPress(ALLEGRO_EVENT &keyPressed);

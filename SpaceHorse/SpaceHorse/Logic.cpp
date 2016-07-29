@@ -6,6 +6,7 @@ Logic::Logic()
 	m_map(),
 	m_menu_logic(),
 	m_new_game_logic(),
+	m_load_game_logic(),
 	m_space_logic(),
 	m_dock_logic(),
 	m_gameMode(GameMode::menu),
@@ -30,6 +31,9 @@ void Logic::update()
 	case GameMode::newGame:
 		m_new_game_logic.update();
 		break;
+	case GameMode::loadGame:
+		m_load_game_logic.update();
+		break;
 	case GameMode::space:
 		m_space_logic.update();
 		break;
@@ -49,6 +53,9 @@ void Logic::pressKey(ALLEGRO_EVENT &keyPressed, Display &display)
 		break;
 	case GameMode::newGame:
 		gameMode = m_new_game_logic.keyPress(keyPressed);
+		break;
+	case GameMode::loadGame:
+		gameMode = m_load_game_logic.keyPress(keyPressed);
 		break;
 	case GameMode::space:
 		gameMode = m_space_logic.keyPress(keyPressed);
@@ -74,6 +81,12 @@ void Logic::releaseKey(ALLEGRO_EVENT &keyReleased)
 	case GameMode::menu:
 //		m_screenMode = menu.keyRelease(keyReleased);
 		break;
+	case GameMode::newGame:
+		//		m_screenMode = newGame.keyRelease(keyReleased);
+		break;
+	case GameMode::loadGame:
+		//		m_screenMode = loadGame.keyRelease(keyReleased);
+		break;
 	case GameMode::space:
 		m_space_logic.keyRelease(keyReleased);
 		break;
@@ -92,7 +105,10 @@ void Logic::changeScreen(GameMode oldScreenMode, Display &display)
 		m_menu_logic.unload(); //tells logic to tell old display to unload resources (e.g. bitmaps, etc)
 		break;
 	case GameMode::newGame:
-		m_new_game_logic.unload(); //tells logic to tell old display to unload resources (e.g. bitmaps, etc)
+		m_new_game_logic.unload();
+		break;
+	case GameMode::loadGame:
+		m_load_game_logic.unload();
 		break;
 	case GameMode::space:
 		m_space_logic.unload();
@@ -109,6 +125,9 @@ void Logic::changeScreen(GameMode oldScreenMode, Display &display)
 		break;
 	case GameMode::newGame:
 		m_new_game_logic.load(display.getNewGame()); //tells logic to tell old display to unload resources (e.g. bitmaps, etc)
+		break;
+	case GameMode::loadGame:
+		m_load_game_logic.load(display.getLoadGame()); //tells logic to tell old display to unload resources (e.g. bitmaps, etc)
 		break;
 	case GameMode::space:
 		m_space_logic.load(display.getSpace(), display.getWindowWidth(), display.getWindowHeight(), m_players, m_map);

@@ -95,7 +95,7 @@ GameMode New_game_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 		else
 		{
 			//Database stuff
-			Database db("TestDB");
+			Database db(m_textEntered);
 
 			db.set("Chris", "Walsh");
 
