@@ -35,6 +35,8 @@ void New_game_display::unload() //free up all the resources for this display scr
 		if (m_font) { al_destroy_font(m_font); m_font = nullptr; }
 		if (m_music) { al_destroy_sample(m_music); m_music = nullptr; }
 
+		m_textEntered.clear();
+
 		m_newGameLoad = false;
 	}
 }

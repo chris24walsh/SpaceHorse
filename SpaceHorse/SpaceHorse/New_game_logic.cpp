@@ -19,6 +19,8 @@ void New_game_logic::load(New_game_display &New_game)
 void New_game_logic::unload()
 {
 	(*m_new_game).unload();
+	
+	m_textEntered.clear();
 }
 
 void New_game_logic::update() {}
