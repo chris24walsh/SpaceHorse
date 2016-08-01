@@ -27,13 +27,13 @@ GameMode Menu_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 	case ALLEGRO_KEY_UP:
 		{
 			m_homeScreenOption--;
-			if (m_homeScreenOption < 1) { m_homeScreenOption = 3; }
+			if (m_homeScreenOption < 1) { m_homeScreenOption = 4; }
 		}
 		break;
 	case ALLEGRO_KEY_DOWN:
 		{
 			m_homeScreenOption++;
-			if (m_homeScreenOption > 3) { m_homeScreenOption = 1; }
+			if (m_homeScreenOption > 4) { m_homeScreenOption = 1; }
 		}
 		break;
 	case ALLEGRO_KEY_ENTER:
@@ -45,6 +45,8 @@ GameMode Menu_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 			case 2:
 				return GameMode::loadGame; //Load existing game (go to space screen)
 			case 3:
+				return GameMode::saveGame; //Save current game (go to space screen)
+			case 4:
 				return GameMode::quit; //Quit
 			}
 		}

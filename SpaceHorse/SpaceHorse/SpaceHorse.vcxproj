@@ -90,6 +90,8 @@
     <ClCompile Include="New_game_logic.cpp" />
     <ClCompile Include="Planet.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Save_game_display.cpp" />
+    <ClCompile Include="Save_game_logic.cpp" />
     <ClCompile Include="Ship.cpp" />
     <ClCompile Include="Space_display.cpp" />
     <ClCompile Include="Space_junk.cpp" />
@@ -110,6 +112,8 @@
     <ClInclude Include="Load_game_logic.h" />
     <ClInclude Include="New_game_display.h" />
     <ClInclude Include="New_game_logic.h" />
+    <ClInclude Include="Save_game_display.h" />
+    <ClInclude Include="Save_game_logic.h" />
     <ClInclude Include="Space_junk.h" />
     <ClInclude Include="Logic.h" />
     <ClInclude Include="Map.h" />

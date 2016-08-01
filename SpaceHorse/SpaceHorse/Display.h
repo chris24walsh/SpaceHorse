@@ -6,6 +6,7 @@
 #include "Menu_display.h"
 #include "New_game_display.h"
 #include "Load_game_display.h"
+#include "Save_game_display.h"
 #include "Space_display.h"
 #include "Dock_display.h"
 #include "Game_mode.h"
@@ -16,6 +17,7 @@ private:
 	Menu_display menu;
 	New_game_display newGame;
 	Load_game_display loadGame;
+	Save_game_display saveGame;
 	Space_display space;
 	Dock_display dock;
 	int m_windowWidth;
@@ -28,6 +30,7 @@ public:
 	Menu_display& getMenu();
 	New_game_display& getNewGame();
 	Load_game_display& getLoadGame();
+	Save_game_display& getSaveGame();
 	Space_display& getSpace();
 	Dock_display& getDock();
 	int getWindowWidth();

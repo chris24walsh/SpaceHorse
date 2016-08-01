@@ -66,6 +66,9 @@ void Load_game_display::update()
 	if(!m_loadGameLoad) { load(); }
 	al_clear_to_color(al_map_rgb(30,30,30));
 	
+	//Draw title
+	al_draw_text(m_font, al_map_rgb(190, 190, 190), m_windowWidth * 0.5, m_windowHeight * 0.2, ALLEGRO_ALIGN_CENTRE, "LOAD FROM:"); //Iterate through all the saved games, and display them as options
+
 	//draw menu options
 	for (int i = 0; i < savedGameName.size(); i++) {
 		if (i+1 == m_homeScreenOption) { //Highlight option
@@ -89,6 +92,10 @@ void Load_game_display::setHomeScreenOption(int homeScreenOption) { m_homeScreen
 int Load_game_display::getNumberSaveGames()
 {
 	return savedGameName.size();
+}
+
+std::vector<std::string> Load_game_display::getSavedGames() {
+	return savedGameName;
 }
 
 Load_game_display::~Load_game_display(void)

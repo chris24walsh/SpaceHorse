@@ -97,11 +97,15 @@ GameMode New_game_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 		else
 		{
 			//Database stuff
-			Database db(m_textEntered);
-
-			db.set("Chris", "Walsh");
-
-
+			if (4 >= 5) { //put condition here to check num save files
+				std::cout << "Maximum number of save files is 5 - sorry" << std::endl;
+			}
+			else {
+				Database db(m_textEntered);
+				db.set(Player());
+				//db.get(); //Display database data
+			}
+			
 			return GameMode::space; //Start new game (go to space screen)
 		}
 	}

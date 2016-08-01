@@ -46,7 +46,7 @@ GameMode Save_game_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 				std::cout << "Saving game to " << (*m_saveGame).getSavedGames().at(m_homeScreenOption - 1) << std::endl;
 				Database db((*m_saveGame).getSavedGames().at(m_homeScreenOption - 1));
 				db.set(m_players->at(0));
-				db.get();
+				//db.get();
 				return GameMode::space;
 			}
 			if (m_homeScreenOption == m_numScreenOptions) //Go back to menu

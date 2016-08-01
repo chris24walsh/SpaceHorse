@@ -45,13 +45,10 @@ void New_game_display::update()
 {
 	if (!m_newGameLoad) { load(); }
 	al_clear_to_color(al_map_rgb(30, 30, 30));
-	int c1R, c1G, c1B,
-		c2R, c2G, c2B;
-	c1R = c1G = c1B = c2R = c2G = c2B = 190;
-
+	
 	//draw new game options
-	al_draw_text(m_font, al_map_rgb(c1R, c1G, c1B), m_windowWidth*0.5, m_windowHeight*0.3, ALLEGRO_ALIGN_CENTRE, "ENTER A NAME FOR THE NEW GAME:");
-	al_draw_text(m_font, al_map_rgb(c2R, c2G, c2B), m_windowWidth*0.5, m_windowHeight*0.5, ALLEGRO_ALIGN_CENTRE, m_textEntered.c_str());
+	al_draw_text(m_font, al_map_rgb(190, 190, 190), m_windowWidth*0.5, m_windowHeight*0.3, ALLEGRO_ALIGN_CENTRE, "ENTER A NAME FOR THE NEW GAME:");
+	al_draw_text(m_font, al_map_rgb(190, 190, 190), m_windowWidth*0.5, m_windowHeight*0.5, ALLEGRO_ALIGN_CENTRE, m_textEntered.c_str());
 }
 
 void New_game_display::menuFail(std::string failMessage)

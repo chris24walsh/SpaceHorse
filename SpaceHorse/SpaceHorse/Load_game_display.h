@@ -22,6 +22,7 @@ public:
 	void update();
 	void setHomeScreenOption(int homeScreenOption);
 	int getNumberSaveGames();
+	std::vector<std::string> getSavedGames();
 	void loadGameFail(std::string failMessage);
 	~Load_game_display(void);
 };
