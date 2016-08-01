@@ -118,6 +118,7 @@ void Ship::setAngle(double angle) { m_angle = angle; }
 void Ship::setHealth(int health) { if(health>0) {m_health = health;} else m_health=0; }
 int Ship::getHealth() { return m_health; }
 int Ship::getSpaceJunkCounter() { return m_spaceJunkCounter; }
+void Ship::setSpaceJunkCounter(int counter) { m_spaceJunkCounter = counter; }
 void Ship::incrementSpaceJunkCounter()
 {
 	m_spaceJunkCounter++;
