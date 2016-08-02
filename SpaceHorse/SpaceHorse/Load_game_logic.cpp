@@ -43,8 +43,8 @@ GameMode Load_game_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 			if (m_homeScreenOption != m_numScreenOptions) //Load selected game
 			{
 				std::cout << "Loading game from " << (*m_loadGame).getSavedGames().at(m_homeScreenOption - 1) << std::endl;
-				Database db((*m_loadGame).getSavedGames().at(m_homeScreenOption - 1));
-				db.get(m_players->at(0));
+				Database db((*m_loadGame).getSavedGames().at(m_homeScreenOption - 1)); //Create new database connection, passing in the name of the savefile chosen
+				db.load(m_players->at(0));
 				return GameMode::space;
 			}
 			if (m_homeScreenOption == m_numScreenOptions) //Go back to menu

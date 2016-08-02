@@ -45,7 +45,7 @@ Database::Database(std::string fileName)
 	}
 }
 
-void Database::set(Player &player)
+void Database::save(Player &player)
 {
 	//Insert data
 	//std::cout << "Inserting a value into MyTable ..." << std::endl;
@@ -62,7 +62,7 @@ void Database::set(Player &player)
 	}
 }
 
-std::string Database::get(Player &player)
+std::string Database::load(Player &player)
 {
 	//Get data
 	std::cout << "Retrieving values in Players ..." << std::endl;
