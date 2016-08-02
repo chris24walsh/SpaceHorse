@@ -56,3 +56,5 @@ If you are getting errors when you rebuild the project, you may need to delete t
 ### Other resources
 
 [Here] (https://wiki.allegro.cc/index.php?title=Windows,_Visual_Studio_2010_and_Allegro_5) is a link to a tutorial to set up VS with the Allegro 5 windows binary.
+
+[Here](https://dcravey.wordpress.com/2011/03/21/using-sqlite-in-a-visual-c-application/) is a link to a tutorial to set up VS with sqlite3.
