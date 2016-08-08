@@ -5,6 +5,7 @@
 
 #include "Space_display.h"
 #include "Player.h"
+#include "AI.h"
 #include "Map.h"
 #include "Game_mode.h"
 
@@ -13,6 +14,7 @@ class Space_logic
 private:
 	Space_display *m_space_display;
 	std::vector<Player> *m_players;
+	std::vector<AI> *m_ai;
 	Map *m_map;
 	bool m_leftPressed,
 		m_rightPressed,
@@ -72,6 +74,7 @@ public:
 	void triggerAnimation1();
 	void triggerAnimation2();
 	void checkAnimations();
+	void AIUpdate();
 	~Space_logic(void);
 };
 
