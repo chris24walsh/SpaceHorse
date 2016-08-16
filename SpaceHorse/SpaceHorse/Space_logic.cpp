@@ -415,7 +415,7 @@ GameMode Space_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 		switch(keyPressed.keyboard.keycode)
 		{
 		case ALLEGRO_KEY_ESCAPE: 
-			return GameMode::quit;
+			return GameMode::menu;
 		case ALLEGRO_KEY_LEFT:
 			m_leftPressed = true;
 			break;

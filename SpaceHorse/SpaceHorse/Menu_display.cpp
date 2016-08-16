@@ -43,28 +43,16 @@ void Menu_display::update()
 {
 	if(!m_menuLoad) { load(); }
 	al_clear_to_color(al_map_rgb(30,30,30));
-	int c1R, c1G, c1B,
-		c2R, c2G, c2B,
-		c3R, c3G, c3B;
-	c1R = c1G = c1B = c2R = c2G = c2B = c3R = c3G = c3B = 0;
-
-	switch(m_homeScreenOption) //light up the selected option
-	{
-	case 1:
-		c1R = c1G = c1B = 190;
-		break;
-	case 2:
-		c2R = c2G = c2B = 190;
-		break;
-	case 3:
-		c3R = c3G = c3B = 190;
-		break;
-	}
 
 	//draw menu options
-	al_draw_text(m_font, al_map_rgb(c1R,c1G,c1B), m_windowWidth*0.5, m_windowHeight*0.3, ALLEGRO_ALIGN_CENTRE, "NEW GAME");
-	al_draw_text(m_font, al_map_rgb(c2R,c2G,c2B), m_windowWidth*0.5, m_windowHeight*0.5, ALLEGRO_ALIGN_CENTRE, "LOAD GAME");
-	al_draw_text(m_font, al_map_rgb(c3R,c3G,c3B), m_windowWidth*0.5, m_windowHeight*0.7, ALLEGRO_ALIGN_CENTRE, "QUIT");
+	if (m_homeScreenOption == 1) al_draw_text(m_font, al_map_rgb(190, 190, 190), m_windowWidth*0.5, m_windowHeight*0.2, ALLEGRO_ALIGN_CENTRE, "NEW GAME");
+	else al_draw_text(m_font, al_map_rgb(0, 0, 0), m_windowWidth*0.5, m_windowHeight*0.2, ALLEGRO_ALIGN_CENTRE, "NEW GAME");
+	if (m_homeScreenOption == 2) al_draw_text(m_font, al_map_rgb(190, 190, 190), m_windowWidth*0.5, m_windowHeight*0.4, ALLEGRO_ALIGN_CENTRE, "LOAD GAME");
+	else al_draw_text(m_font, al_map_rgb(0, 0, 0), m_windowWidth*0.5, m_windowHeight*0.4, ALLEGRO_ALIGN_CENTRE, "LOAD GAME");
+	if (m_homeScreenOption == 3) al_draw_text(m_font, al_map_rgb(190, 190, 190), m_windowWidth*0.5, m_windowHeight*0.6, ALLEGRO_ALIGN_CENTRE, "SAVE GAME");
+	else al_draw_text(m_font, al_map_rgb(0, 0, 0), m_windowWidth*0.5, m_windowHeight*0.6, ALLEGRO_ALIGN_CENTRE, "SAVE GAME");
+	if (m_homeScreenOption == 4) al_draw_text(m_font, al_map_rgb(190, 190, 190), m_windowWidth*0.5, m_windowHeight*0.8, ALLEGRO_ALIGN_CENTRE, "QUIT");
+	else al_draw_text(m_font, al_map_rgb(0, 0, 0), m_windowWidth*0.5, m_windowHeight*0.8, ALLEGRO_ALIGN_CENTRE, "QUIT");
 }
 
 void Menu_display::menuFail(std::string failMessage)
