@@ -10,6 +10,7 @@
 #include <random>
 #include <cmath>
 #include <string>
+#include <ios>
 
 #include "Allegro_init.h"
 #include "Enum.h"

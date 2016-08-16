@@ -1,6 +1,8 @@
 #include "Header.h"
 #include "Game.h"
 
+using namespace std;
+
 void abort(std::string message)
 {
 	std::cout << message << std::endl;
@@ -39,8 +41,8 @@ int main(int argc, char* argv[])
 	//setup display
 	ALLEGRO_DISPLAY_MODE disp_data;
 	al_get_display_mode(al_get_num_display_modes() - 1, &disp_data); //Set resolution to max
-	int windowWidth = 1400;//disp_data.width;
-	int windowHeight = 800;// disp_data.height;
+	int windowWidth = disp_data.width;
+	int windowHeight = disp_data.height;
     //al_set_new_display_flags(ALLEGRO_FULLSCREEN);
 	al_set_new_display_flags(ALLEGRO_WINDOWED);
 	ALLEGRO_DISPLAY *display;

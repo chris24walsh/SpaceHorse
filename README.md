@@ -11,7 +11,7 @@ This project was started with the goal of creating an open map, multiplayer, 2D 
 
 ###**Setup**
 
-If you want to develop for this project, you will need to install the allegro library - See instructions below.
+####**Allegro library**
 
 ##### 1. Download allegro
 
@@ -52,6 +52,15 @@ Click on Apply then OK, this will close the Property Pages of the project and sh
 
 If you are getting errors when you rebuild the project, you may need to delete the allegroTest.sdf file located in ./allegroTest/ and reload the project (right click on the project in Solution Explorer). Contact me if you have trouble setting this up.
 
+####**Sqlite3 library**
+
+##### 1. Download Sqlite library
+
+Download [this lib file](https://www.dropbox.com/s/9xq5r8yvukh6k1r/sqlite3.lib?dl=0), which has been prepared for VS Community 2015.
+
+##### 2. Place in project
+
+Create a folder ```C:\sqlite``` and place the lib file there. This directory is linked by default to the project.
 
 ### Other resources
 

@@ -48,7 +48,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>c:\allegro\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>c:\allegro\lib;C:\sqlite;</AdditionalLibraryDirectories>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);ws2_32.lib;winmm.lib;allegro-5.0.10-monolith-mt-debug.lib</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -67,31 +67,40 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>c:\allegro\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>c:\allegro\lib;C:\sqlite;</AdditionalLibraryDirectories>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);dumb-0.9.3-static-mt.lib;freetype-2.4.8-static-mt.lib;libFLAC-1.2.1-static-mt.lib;libogg-1.2.1-static-mt.lib;libvorbis-1.3.2-static-mt.lib;libvorbisfile-1.3.2-static-mt.lib;openal-1.14-static-mt.lib;zlib-1.2.5-static-mt.lib;winmm.lib;opengl32.lib;gdiplus.lib;psapi.lib;shlwapi.lib;allegro-5.0.10-monolith-static-mt.lib;</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Database.cpp" />
     <ClCompile Include="Display.cpp" />
     <ClCompile Include="Dock_display.cpp" />
     <ClCompile Include="Dock_logic.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Load_game_display.cpp" />
+    <ClCompile Include="Load_game_logic.cpp" />
     <ClCompile Include="Logic.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Menu_display.cpp" />
     <ClCompile Include="Menu_logic.cpp" />
+    <ClCompile Include="New_game_display.cpp" />
+    <ClCompile Include="New_game_logic.cpp" />
     <ClCompile Include="Planet.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Save_game_display.cpp" />
+    <ClCompile Include="Save_game_logic.cpp" />
     <ClCompile Include="Ship.cpp" />
     <ClCompile Include="Space_display.cpp" />
     <ClCompile Include="Space_junk.cpp" />
     <ClCompile Include="Space_logic.cpp" />
+    <ClCompile Include="sqlite3.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Allegro_init.h" />
+    <ClInclude Include="Database.h" />
     <ClInclude Include="Display.h" />
     <ClInclude Include="Dock_display.h" />
     <ClInclude Include="Dock_logic.h" />
@@ -99,6 +108,12 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="Enum.h" />
     <ClInclude Include="Header.h" />
+    <ClInclude Include="Load_game_display.h" />
+    <ClInclude Include="Load_game_logic.h" />
+    <ClInclude Include="New_game_display.h" />
+    <ClInclude Include="New_game_logic.h" />
+    <ClInclude Include="Save_game_display.h" />
+    <ClInclude Include="Save_game_logic.h" />
     <ClInclude Include="Space_junk.h" />
     <ClInclude Include="Logic.h" />
     <ClInclude Include="Map.h" />
