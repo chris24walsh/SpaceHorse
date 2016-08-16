@@ -14,8 +14,8 @@ Ship::Ship()
 	m_speedY(0),
 	m_upgraded(0),
 	m_docked(0),
-	m_x(489000 + rand()%100),
-	m_y(503800 + rand()%100),
+	m_x(512000),//m_x(489000 + rand()%100),
+	m_y(500000),//m_y(503800 + rand()%100),
 	m_shipSprite("../../images/shipSprite.png"), //display will load these when needed, ship just tells it where to load from
 	m_shipSprite1("../../images/shipSprite1.png"),
 	m_shipSprite2("../../images/shipSprite2.png"),

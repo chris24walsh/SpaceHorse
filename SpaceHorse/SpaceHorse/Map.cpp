@@ -15,7 +15,7 @@ Map::Map(void)
 
 void Map::makeSolarSystem()
 {
-	int canUpgrade[8] = {0,0,0,0,0,0,0,0};
+	int canUpgrade[8] = {0,0,1,0,0,0,0,0};
 	int i=0;
 	while(!canUpgrade[i])
 	{
@@ -29,7 +29,7 @@ void Map::makeSolarSystem()
 	Planet sun("../../images/sun.png", "The Sun", 0, 0, 1, 0);
 	Planet mercury("../../images/mercury.png", "Mercury", 1, 1, 0, canUpgrade[0]);
 	Planet venus("../../images/venus.png", "Venus", 2, 1, 0, canUpgrade[1]);
-	Planet earth("../../images/earth.png", "Earth", 3, 1, 0, canUpgrade[2]);
+	Planet earth("../../images/earth.png", "Earth", 3, 0, 1, 0, canUpgrade[2]);
 	Planet mars("../../images/mars.png", "Mars", 4, 1, 0, canUpgrade[3]);
 	Planet jupiter("../../images/jupiter.png", "Jupiter", 13, 1, 0, canUpgrade[4]);
 	Planet saturn("../../images/saturn.png", "Saturn", 24, 1, 0, canUpgrade[5]);

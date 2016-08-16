@@ -24,6 +24,7 @@ public:
 	Planet();
 	Planet(std::string planetSprite);
 	Planet(std::string planetSprite, std::string planetName, int distance, bool canDock, bool canCollide, bool canUpgrade);
+	Planet(std::string planetSprite, std::string planetName, int distance, double angle, bool canDock, bool canCollide, bool canUpgrade);
 	int getX();
 	int getY();
 	int getPlanetScale();
