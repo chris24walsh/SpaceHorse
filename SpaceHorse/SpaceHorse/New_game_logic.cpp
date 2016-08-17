@@ -102,7 +102,7 @@ GameMode New_game_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 			}
 			else {
 				Database db(m_textEntered);
-				db.set(Player());
+				db.save(Player());
 				//db.get(); //Display database data
 			}
 			
