@@ -70,6 +70,7 @@ public:
 	void setHealth(int health);
 	int getHealth();
 	int getSpaceJunkCounter();
+	void setSpaceJunkCounter(int counter);
 	void incrementSpaceJunkCounter();
 	int getWidth();
 	int getHeight();

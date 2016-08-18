@@ -59,6 +59,28 @@ Planet::Planet(std::string planetSprite, std::string planetName, int distance, b
 	//logic will set height and width when loaded by taking the info from display
 }
 
+Planet::Planet(std::string planetSprite, std::string planetName, int distance, double angle, bool canDock, bool canCollide, bool canUpgrade)
+	:m_x(0),
+	m_y(0),
+	m_height(0),
+	m_width(0),
+	m_canCollide(canCollide),
+	m_canDock(canDock),
+	m_canUpgrade(canUpgrade),
+	m_planetScale(4),
+	m_distance(distance),
+	m_planetSprite(planetSprite),
+	m_color1(255),
+	m_color2(255),
+	m_color3(255),
+	m_planetName(planetName)
+{
+	//double angle = (6.25)*(rand() % 100) / 100;
+	m_x = distance * 1000 * m_planetScale * cos(angle) + 500000;
+	m_y = distance * 1000 * m_planetScale * sin(angle) + 500000;
+	//logic will set height and width when loaded by taking the info from display
+}
+
 int Planet::getX() { return m_x; }
 int Planet::getY() { return m_y; }
 int Planet::getPlanetScale() { return m_planetScale; }
