@@ -35,7 +35,7 @@ Space_logic::Space_logic()
 
 void Space_logic::load(Space_display &space, int windowWidth, int windowHeight, std::vector<Player> &players, std::vector<AI> &ais, Map &map)
 {
-	space.load(players, map);
+	space.load(players, ais, map);
 	m_space_display = &space;
 	m_players = &players;
 	m_ais = &ais;

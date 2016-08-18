@@ -127,7 +127,7 @@ void Space_display::unload()
 
 void Space_display::update()
 {
-	if(!m_spaceLoad) { load((*m_players), (*m_map)); }
+	if(!m_spaceLoad) { load((*m_players), (*m_ais), (*m_map)); }
 	//Clear display first
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 	
