@@ -400,6 +400,9 @@ void Space_logic::update()
 
 		//Check for animations
 		checkAnimations();
+
+		//Update AI
+		AIUpdate();
 	}
 
 	if (m_hyperDrive && m_textEntered)
