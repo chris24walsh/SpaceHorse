@@ -7,12 +7,13 @@ Load_game_logic::Load_game_logic()
 {
 }
 
-void Load_game_logic::load(Load_game_display &loadGame, std::vector<Player> &players)
+void Load_game_logic::load(Load_game_display &loadGame, std::vector<Player> &players, bool &gameStarted)
 {
 	loadGame.load();
 	m_players = &players;
 	m_loadGame = &loadGame;
 	m_numScreenOptions = (int)((*m_loadGame).getNumberSaveGames());
+	m_gameStarted = &gameStarted;
 }
 
 void Load_game_logic::unload()
@@ -45,6 +46,10 @@ GameMode Load_game_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 				std::cout << "Loading game from " << (*m_loadGame).getSavedGames().at(m_homeScreenOption - 1) << std::endl;
 				Database db((*m_loadGame).getSavedGames().at(m_homeScreenOption - 1)); //Create new database connection, passing in the name of the savefile chosen
 				db.load(m_players->at(0));
+
+				//Indicate game has begun
+				m_gameStarted = true;
+
 				return GameMode::space;
 			}
 			if (m_homeScreenOption == m_numScreenOptions) //Go back to menu

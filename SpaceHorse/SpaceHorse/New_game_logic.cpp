@@ -10,10 +10,11 @@ New_game_logic::New_game_logic()
 {
 }
 
-void New_game_logic::load(New_game_display &New_game)
+void New_game_logic::load(New_game_display &New_game, bool &gameStarted)
 {
 	New_game.load();
 	m_new_game = &New_game;
+	m_gameStarted = &gameStarted;
 }
 
 void New_game_logic::unload()
@@ -105,6 +106,9 @@ GameMode New_game_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 				db.save(Player());
 				//db.get(); //Display database data
 			}
+
+			//Indicate game has begun
+			m_gameStarted = true;
 			
 			return GameMode::space; //Start new game (go to space screen)
 		}

@@ -7,10 +7,11 @@ Menu_logic::Menu_logic()
 {
 }
 
-void Menu_logic::load(Menu_display &menu)
+void Menu_logic::load(Menu_display &menu, bool &gameStarted)
 {
 	menu.load();
 	m_menu = &menu;
+	m_gameStarted = &gameStarted;
 }
 
 void Menu_logic::unload()
@@ -34,6 +35,16 @@ GameMode Menu_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 		{
 			m_homeScreenOption++;
 			if (m_homeScreenOption > 4) { m_homeScreenOption = 1; }
+		}
+		break;
+	case ALLEGRO_KEY_ESCAPE:
+		{
+			if (m_gameStarted) {
+				return GameMode::space;
+			}
+			else {
+				; //Do nothing
+			}
 		}
 		break;
 	case ALLEGRO_KEY_ENTER:
