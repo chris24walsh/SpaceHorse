@@ -5,6 +5,7 @@
 
 #include "Display.h"
 #include "Player.h"
+#include "AI.h"
 #include "Map.h"
 #include "Menu_logic.h"
 #include "New_game_logic.h"
@@ -18,6 +19,7 @@ class Logic
 {
 private:
 	std::vector<Player> m_players;
+	std::vector<AI> m_ais;
 	Map m_map;
 	Menu_logic m_menu_logic;
 	New_game_logic m_new_game_logic;

@@ -1,10 +1,11 @@
 #include "AI.h"
 
 AI::AI()
-	:m_counter(0)
+	:ship(),
+	m_counter(0)
 {
-	getShip().setX(501000);
-	getShip().setY(501000);
+	getShip().setX(512200);
+	getShip().setY(500000);
 }
 
 Ship & AI::getShip()
@@ -14,8 +15,8 @@ Ship & AI::getShip()
 
 void AI::moveAI()
 {
-	if (m_counter < 250) {
-		getShip().setX(
+	if (1) { //Always, move in straight line
+		getShip().setX(getShip().getX() + 1);
 	}
 }
 

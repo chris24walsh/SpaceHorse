@@ -14,7 +14,7 @@ class Space_logic
 private:
 	Space_display *m_space_display;
 	std::vector<Player> *m_players;
-	std::vector<AI> *m_ai;
+	std::vector<AI> *m_ais;
 	Map *m_map;
 	bool m_leftPressed,
 		m_rightPressed,
@@ -44,7 +44,7 @@ private:
 
 public:
 	Space_logic();
-	void load(Space_display &space, int windowWidth, int windowHeight, std::vector<Player> &players, Map &map);
+	void load(Space_display &space, int windowWidth, int windowHeight, std::vector<Player> &players, std::vector<AI> &ais, Map &map);
 	void unload();
 	void rotate();
 	void animateShips();

@@ -4,6 +4,7 @@
 #include "Header.h"
 
 #include "Player.h"
+#include "AI.h"
 #include "Map.h"
 
 class Space_display
@@ -36,6 +37,7 @@ private:
 		m_shipSprite2s,
 		m_fireSprites;
 	std::vector<Player> *m_players;
+	std::vector<AI> *m_ais;
 	Map *m_map;
 	ALLEGRO_FONT *font;
 	ALLEGRO_SAMPLE *music, *fireball;
@@ -51,7 +53,7 @@ private:
 
 public:
 	Space_display(int windowWidth, int windowHeight);
-	void load(std::vector<Player> &players, Map &map);
+	void load(std::vector<Player> &players, std::vector<AI> &ais, Map &map);
 	void unload();
 	void update();
 	int getPlanetSpriteWidth(int index);

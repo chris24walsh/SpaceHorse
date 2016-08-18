@@ -73,6 +73,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AI.cpp" />
     <ClCompile Include="Database.cpp" />
     <ClCompile Include="Display.cpp" />
     <ClCompile Include="Dock_display.cpp" />
@@ -99,6 +100,7 @@
     <ClCompile Include="sqlite3.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AI.h" />
     <ClInclude Include="Allegro_init.h" />
     <ClInclude Include="Database.h" />
     <ClInclude Include="Display.h" />
