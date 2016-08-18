@@ -27,6 +27,7 @@ private:
 	Dock_logic m_dock_logic;
 	GameMode m_gameMode;
 	bool m_done;
+	bool m_gameStarted;
 
 public:
 	Logic();
