@@ -48,7 +48,7 @@ GameMode Load_game_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 				db.load(m_players->at(0));
 
 				//Indicate game has begun
-				m_gameStarted = true;
+				*m_gameStarted = true;
 
 				return GameMode::space;
 			}

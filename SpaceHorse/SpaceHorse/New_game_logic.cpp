@@ -108,7 +108,7 @@ GameMode New_game_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 			}
 
 			//Indicate game has begun
-			m_gameStarted = true;
+			*m_gameStarted = true;
 			
 			return GameMode::space; //Start new game (go to space screen)
 		}

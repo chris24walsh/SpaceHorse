@@ -39,7 +39,7 @@ GameMode Menu_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 		break;
 	case ALLEGRO_KEY_ESCAPE:
 		{
-			if (m_gameStarted) {
+			if (*m_gameStarted) {
 				return GameMode::space;
 			}
 			else {
