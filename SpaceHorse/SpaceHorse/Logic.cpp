@@ -11,15 +11,17 @@ Logic::Logic()
 	m_space_logic(),
 	m_dock_logic(),
 	m_gameMode(GameMode::menu),
-	m_done(0)
+	m_done(0),
+	m_gameStarted(0)
 {
 	//load map
 	m_map.makeSolarSystem();
+	m_gameStarted = false;
 }
 
 void Logic::load(Display &display)
 {
-	m_menu_logic.load(display.getMenu());
+	m_menu_logic.load(display.getMenu(), m_gameStarted);
 }
 
 void Logic::update() 
@@ -134,13 +136,13 @@ void Logic::changeScreen(GameMode oldScreenMode, Display &display)
 	switch(m_gameMode)
 	{
 	case GameMode::menu: //passes the display to logic (for future manipulation/control) and tells logic to tell display to load resources (e.g. bitmaps, fonts, etc)
-		m_menu_logic.load(display.getMenu());
+		m_menu_logic.load(display.getMenu(), m_gameStarted);
 		break;
 	case GameMode::newGame:
-		m_new_game_logic.load(display.getNewGame()); //tells logic to tell old display to unload resources (e.g. bitmaps, etc)
+		m_new_game_logic.load(display.getNewGame(), m_gameStarted); //tells logic to tell old display to unload resources (e.g. bitmaps, etc)
 		break;
 	case GameMode::loadGame:
-		m_load_game_logic.load(display.getLoadGame(), m_players); //tells logic to tell old display to unload resources (e.g. bitmaps, etc)
+		m_load_game_logic.load(display.getLoadGame(), m_players, m_gameStarted); //tells logic to tell old display to unload resources (e.g. bitmaps, etc)
 		break;
 	case GameMode::saveGame:
 		m_save_game_logic.load(display.getSaveGame(), m_players); //tells logic to tell old display to unload resources (e.g. bitmaps, etc)

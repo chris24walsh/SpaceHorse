@@ -13,10 +13,11 @@ private:
 	std::string m_textEntered;
 	int m_newKey;
 	char m_newChar;
+	bool *m_gameStarted;
 
 public:
 	New_game_logic();
-	void load(New_game_display &newGame);
+	void load(New_game_display &newGame, bool &gameStarted);
 	void unload();
 	void update();
 	GameMode keyPress(ALLEGRO_EVENT &keyPressed);
