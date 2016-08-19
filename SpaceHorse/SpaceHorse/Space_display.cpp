@@ -243,6 +243,9 @@ void Space_display::drawStats(void)
 	std::stringstream ss_health;
 	ss_health << "Health: " << (*m_players).at(0).getShip().getHealth();
 	std::string health = ss_health.str(); //good, don't try mixing stringstream with c-style strings - char* is just pointer to array!
+	std::stringstream ss_credits;
+	ss_credits << "Credits: " << (*m_players).at(0).getShip().getCredits();
+	std::string credits = ss_credits.str();
 	std::stringstream ss_spaceJunkCounter;
 	ss_spaceJunkCounter << "Space Junk Counter: " << (*m_players).at(0).getShip().getSpaceJunkCounter();
 	std::string spaceJunkCounter = ss_spaceJunkCounter.str();
@@ -251,7 +254,8 @@ void Space_display::drawStats(void)
 	std::string coordinates = ss_coordinates.str();
 
 	al_draw_text(font, al_map_rgb(255, 255, 255), m_windowWidth*0.05, m_windowHeight*0.1, 0, health.c_str());
-	al_draw_text(font, al_map_rgb(255, 255, 255), m_windowWidth*0.2, m_windowHeight*0.1, 0, spaceJunkCounter.c_str());
+	al_draw_text(font, al_map_rgb(255, 255, 255), m_windowWidth*0.2, m_windowHeight*0.1, 0, credits.c_str());
+	al_draw_text(font, al_map_rgb(255, 255, 255), m_windowWidth*0.35, m_windowHeight*0.1, 0, spaceJunkCounter.c_str());
 	al_draw_text(font, al_map_rgb(255, 255, 255), m_windowWidth*0.05, m_windowHeight*0.9, 0, coordinates.c_str());
 }
 void Space_display::drawRadar(void)

@@ -44,7 +44,7 @@ GameMode Dock_logic::keyPress(ALLEGRO_EVENT &keyPressed)
 		(*m_player).getShip().setDocked(false, 0);
 		return GameMode::space;
 	case ALLEGRO_KEY_ESCAPE:
-		return GameMode::quit;
+		return GameMode::space;
 	}
 	return GameMode::dock;
 }

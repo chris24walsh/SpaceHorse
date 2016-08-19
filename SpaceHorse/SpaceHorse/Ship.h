@@ -23,7 +23,8 @@ private:
 		m_fireSpeed,
 		m_fireCycle,
 		m_dockPlanet,
-		m_spaceJunkCounter;
+		m_spaceJunkCounter,
+		m_credits;
 	double m_angle,
 		m_speedX,
 		m_speedY,
@@ -87,6 +88,7 @@ public:
 	void setDocked(bool docked, int dockPlanet);
 	int getDockPlanet();
 	bool getDocked();
+	int getCredits();
 	std::vector<Animation>& getAnimations();
 	void setAnimation(Animation);
 	~Ship();
