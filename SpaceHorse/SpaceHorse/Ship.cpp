@@ -27,7 +27,8 @@ Ship::Ship()
 	m_maxFireBalls(static_cast<int>(Fire::MAXFIREBALLS)),
 	m_fireCycle(100),
 	m_dockPlanet(0),
-	m_spaceJunkCounter(0)
+	m_spaceJunkCounter(0),
+	m_credits(0)
 {
 	m_fireSpeed = m_maxSpeed + 10;
 	for (int i=0;i<m_maxFireBalls;++i) 
@@ -69,7 +70,9 @@ But yes, rand() is pretty poor*/
 	//logic will also set height and width of fireball to bitmap when loading display
 	m_maxFireBalls(static_cast<int>(Fire::MAXFIREBALLS)),
 	m_fireCycle(100),
-	m_dockPlanet(0)
+	m_dockPlanet(0),
+	m_spaceJunkCounter(0),
+	m_credits(0)
 {
 	m_fireSpeed = m_maxSpeed + 10;
 	for (int i=0;i<m_maxFireBalls;++i)
@@ -119,10 +122,7 @@ void Ship::setHealth(int health) { if(health>0) {m_health = health;} else m_heal
 int Ship::getHealth() { return m_health; }
 int Ship::getSpaceJunkCounter() { return m_spaceJunkCounter; }
 void Ship::setSpaceJunkCounter(int counter) { m_spaceJunkCounter = counter; }
-void Ship::incrementSpaceJunkCounter()
-{
-	m_spaceJunkCounter++;
-}
+void Ship::incrementSpaceJunkCounter() { m_spaceJunkCounter++; }
 int Ship::getWidth() { return m_width; }
 int Ship::getHeight() { return m_height; }
 int Ship::getSpeed() { return m_speed; }
@@ -137,6 +137,7 @@ bool Ship::goingMaxSpeed() { return (m_speed==m_maxSpeed); }
 void Ship::setSpeed(int speed) { m_speed = speed; }
 int Ship::getDockPlanet() { return m_dockPlanet; }
 bool Ship::getDocked() { return m_docked; }
+int Ship::getCredits() { return m_credits; }
 std::vector<Animation>& Ship::getAnimations() { return m_animations; }
 void Ship::setAnimation(Animation a1) { m_animations.push_back(a1); }
 Ship::~Ship(void)

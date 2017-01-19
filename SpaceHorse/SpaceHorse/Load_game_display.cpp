@@ -40,7 +40,7 @@ void Load_game_display::load() //load all the resources for this display screen
 			::FindClose(hFind);
 		}
 
-		savedGameName.erase(savedGameName.begin());
+		savedGameName.erase(savedGameName.begin()); //Delete the .gitignore file entry
 		savedGameName.push_back("BACK TO MENU");
 
 		m_loadGameLoad = true;
