@@ -3,6 +3,7 @@
 
 Logic::Logic()
 	:m_players(1, Player()),
+	m_ais(1, AI()),
 	m_map(),
 	m_menu_logic(),
 	m_new_game_logic(),
@@ -148,7 +149,7 @@ void Logic::changeScreen(GameMode oldScreenMode, Display &display)
 		m_save_game_logic.load(display.getSaveGame(), m_players); //tells logic to tell old display to unload resources (e.g. bitmaps, etc)
 		break;
 	case GameMode::space:
-		m_space_logic.load(display.getSpace(), display.getWindowWidth(), display.getWindowHeight(), m_players, m_map);
+		m_space_logic.load(display.getSpace(), display.getWindowWidth(), display.getWindowHeight(), m_players, m_ais, m_map);
 		break;
 	case GameMode::dock:
 		m_dock_logic.load(display.getDock(), (m_players).at(0), (m_map).getPlanets().at((m_players).at(0).getShip().getDockPlanet()));

@@ -33,11 +33,12 @@ Space_logic::Space_logic()
 {
 }
 
-void Space_logic::load(Space_display &space, int windowWidth, int windowHeight, std::vector<Player> &players, Map &map)
+void Space_logic::load(Space_display &space, int windowWidth, int windowHeight, std::vector<Player> &players, std::vector<AI> &ais, Map &map)
 {
-	space.load(players, map);
+	space.load(players, ais, map);
 	m_space_display = &space;
 	m_players = &players;
+	m_ais = &ais;
 	m_map = &map;
 	m_maxX = windowWidth*space.getNumberGrids();
 	m_maxY = windowHeight*space.getNumberGrids();
@@ -399,6 +400,9 @@ void Space_logic::update()
 
 		//Check for animations
 		checkAnimations();
+
+		//Update AI
+		AIUpdate();
 	}
 
 	if (m_hyperDrive && m_textEntered)
@@ -562,6 +566,10 @@ void Space_logic::checkAnimations()
 			if (done) ship.getAnimations().erase(ship.getAnimations().begin() + i);
 		}
 	}
+}
+
+void Space_logic::AIUpdate() {
+	m_ais->at(0).moveAI();
 }
 
 Space_logic::~Space_logic(void)

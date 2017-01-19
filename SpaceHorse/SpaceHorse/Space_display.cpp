@@ -19,6 +19,7 @@ Space_display::Space_display(int windowWidth, int windowHeight)
 	m_radarDotSprite(nullptr),
 	m_radarBuffer(nullptr),
 	m_players(),
+	m_ais(),
 	m_map(),
 	font(nullptr),
 	m_numberGrids(1000000), 
@@ -35,11 +36,12 @@ Space_display::Space_display(int windowWidth, int windowHeight)
 {
 }
 
-void Space_display::load(std::vector<Player> &players, Map &map)
+void Space_display::load(std::vector<Player> &players, std::vector<AI> &ais, Map &map)
 {
 	if(!m_spaceLoad)
 	{
 		m_players = &players;
+		m_ais = &ais;
 		m_map = &map;
 		
 		//load background
@@ -125,7 +127,7 @@ void Space_display::unload()
 
 void Space_display::update()
 {
-	if(!m_spaceLoad) { load((*m_players), (*m_map)); }
+	if(!m_spaceLoad) { load((*m_players), (*m_ais), (*m_map)); }
 	//Clear display first
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 	

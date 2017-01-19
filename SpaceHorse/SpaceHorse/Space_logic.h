@@ -5,6 +5,7 @@
 
 #include "Space_display.h"
 #include "Player.h"
+#include "AI.h"
 #include "Map.h"
 #include "Game_mode.h"
 
@@ -13,6 +14,7 @@ class Space_logic
 private:
 	Space_display *m_space_display;
 	std::vector<Player> *m_players;
+	std::vector<AI> *m_ais;
 	Map *m_map;
 	bool m_leftPressed,
 		m_rightPressed,
@@ -42,7 +44,7 @@ private:
 
 public:
 	Space_logic();
-	void load(Space_display &space, int windowWidth, int windowHeight, std::vector<Player> &players, Map &map);
+	void load(Space_display &space, int windowWidth, int windowHeight, std::vector<Player> &players, std::vector<AI> &ais, Map &map);
 	void unload();
 	void rotate();
 	void animateShips();
@@ -72,6 +74,7 @@ public:
 	void triggerAnimation1();
 	void triggerAnimation2();
 	void checkAnimations();
+	void AIUpdate();
 	~Space_logic(void);
 };
 
